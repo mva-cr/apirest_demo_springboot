@@ -1,0 +1,79 @@
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+# Archivos de logs
+*.log
+
+# Archivos de sistema operativo
+.DS_Store
+Thumbs.db
+
+# Maven
+/log/
+/release/
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/
+target/
+
+# Gradle
+.gradle/
+/build/
+/.gradle/
+/out/
+/!gradle-wrapper.jar
+.gradle/
+/build/
+!gradlew
+!gradlew.bat
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+
+# Carpetas de uso común
+/bin/
+/.mvn//Library/Java/JavaVirtual
+/.mvn/wrapper/maven-wrapper.jar
+
+# Configuración específica de Windows
+Thumbs.db
+*.bak
+
+# Archivo de ambiente
+.env
+
+# archivo de properties
+application-dev.properties
+
+# archivo de info de pruebas
+user-data.txt

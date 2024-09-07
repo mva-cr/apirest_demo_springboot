@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         <!-- Versión del modelo de POM -->
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Definición del proyecto principal del que hereda este proyecto -->
+    <parent>
+        <groupId>org.springframework.boot</groupId> <!-- Grupo del proyecto padre (Spring Boot) -->
+        <artifactId>spring-boot-starter-parent</artifactId> <!-- ID de artefacto del proyecto padre -->
+        <version>3.3.3</version> <!-- Versión del proyecto padre -->
+        <relativePath/> <!-- Busca el padre en el repositorio de Maven -->
+    </parent>
+
+    <!-- Información del proyecto -->
+    <groupId>com.mvanalytic</groupId> <!-- Identificador único del grupo del proyecto -->
+    <artifactId>apirest_demo_springboot</artifactId> <!-- Identificador único del artefacto -->
+    <version>0.0.1-SNAPSHOT</version> <!-- Versión del proyecto -->
+    <name>apirest_demo_springboot</name> <!-- Nombre del proyecto -->
+    <description>Demo project for Spring Boot</description> <!-- Descripción del proyecto -->
+
+    <!-- URL del sitio web del proyecto -->
+    <url>https://github.com/mvanalytic/apirest_demo_springboot</url>
+
+    <!-- Información sobre la licencia del proyecto -->
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name> <!-- Nombre de la licencia -->
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url> <!-- URL de la licencia -->
+            <distribution>repo</distribution> <!-- Método de distribución -->
+            <comments>Una licencia de código abierto permissiva ampliamente utilizada</comments>
+        </license>
+    </licenses>
+
+    <!-- Información sobre los desarrolladores del proyecto -->
+    <developers>
+        <developer>
+            <id>mmartinez</id> <!-- Identificador único del desarrollador -->
+            <name>Mario Martínez Lanuza</name> <!-- Nombre del desarrollador -->
+            <email>mmartinez@mvanalytic.com</email> <!-- Correo electrónico del desarrollador -->
+            <organization>MV Analytic SA</organization> <!-- Organización del desarrollador -->
+            <organizationUrl>https://mvanalytic.com</organizationUrl> <!-- URL de la organización -->
+            <roles>
+                <role>Desarrollador Principal</role>
+                <role>Administrador del Proyecto</role>
+            </roles>
+            <timezone>-6</timezone> <!-- Zona horaria del desarrollador -->
+        </developer>
+    </developers>
+
+    <!-- Información sobre el sistema de control de versiones del proyecto -->
+    <scm>
+        <connection>scm:git:git://github.com/mvanalytic/apirest_demo_springboot.git</connection> <!-- Conexión de SCM -->
+        <developerConnection>scm:git:ssh://git@github.com:mvanalytic/apirest_demo_springboot.git</developerConnection> <!-- Conexión de SCM para desarrolladores -->
+        <url>https://github.com/mvanalytic/apirest_demo_springboot</url> <!-- URL del repositorio -->
+        <tag>HEAD</tag> <!-- Tag de la versión actual, puede ser HEAD para la última versión -->
+    </scm>
+
+    <!-- Propiedades de configuración del proyecto -->
+    <properties>
+        <java.version>17</java.version> <!-- Versión de Java utilizada en el proyecto -->
+    </properties>
+
+    <!-- Dependencias del proyecto -->
+    <dependencies>
+        <!-- Dependencias para JWT -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.11.2</version> <!-- Esta dependencia solo se requiere en tiempo de ejecución -->
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.11.2</version>
+            <scope>runtime</scope> <!-- Esta dependencia solo se requiere en tiempo de ejecución -->
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.11.2</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Dependencias de Spring Boot -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId> <!-- Starter para JPA y Hibernate -->
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId> <!-- Starter para enviar correos electrónicos -->
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId> <!-- Starter para la seguridad de Spring -->
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope> <!-- Esta dependencia se utiliza para pruebas de seguridad -->
+        </dependency>
+        <!-- Dependencia de Spring Boot para aplicaciones web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId> <!-- Exclusión de logback para usar log4j2 -->
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Documentación OpenAPI -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.6.0</version> <!-- Herramienta para generar documentación OpenAPI/Swagger -->
+        </dependency>
+
+        <!-- Dependencias para desarrollo y pruebas -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId> <!-- Herramienta de desarrollo para recarga automática -->
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <scope>runtime</scope> <!-- Controlador JDBC para SQL Server -->
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional> <!-- Librería Lombok para reducir código repetitivo -->
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope> <!-- Starter para pruebas con JUnit, Mockito, etc. -->
+        </dependency>
+
+        <!-- Dependencias para Log4j2 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId> <!-- Starter para Log4j2 -->
+        </dependency>
+
+    </dependencies>
+
+    <!-- Configuración de construcción del proyecto -->
+    <build>
+        <plugins>
+            <!-- Plugin de Spring Boot para empaquetar aplicaciones -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <!-- Exclusión de Lombok durante la construcción final -->
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
