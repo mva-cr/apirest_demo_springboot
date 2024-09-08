@@ -20,7 +20,7 @@
     <description>Demo project for Spring Boot</description> <!-- Descripción del proyecto -->
 
     <!-- URL del sitio web del proyecto -->
-    <url>https://github.com/mvanalytic/apirest_demo_springboot</url>
+    <url>https://github.com/mva-cr/apirest_demo_springboot</url>
 
     <!-- Información sobre la licencia del proyecto -->
     <licenses>
@@ -50,8 +50,8 @@
 
     <!-- Información sobre el sistema de control de versiones del proyecto -->
     <scm>
-        <connection>scm:git:git://github.com/mvanalytic/apirest_demo_springboot.git</connection> <!-- Conexión de SCM -->
-        <developerConnection>scm:git:ssh://git@github.com:mvanalytic/apirest_demo_springboot.git</developerConnection> <!-- Conexión de SCM para desarrolladores -->
+        <connection>scm:git:git://github.com/mva-cr/apirest_demo_springboot.git</connection> <!-- Conexión de SCM -->
+        <developerConnection>scm:git:ssh://git@github.com:mva-cr/apirest_demo_springboot.git</developerConnection> <!-- Conexión de SCM para desarrolladores -->
         <url>https://github.com/mvanalytic/apirest_demo_springboot</url> <!-- URL del repositorio -->
         <tag>HEAD</tag> <!-- Tag de la versión actual, puede ser HEAD para la última versión -->
     </scm>
