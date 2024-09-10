@@ -1,5 +1,6 @@
 package com.mvanalytic.apirest_demo_springboot.services.user;
 
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.mvanalytic.apirest_demo_springboot.dto.user.JwtResponse;
 import com.mvanalytic.apirest_demo_springboot.utility.JwtUtils;
-
+import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
 
 /**
  * Servicio para gestionar la autenticación de usuarios.
@@ -23,6 +24,8 @@ import com.mvanalytic.apirest_demo_springboot.utility.JwtUtils;
  */
 @Service
 public class AuthService {
+  // Instancia singleton de logger
+  private static final Logger logger = LoggerSingleton.getLogger(AuthService.class);
 
   private AuthenticationManager authenticationManager;
 
@@ -79,20 +82,25 @@ public class AuthService {
 
     } catch (UsernameNotFoundException e) {
       // Manejo de excepción cuando el nickname no existe
+      logger.error("El identificador no existe {}", e.getMessage());
       throw new UsernameNotFoundException("El identificador no existe.");
     } catch (BadCredentialsException e) {
       // Maneja el caso cuando el password es incorrecto
+      logger.error("El password ingresado es incorrecto {}", e.getMessage());
       throw new BadCredentialsException("El password ingresado es incorrecto.");
 
     } catch (CredentialsExpiredException e) {
       // Maneja el caso cuando las credenciales han expirado
+      logger.error("Las credenciales han expirado {}", e.getMessage());
       throw new CredentialsExpiredException("Las credenciales han expirado. Por favor, inicia sesión nuevamente.");
 
     } catch (DisabledException e) {
       // Maneja el caso cuando la cuenta está deshabilitada
+      logger.error("Cuenta deshabilitada {}", e.getMessage());
       throw new DisabledException("Cuenta deshabilitada, contacte al administrador.");
     } catch (Exception e) {
       // Manejo de cualquier otra excepción de autenticación
+      logger.error("Error en la autenticación {}", e.getMessage());
       throw new RuntimeException("Error en la autenticación: " + e.getMessage(), e);
     }
 

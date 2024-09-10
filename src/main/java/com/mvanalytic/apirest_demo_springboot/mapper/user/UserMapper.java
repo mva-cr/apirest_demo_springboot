@@ -17,7 +17,6 @@ import com.mvanalytic.apirest_demo_springboot.dto.user.UserRegistrationDTO;
 
 // import org.springframework.security.core.GrantedAuthority;
 
-
 /**
  * Clase que realiza conversiones entre User y sus DTO's
  */
@@ -195,4 +194,7 @@ public class UserMapper {
 
     return jwtResponse;
   }
+
+  // TODO: hacer mapper de UserAuditDTO con User
+
 }

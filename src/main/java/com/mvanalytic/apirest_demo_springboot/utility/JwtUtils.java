@@ -55,6 +55,7 @@ public class JwtUtils {
   public String generateJwtToken(Authentication authentication) {
     UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
 
+
     // Agrega las autoridades del usuario como un "claim" en el token
     String roles = userPrincipal.getAuthorities().stream()
         // Convierte cada GrantedAuthority a su representación de cadena (nombre del

@@ -4,13 +4,18 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.mvanalytic.apirest_demo_springboot.domain.user.User;
+import com.mvanalytic.apirest_demo_springboot.dto.user.AdminUserDTO;
 import com.mvanalytic.apirest_demo_springboot.repositories.user.UserRepository;
 import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
+
+import jakarta.persistence.EntityNotFoundException;
 
 import org.apache.logging.log4j.Logger;
 
@@ -69,30 +74,29 @@ public class UserService {
    * @param user El usuario con la información actualizada.
    * @return El usuario actualizado.
    */
-  // FIXME: hacer que solo se actulice lo que ha cambiado
-  public User updateUser(User user) {
-    Optional<User> existingUserOptional = userRepository.findByNickname(user.getNickname());
-    if (existingUserOptional.isPresent()) {
-      User existingUser = existingUserOptional.get();
+  @Transactional
+  public User updateUserByRoleAdmin(AdminUserDTO adminUserDTO) {
+    try {
+      // Obtener el usuario por ID, esto lanzará DataAccessException si no se encuentra
+      getUserById(adminUserDTO.getId());
 
-      // Solo se actualiza la contraseña si se ha modificado
-      if (!user.getPassword().equals(existingUser.getPassword())) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-      }
+      // Llamar al procedimiento almacenado para actualizar el usuario
+      userRepository.spUpdateUserByRoleAdmin(
+        adminUserDTO.getId(),
+        adminUserDTO.isActivated(),
+        adminUserDTO.isStatus()
+        );
 
-      existingUser.setFirstName(user.getFirstName());
-      existingUser.setLastName(user.getLastName());
-      existingUser.setEmail(user.getEmail());
-      existingUser.setNickname(user.getNickname());
-      existingUser.setActivated(user.isActivated());
-      existingUser.setStatus(user.isStatus());
-      existingUser.setLanguageKey(user.getLanguageKey());
-      existingUser.setAuthorities(user.getAuthoritySet());
+        // Retornar el usuario actualizado
+        return getUserById(adminUserDTO.getId());
 
-      return userRepository.save(existingUser);
-    } else {
-      throw new IllegalArgumentException("Usuario no encontrado para actualización");
+
+    } catch (DataAccessException e) {
+      logger.error("Error al actualizar el usuario: {}", e.getMessage());
+      // Lanza una excepción de tiempo de ejecución con un mensaje más específico
+      throw new RuntimeException("El usuario no se ha podido actualizar: " + e.getMostSpecificCause().getMessage());
     }
+    
   }
 
   /**
@@ -102,8 +106,35 @@ public class UserService {
    * @return El usuario encontrado.
    */
   public User getUserByEmail(String email) {
-    return userRepository.findByEmail(email)
-        .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con el email: " + email));
+    try {
+      // intenta encontrar el usaurio con el email
+      return userRepository.findByEmail(email)
+          .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con el email: " + email));
+    } catch (UsernameNotFoundException e) {
+      // Loguea el error con el mensaje de excepción
+      logger.error("Usuario no encontrado con el email: {}", email, e);
+      // Relanza la excepción para que sea manejada por otros manejadores de excepciones
+      throw e;
+    }
+  }
+
+  /**
+   * Obtiene un usuario por su id.
+   *
+   * @param id El id del usuario a buscar.
+   * @return El usuario encontrado.
+   */
+  public User getUserById(Long id) {
+    try {
+      // Intenta encontrar al usuario por ID
+      return userRepository.findById(id)
+      .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado en el id: " + id));
+    } catch (EntityNotFoundException e) {
+      // Loguea el error con el mensaje de excepción
+      logger.error("Usuario no encontrado en el id: {}", id, e);
+      // Relanza la excepción para que sea manejada por otros manejadores de excepciones
+      throw e;
+    }
   }
 
   /**

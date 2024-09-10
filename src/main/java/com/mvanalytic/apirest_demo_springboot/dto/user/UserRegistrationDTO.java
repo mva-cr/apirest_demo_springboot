@@ -36,6 +36,7 @@ public class UserRegistrationDTO {
   @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres.")
   private String password;
 
+  @NotNull
   @Size(min = 2, max = 2, message = "El código de idioma debe tener 2 caracteres.")
   private String languageKey = "es"; // Valor predeterminado para el idioma
 

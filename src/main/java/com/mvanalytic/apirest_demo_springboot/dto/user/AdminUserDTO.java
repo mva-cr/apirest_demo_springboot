@@ -2,9 +2,19 @@ package com.mvanalytic.apirest_demo_springboot.dto.user;
 
 import java.util.Set;
 
+import jakarta.validation.constraints.NotNull;
+
+/**
+ * Clase que representa la respuesta que contiene la información que el
+ * ROLE_ADMIN
+ * puede ver y será utilizado para recibir información que este perfil puede
+ * modificar
+ * Es clase la utiliza unicamente por el ROLE_ADMIN
+ */
 public class AdminUserDTO {
 
-  private long id;
+  @NotNull
+  private Long id;
   private String firstName;
   private String lastName;
   private String secondLastName;
@@ -15,7 +25,7 @@ public class AdminUserDTO {
   private boolean activated;
   private Set<AuthorityDTO> authorities;
 
-  public AdminUserDTO(long id, String firstName, String lastName, String secondLastName, String nickName, String email,
+  public AdminUserDTO(Long id, String firstName, String lastName, String secondLastName, String nickName, String email,
       String languageKey, boolean status, boolean activated, Set<AuthorityDTO> authorities) {
     this.id = id;
     this.firstName = firstName;
@@ -32,11 +42,11 @@ public class AdminUserDTO {
   public AdminUserDTO() {
   }
 
-  public long getId() {
+  public Long getId() {
     return id;
   }
 
-  public void setId(long id) {
+  public void setId(Long id) {
     this.id = id;
   }
 

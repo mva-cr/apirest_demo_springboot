@@ -1,4 +1,4 @@
-# sugef_test_springboot_b
+# API REST Demo en Spring Boot
 
 ## Estructura para el inicio de sesión
 
@@ -34,6 +34,9 @@ src/main/java/com/mvanalitic/sugef_test_springboot_b
 │   └── JwtResponse.java                  # DTO que contiene el token JWT cuando inicia sesión exitosamente
 │   └── JwtResponse.java                  # DTO que contiene el
 │   └── JwtResponse.java                  # DTO que contiene el
+│
+├── exception
+│   └── GlobalExceptionHandler.java       # Manejador global de excepciones
 │
 ├── mapper
 │   ├── UserMapper.java                 # DTO que recibe

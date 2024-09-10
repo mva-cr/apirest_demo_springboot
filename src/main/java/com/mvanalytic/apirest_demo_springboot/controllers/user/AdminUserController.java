@@ -8,9 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
+// import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -99,20 +100,21 @@ public class AdminUserController {
 
   /**
    * Actualiza la información de un usuario existente.
+   * Solo permite modificar los parámetros activated y status
    * Solo usuarios con el rol ROLE_ADMIN pueden acceder a este método.
+   * Permite actualizaciones parciales del User
    *
    * @param user El usuario con la información actualizada.
    * @return El usuario actualizado.
    */
-  @PutMapping("/update")
+  @PatchMapping("/update")
   @PreAuthorize("hasAuthority('ROLE_ADMIN')")
   public ResponseEntity<AdminUserDTO> updateUser(@RequestBody AdminUserDTO adminUserDTO) {
-    User user = UserMapper.convertAdminUserDTOToUser(adminUserDTO);
-    User updatUser = userService.updateUser(user);
+    // User user = UserMapper.convertAdminUserDTOToUser(adminUserDTO);
+    User updateUser = userService.updateUserByRoleAdmin(adminUserDTO);
 
-    AdminUserDTO adminUserDTO2 = new AdminUserDTO();
-    adminUserDTO2 = UserMapper.convertUserToAdminUserDTO(updatUser);
+    AdminUserDTO adminUserDTOResponse =UserMapper.convertUserToAdminUserDTO(updateUser);
 
-    return ResponseEntity.ok(adminUserDTO2);
+    return ResponseEntity.ok(adminUserDTOResponse);
   }
 }
