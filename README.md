@@ -18,37 +18,37 @@ src/main/java/com/mvanalitic/sugef_test_springboot_b
 │
 ├── controller
 │   ├── busines/
-│   │   └── TODO:                         # TODO:
+│   │   └── TODO:                               # TODO:
 │   └── user/
-│       ├── AdminUserController.java      # Endpoint para administrar los usuarios de uso exclusivo para el ROLE_ADMIN
-│       ├── AuthController.java           # Recibe la solicitud de inicio de sesión
-│       └── UserController.java           # Endpoind para administrar variables del usuario con sesión activa, cualquier rol
+│       ├── AdminUserController.java            # Endpoint - administrar usuarios de uso exclusivo para el ROLE_ADMIN
+│       ├── AuthController.java                 # Recibe la solicitud de inicio de sesión
+│       └── UserController.java                 # Endpoind para administrar variables del usuario con sesión activa, cualquier rol
 │
 ├── domain
 │   ├── busines/
-│   │   ├── TODO:                         # TODO:
+│   │   ├── TODO:                               # TODO:
 │   └── user/
-│       ├── Authority.java                # Representa la autoridad o roles en el sistema
-│       └── User.java                     # Representa un usuario en el sistema
+│       ├── Authority.java                      # Representa la autoridad o roles en el sistema
+│       └── User.java                           # Representa un usuario en el sistema
 │
 ├── dto
 │   ├── busines/
-│   │   ├── TODO:                         # TODO:
+│   │   ├── TODO:                               # TODO:
 │   └── user/
-│       ├── AdminUserResponseDTO.java         #
-│       └── AuthorityDTO.java                 #
-│       └── JwtResponseDTO.java               # DTO que contiene el token JWT cuando inicia sesión exitosamente
-│       └── LoginAttemptResponseDTO.java      #
-│       └── LoginRequestDTO.java              # DTO que recibe la solicitud de inicio de sesión
-│       └── UserAuditresponseDTO.java         # DTO que contiene el
-│       └── UserEmailUpdateRequestDTO.java      # DTO que contiene el
-│       └── UserNicknameUpdateRequestDTO.java   # DTO que contiene el
-│       └── UerPasswordUpdateRequestDTO.java    # DTO que contiene el
-│       └── UserProfileResponseDTO.java         # DTO que contiene el
-│       └── UserProfileUpdateRequestDTO.java    # DTO que contiene el
-│       └── UserRegistrationRequestDTO.java     # DTO que contiene el
-│       └── UserRoleUpdateRequestDTO.java       # DTO que contiene el
-│       └── UserStatusUpdateRequestDTO.java     # DTO que contiene el
+│       ├── AdminUserResponseDTO.java           # Contiene la información que el ROLE_ADMIN puede ver
+│       └── AuthorityDTO.java                   # Representa la el rol del usuario
+│       └── JwtResponseDTO.java                 # DTO que contiene el token JWT cuando inicia sesión exitosamente
+│       └── LoginAttemptResponseDTO.java        # tabla de auditoría de los intentos de login exitosos y fallidos
+│       └── LoginRequestDTO.java                # DTO que recibe la solicitud de inicio de sesión
+│       └── UserAuditresponseDTO.java           # Representa la información de la tabla user_audit
+│       └── UserEmailUpdateRequestDTO.java      # Solicitud de cambio de email del usuaro con sesión activa
+│       └── UserNicknameUpdateRequestDTO.java   # Solicitud de cambio de nickname del usuario
+│       └── UerPasswordUpdateRequestDTO.java    # Solicitud de cambio de contraseña del usuario
+│       └── UserProfileResponseDTO.java         # Información que el usario puede ver
+│       └── UserProfileUpdateRequestDTO.java    # Solicitud de cambio de información del usuario activo
+│       └── UserRegistrationRequestDTO.java     # Datos del registro de un nuevo usuario
+│       └── UserRoleUpdateRequestDTO.java       # Solicitud de cambio de role de un usuario
+│       └── UserStatusUpdateRequestDTO.java     # Cambio de los atributos: status y activated
 │
 ├── exception
 │   └── GlobalExceptionHandler.java             # Manejador global de excepciones
@@ -57,13 +57,13 @@ src/main/java/com/mvanalitic/sugef_test_springboot_b
 │   ├── busines/
 │   │   ├── TODO:                               # TODO:
 │   └── user/
-│       └── UserMapper.java                     # DTO que contiene el
+│       └── UserMapper.java                     # Realiza conversiones entre User y sus DTO's
 │
 ├── repositories
 │   ├── busines/
 │   │   ├── TODO:                               # TODO:
 │   └── user/
-│       └── UserRepository.java                 # Interfaz que define los
+│       └── UserRepository.java                 # Interfaz que define las operaciones CRUD y métodos personalizados
 │
 └── security/
 │   ├── config/                                 # Configuración general de seguridad
@@ -72,9 +72,9 @@ src/main/java/com/mvanalitic/sugef_test_springboot_b
 │   │   ├── AuthEntryPointJwt.java              # Clase para manejar errores de autenticación
 │   │   └── CustomAccessDeniedHandler.java      # Clase para manejar errores de autorización
 │   ├── jwt/
-│   │   └── AuthTokenFilter.java                #
+│   │   └── AuthTokenFilter.java                # Filtro para comprobar la existencia de un token JWT válido
 │   └── providers/
-│       └── CustomAuthenticationProvider.java   #
+│       └── CustomAuthenticationProvider.java   # Manejo centralizado de las excepciones de la aplicación
 │
 ├── services
 │   ├── busines/
@@ -85,16 +85,16 @@ src/main/java/com/mvanalitic/sugef_test_springboot_b
 │       └── UserService.java                    # Encargado del CRUD de los usuarios del sistema
 │
 ├── utility
-│   ├── JwtUtils.java                           #
-│   ├── LoggerConfig.java                       #
-│   ├── LoggerSingleton.java                    #
-│   ├── LogPathConfig.java                      #
-│   └── UserValidationService.java              #
+│   ├── JwtUtils.java                           # Gestión de JWT (JSON Web Tokens)
+│   ├── LoggerConfig.java                       # Configuración para el sistema de logging de la aplicación
+│   ├── LoggerSingleton.java                    # Manejo la instancia única de Logger en toda la aplicación
+│   ├── LogPathConfig.java                      # Configurar y obtener la ruta del directorio de logs de la aplicación
+│   └── UserValidationService.java              # Validaciones de objetos utilizados con la administración del user
 │
 └── resources /
-    ├── application-dev.properties              #
-    ├── application-prod.properties             #
-    └── application.properties                  #
+    ├── application-dev.properties              # Gestión de configuraciones en el entorno de desarrollo
+    ├── application-prod.properties             # Gestión de configuraciones en el entorno de producción
+    └── application.properties                  # Gestión de configuraciones globales y de inicio.
 ```
 
 ## Implementaciones:

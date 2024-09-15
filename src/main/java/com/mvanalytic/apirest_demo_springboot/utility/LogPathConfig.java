@@ -5,6 +5,32 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.io.File;
 
+/**
+ * Clase de utilidad para configurar y obtener la ruta del directorio de logs de la aplicación.
+ * 
+ * Esta clase proporciona un método para determinar la ruta de un directorio de logs
+ * basado en el sistema operativo y el nombre de la aplicación proporcionado.
+ * Además, crea el directorio de logs si no existe.
+ * 
+ * Uso típico:
+ * <pre>
+ * {@code
+ * String logPath = LogPathConfig.getLogDirectoryPath("MyApplication");
+ * System.out.println("Los logs se almacenarán en: " + logPath);
+ * }
+ * </pre>
+ * 
+ * Comportamiento:
+ * <ul>
+ *   <li>Para sistemas Windows, los logs se almacenarán en "C:\Logs\<nombreAplicacion>\".</li>
+ *   <li>Para sistemas basados en Unix/Linux/MacOS, los logs se almacenarán en 
+ *       "<user.home>/logs/<nombreAplicacion>/".</li>
+ * </ul>
+ * 
+ * El directorio de logs se crea automáticamente si no existe.
+ * 
+ * @author Mario Martínez Lanuza
+ */
 public class LogPathConfig {
 
   public static String getLogDirectoryPath(String applicationName) {

@@ -8,6 +8,17 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import com.mvanalytic.apirest_demo_springboot.domain.user.User;
 
+/**
+ * Repositorio para la entidad {@link User}.
+ * 
+ * Esta interfaz extiende de {@link JpaRepository} para proporcionar operaciones CRUD 
+ * (crear, leer, actualizar y eliminar) sobre la entidad {@link User}. 
+ * 
+ * Además, permite la definición de métodos personalizados para realizar consultas 
+ * específicas a la base de datos. La implementación de esta interfaz es manejada automáticamente 
+ * por Spring Data JPA.
+  * @author Mario Martínez Lanuza
+ */
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 

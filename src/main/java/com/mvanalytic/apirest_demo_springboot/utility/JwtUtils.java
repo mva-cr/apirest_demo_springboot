@@ -3,19 +3,13 @@ package com.mvanalytic.apirest_demo_springboot.utility;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-
 import org.springframework.stereotype.Component;
-
-// import com.mvanalytic.sugef_test_springboot_b.domain.User;
-
 import java.security.Key;
 import java.util.Date;
 import java.util.stream.Collectors;
-
 import org.apache.logging.log4j.Logger;
 
 /**

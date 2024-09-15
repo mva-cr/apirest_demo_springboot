@@ -20,7 +20,7 @@ import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
 
 /**
  * Proveedor personalizado de autenticación para la aplicación.
- * Este proveedor autentica a los usuarios en función de su 'nickname' y
+ * Este proveedor recibe las excepciones y las retorna al frontent
  * 'password'.
  */
 @Component

@@ -11,8 +11,7 @@ import com.mvanalytic.apirest_demo_springboot.dto.user.UserStatusUpdateRequestDT
 
 /**
  * Clase que realiza las validaciones de los diferentes objetos utilizados con
- * la
- * administración del user.
+ * la administración del user.
  */
 public class UserValidationService {
 
