@@ -1,5 +1,7 @@
 # Flujo de Logger
 
+[Retornar a la principal](../../README.md)
+
 Configuración del Logger (Inicio de la Aplicación)
 
 La clase LoggerConfig configura los detalles del logger al inicio de la aplicación.
@@ -7,9 +9,9 @@ Este paso define los "appenders" (destinos de los logs), los "layouts" (formato 
 java
 Copiar código
 public class LoggerConfig {
-    public static void configureLogger(String applicationName) {
-        // Obtiene el directorio de logs
-        String logDir = LogPathConfig.getLogDirectoryPath(applicationName);
+public static void configureLogger(String applicationName) {
+// Obtiene el directorio de logs
+String logDir = LogPathConfig.getLogDirectoryPath(applicationName);
 
         // Construye la configuración del logger
         ConfigurationBuilder<BuiltConfiguration> builder = ConfigurationBuilderFactory.newConfigurationBuilder();
@@ -47,6 +49,7 @@ public class LoggerConfig {
         // Inicializa el logger
         Configurator.initialize(builder.build());
     }
+
 }
 Obtención de la Ruta del Directorio de Logs
 
@@ -55,10 +58,10 @@ Si el directorio no existe, lo crea.
 java
 Copiar código
 public class LogPathConfig {
-    public static String getLogDirectoryPath(String applicationName) {
-        String os = System.getProperty("os.name").toLowerCase();
-        String baseDir = os.contains("win") ? "C:" + File.separator + "Logs" : System.getProperty("user.home") + "/logs";
-        String finalPath = baseDir + File.separator + applicationName + File.separator;
+public static String getLogDirectoryPath(String applicationName) {
+String os = System.getProperty("os.name").toLowerCase();
+String baseDir = os.contains("win") ? "C:" + File.separator + "Logs" : System.getProperty("user.home") + "/logs";
+String finalPath = baseDir + File.separator + applicationName + File.separator;
 
         // Crea el directorio si no existe
         try {
@@ -71,6 +74,7 @@ public class LogPathConfig {
         }
         return finalPath;
     }
+
 }
 Inicialización del Logger Singleton
 
@@ -79,7 +83,7 @@ Esta clase se asegura de que el logger se inicialice una sola vez y se reutilice
 java
 Copiar código
 public class LoggerSingleton {
-    private static Logger logger = null;
+private static Logger logger = null;
 
     private LoggerSingleton() {}
 
@@ -93,6 +97,7 @@ public class LoggerSingleton {
         }
         return logger;
     }
+
 }
 Uso del Logger en la Aplicación
 
@@ -101,7 +106,7 @@ Por ejemplo, en la clase AuthTokenFilter:
 java
 Copiar código
 public class AuthTokenFilter extends OncePerRequestFilter {
-    private static final Logger logger = LoggerSingleton.getLogger(AuthTokenFilter.class);
+private static final Logger logger = LoggerSingleton.getLogger(AuthTokenFilter.class);
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -127,6 +132,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+
 }
 Salida de Logs a la Consola y a los Archivos
 
@@ -153,3 +159,4 @@ Revisa los permisos del sistema de archivos para el directorio de logs.
 Resumen
 El flujo completo del logger comienza con la configuración inicial en LoggerConfig, seguido por la creación de la ruta de logs en LogPathConfig, la obtención de una instancia única del logger en LoggerSingleton, y finalmente el uso del logger en la aplicación para registrar eventos, errores, y mensajes de depuración.
 
+[Retornar a la principal](../../README.md)

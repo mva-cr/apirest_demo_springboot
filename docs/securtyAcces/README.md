@@ -1,5 +1,7 @@
 # Seguridad en el acceso a la aplicación
 
+[Retornar a la principal](../../README.md)
+
 Definiendo dos capas de seguridad en la aplicación.
 
 ## Configuración en `filterChain`
@@ -127,3 +129,47 @@ Durante el tiempo de ejecución, el método filterChain no se invoca de nuevo. E
 
 1. La configuración que definiste dentro de filterChain se utiliza cada vez que una solicitud HTTP entra en tu aplicación.
 2. Los filtros de seguridad configurados dentro del SecurityFilterChain se ejecutan en el orden en que se definieron para asegurar la aplicación según las reglas establecidas.
+
+## Autenticación
+
+El método `doFilterInternal` carga un objeto de tipo `UserDetails` cargando el usuario, este ultimo metodo es `loadUser` de la clase `UserDetailsServiceImpl`en este método carga los datos a userDetail con el siguiente código:
+
+```
+ org.springframework.security.core.userdetails.User userDetails = new org.springframework.security.core.userdetails.User(
+        user.getNickname(),
+        user.getPassword(),
+        user.isActivated(), // habilitado
+        true, // accountNonExpired
+        true, // credentialsNonExpired
+        user.isStatus(), // accountNonLocked
+        authoritiesList // Lista de autoridades (roles) convertidas a GrantedAuthority
+    );
+```
+
+**Explicación de los Parámetros**
+
+1. `user.getNickname()`: Representa el nombre de usuario o "nickname" que se utiliza para la autenticación.
+
+2. `user.getPassword()`: Contiene la contraseña del usuario (ya debería estar cifrada).
+
+3. `user.isActivated()`: Indica si el usuario está habilitado o deshabilitado en el sistema.
+
+- `true`: El usuario está habilitado y puede autenticarse.
+- `false`: El usuario está deshabilitado y no podrá autenticarse.
+
+Si este valor es `false`, Spring Security impedirá que el usuario inicie sesión y lanzará una excepción de tipo DisabledException.
+
+4. `true` (**accountNonExpired**): Indica que la cuenta del usuario no ha expirado. Este valor está configurado como `true` de forma predeterminada, lo que significa que no se ha implementado lógica para manejar cuentas expiradas.
+
+5. true (**credentialsNonExpired**): Indica que las credenciales (contraseña) del usuario no han expirado. Similar a accountNonExpired, está configurado como `true` de forma predeterminada.
+
+6. `user.isStatus()`: Indica si la cuenta está bloqueada o no.
+
+- `true`: La cuenta no está bloqueada y el usuario puede autenticarse.
+- `false`: La cuenta está bloqueada, lo que significa que el usuario no puede autenticarse.
+
+Si este valor es `false`, Spring Security lanzará una excepción de tipo LockedException.
+
+7. `authoritiesList`: Es una lista de roles o autoridades asociadas con el usuario. Esta lista se convierte en objetos de tipo `GrantedAuthority` y se utiliza para determinar los permisos del usuario en la aplicación.
+
+[Retornar a la principal](../../README.md)

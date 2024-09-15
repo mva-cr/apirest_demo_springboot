@@ -6,13 +6,13 @@ package com.mvanalytic.apirest_demo_springboot.dto.user;
  * Se utiliza para enviar el token y la información relevante del usuario al
  * cliente.
  */
-public class JwtResponse {
+public class JwtResponseDTO {
 
   private long id;
   private String firstname;
   private String lastName;
   private String secondLastName;
-  private String nickName;
+  private String nickname;
   private String email;
   private String languageKey;
 
@@ -32,17 +32,17 @@ public class JwtResponse {
    * @param id          El id del usuario en la base de datos
    * @param firstname   Primer nombre del usuario
    * @param lastname    Apellido
-   * @param nickName    El nickname del usuario para el cual se emitió el token.
+   * @param nickname    El nickname del usuario para el cual se emitió el token.
    * @param accessToken El token JWT emitido.
    */
-  public JwtResponse(
+  public JwtResponseDTO(
       long id, String firstname, String lastName, String secondLastName,
-      String nickName, String accesToken, String email, String languageKey) {
+      String nickname, String accesToken, String email, String languageKey) {
     this.id = id;
     this.firstname = firstname;
     this.lastName = lastName;
     this.secondLastName = secondLastName;
-    this.nickName = nickName;
+    this.nickname = nickname;
     this.email = email;
     this.languageKey = languageKey;
     this.token = accesToken;
@@ -50,7 +50,7 @@ public class JwtResponse {
 
   // Getters y Setters
 
-  public JwtResponse() {
+  public JwtResponseDTO() {
   }
 
   public long getId() {
@@ -85,12 +85,12 @@ public class JwtResponse {
     this.secondLastName = secondLastName;
   }
 
-  public String getNickName() {
-    return nickName;
+  public String getNickname() {
+    return nickname;
   }
 
-  public void setNickName(String nickName) {
-    this.nickName = nickName;
+  public void setNickname(String nickname) {
+    this.nickname = nickname;
   }
 
   public String getEmail() {

@@ -1,5 +1,7 @@
 # Proceso de creación de un usuario
 
+[Retornar a la principal](../../README.md)
+
 ## Ciclo de vida del usuario relacionado con la activación y recuparación de la cuenta
 
 ### `activationKey`
@@ -43,3 +45,5 @@
 2. **Límite de tiempo**: El sistema establece un límite de tiempo (por ejemplo, 24 horas) durante el cual el `resetKey` es válido.
 3. **Verificación de tiempo**: Cuando el usuario intenta restablecer su contraseña usando el `resetKey`, el sistema verifica que la diferencia entre la hora actual y `resetDate` esté dentro del límite de tiempo permitido.
 4. **Expiración**: Si el `resetKey` ha expirado (es decir, el tiempo permitido ha pasado), el usuario no podrá usar ese código para restablecer la contraseña y deberá solicitar un nuevo restablecimiento.
+
+[Retornar a la principal](../../README.md)

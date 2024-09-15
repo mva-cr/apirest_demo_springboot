@@ -2,36 +2,31 @@ package com.mvanalytic.apirest_demo_springboot.dto.user;
 
 import java.util.Set;
 
-import jakarta.validation.constraints.NotNull;
-
 /**
  * Clase que representa la respuesta que contiene la información que el
- * ROLE_ADMIN
- * puede ver y será utilizado para recibir información que este perfil puede
- * modificar
- * Es clase la utiliza unicamente por el ROLE_ADMIN
+ * ROLE_ADMIN puede ver
  */
-public class AdminUserDTO {
+public class AdminUserResponseDTO {
 
-  @NotNull
   private Long id;
   private String firstName;
   private String lastName;
   private String secondLastName;
-  private String nickName;
+  private String nickname;
   private String email;
   private String languageKey;
-  private boolean status;
-  private boolean activated;
+  private Boolean status;
+  private Boolean activated;
   private Set<AuthorityDTO> authorities;
 
-  public AdminUserDTO(Long id, String firstName, String lastName, String secondLastName, String nickName, String email,
-      String languageKey, boolean status, boolean activated, Set<AuthorityDTO> authorities) {
+  public AdminUserResponseDTO(Long id, String firstName, String lastName, String secondLastName, String nickname,
+      String email,
+      String languageKey, Boolean status, Boolean activated, Set<AuthorityDTO> authorities) {
     this.id = id;
     this.firstName = firstName;
     this.lastName = lastName;
     this.secondLastName = secondLastName;
-    this.nickName = nickName;
+    this.nickname = nickname;
     this.email = email;
     this.languageKey = languageKey;
     this.status = status;
@@ -39,7 +34,7 @@ public class AdminUserDTO {
     this.authorities = authorities;
   }
 
-  public AdminUserDTO() {
+  public AdminUserResponseDTO() {
   }
 
   public Long getId() {
@@ -74,12 +69,12 @@ public class AdminUserDTO {
     this.secondLastName = secondLastName;
   }
 
-  public String getNickName() {
-    return nickName;
+  public String getNickname() {
+    return nickname;
   }
 
-  public void setNickName(String nickName) {
-    this.nickName = nickName;
+  public void setNickname(String nickname) {
+    this.nickname = nickname;
   }
 
   public String getEmail() {
@@ -98,19 +93,19 @@ public class AdminUserDTO {
     this.languageKey = languageKey;
   }
 
-  public boolean isStatus() {
+  public Boolean isStatus() {
     return status;
   }
 
-  public void setStatus(boolean status) {
+  public void setStatus(Boolean status) {
     this.status = status;
   }
 
-  public boolean isActivated() {
+  public Boolean isActivated() {
     return activated;
   }
 
-  public void setActivated(boolean activated) {
+  public void setActivated(Boolean activated) {
     this.activated = activated;
   }
 
@@ -125,7 +120,7 @@ public class AdminUserDTO {
   @Override
   public String toString() {
     return "AdminUserDTO [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", secondLastName="
-        + secondLastName + ", nickName=" + nickName + ", email=" + email + ", languageKey=" + languageKey + ", status="
+        + secondLastName + ", nickname=" + nickname + ", email=" + email + ", languageKey=" + languageKey + ", status="
         + status + ", activated=" + activated + ", authorities=" + authorities + "]";
   }
 

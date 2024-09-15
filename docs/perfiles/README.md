@@ -21,3 +21,5 @@
 1. **Validaciones y auditorías**: Cualquier cambio en la información crítica, especialmente realizada por el administrador, debe ser auditada y validada. Esto incluye mantener registros de cuándo y quién realizó cambios en atributos sensibles.
 2. **Seguridad y privacidad**: Asegurar que los cambios en los datos del usuario se hagan de manera segura y que se respete la privacidad del usuario es fundamental.
 3. **Políticas de la empresa**: Las políticas internas de la empresa pueden dictar restricciones adicionales o proporcionar directrices sobre cómo y quién puede modificar ciertos datos del usuario.
+
+[Retornar a la principal](../../README.md)

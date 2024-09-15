@@ -1,5 +1,7 @@
 # Application.properties
 
+[Retornar a la principal](../../README.md)
+
 ## Configuración de Perfiles en Spring Boot
 
 1. **Definir Archivos de Propiedades o YML**
@@ -375,3 +377,5 @@ El valor validate es particularmente útil en entornos de producción o en cualq
 
 1. **Entornos de Producción**: Es recomendable usar validate en producción para evitar cambios no deseados o accidentales en el esquema de la base de datos que podrían afectar la integridad de los datos existentes.
 2. **Desarrollo y Pruebas**: En desarrollo, puedes preferir usar update o incluso create-drop para facilitar el desarrollo y las pruebas, permitiendo que Hibernate maneje dinámicamente el esquema de la base de datos conforme cambian tus entidades.
+
+[Retornar a la principal](../../README.md)

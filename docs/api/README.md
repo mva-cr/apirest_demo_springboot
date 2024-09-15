@@ -1,5 +1,7 @@
 # API (Interfaz de Programación de Aplicaciones)
 
+[Retornar a la principal](../../README.md)
+
 ## API - API REST o API RESTful
 
 Una **`API`** (Interfaz de Programación de Aplicaciones) es un conjunto de reglas y definiciones que permite que diferentes piezas de software interactúen entre sí. Funciona como un contrato entre un proveedor de información y un usuario, especificando la entrada y la salida que el usuario espera.
@@ -175,3 +177,5 @@ A diferencia de los sistemas que dependen de almacenar tokens o sesiones en el s
 - **Validación de Token**: Asegúrate de que cada solicitud que incluya el token sea validada en el servidor para verificar su integridad y autenticidad.
 - **Uso de HTTPS**: Asegúrate de que todas las comunicaciones entre el cliente y el servidor se realicen sobre HTTPS para proteger los datos transmitidos, incluidos los tokens de autenticación, contra la interceptación.
 - **Educación del Usuario**: Informa a los usuarios sobre la importancia de cerrar sesión, especialmente en dispositivos compartidos.
+
+[Retornar a la principal](../../README.md)

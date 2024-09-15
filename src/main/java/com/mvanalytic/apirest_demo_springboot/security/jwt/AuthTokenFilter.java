@@ -22,8 +22,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-
-
 import org.apache.logging.log4j.Logger;
 
 /**
@@ -45,9 +43,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
   @Override
   protected void doFilterInternal(
-    @NonNull HttpServletRequest request,
-    @NonNull HttpServletResponse response,
-    @NonNull FilterChain filterChain)
+      @NonNull HttpServletRequest request,
+      @NonNull HttpServletResponse response,
+      @NonNull FilterChain filterChain)
       throws ServletException, IOException {
 
     try {
@@ -75,23 +73,24 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authentication);
       } else {
         // Si el token es nulo o no es válido, se registra un mensaje de error
-        logger.warn("Token JWT nulo o inválido para la solicitud a {}", request.getRequestURI());
+        logger.error("Token JWT nulo o inválido para la solicitud a {}", request.getRequestURI());
         throw new InsufficientAuthenticationException(
-            "Token JWT nulo o inválido para la solicitud a " + request.getRequestURI());
+            "153, Token JWT nulo o inválido " + request.getRequestURI());
       }
 
     } catch (CredentialsExpiredException e) {
       logger.error("Las credenciales han expirado: {}", e.getMessage());
       // Configura la respuesta con un error 401 y el mensaje correspondiente
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error: Token expired");
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error: 152, Token expirado");
       return;
     } catch (InsufficientAuthenticationException e) {
       // Manejo de excepción para autenticación insuficiente
       logger.error("Error de autenticación insuficiente: {}", e.getMessage());
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error: Insufficient authentication");
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error: 157, Autenticación insuficiente");
     } catch (Exception e) {
       logger.error("No se puede configurar la autenticación del usuario: {}", e.getMessage());
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error: " + e.getMessage());
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+          "Error: 154, No se pudo configurar autenticación " + e.getMessage());
     }
 
     // Continúa con el siguiente filtro en la cadena

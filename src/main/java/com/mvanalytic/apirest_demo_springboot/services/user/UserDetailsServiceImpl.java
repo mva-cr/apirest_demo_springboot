@@ -17,8 +17,6 @@ import com.mvanalytic.apirest_demo_springboot.domain.user.Authority;
 import com.mvanalytic.apirest_demo_springboot.domain.user.User;
 import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
 
-
-
 /**
  * Servicio para cargar los detalles de los usuarios basado en el nickname.
  * Implementa UserDetailsService que es usado por Spring Security para cargar
@@ -80,8 +78,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     // Verifica si el usuario está habilitado
     if (!user.isStatus()) {
-      logger.error("Cuenta deshabilitada, contacte al administrador de la aplicación.");
-      throw new DisabledException("Cuenta deshabilitada, contacte al administrador de la aplicación.");
+      logger.error("Cuenta deshabilitada.");
+      throw new DisabledException("110, Cuenta deshabilitada");
     }
 
     // Convierte el stream a un array de GrantedAuthority antes de pasarlo a
@@ -103,6 +101,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     // builder.authorities(authoritiesList);
     // Crea una instancia de UserDetails utilizando la implementación de Spring
     // Security
+    /**
+     * Carga el nombre, el password cifrado, si está activo (true) de lo contrario no lo autentica, si su status es true
+     * de lo contrario no lo autentica, y agrega los roles o authorities
+     */
     org.springframework.security.core.userdetails.User userDetails = new org.springframework.security.core.userdetails.User(
         user.getNickname(),
         user.getPassword(),
@@ -114,12 +116,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     );
 
     return userDetails;
-
-    // } catch (IllegalArgumentException e) {
-    // logger.error("El identificador no existe {} ", e.getMessage());
-    // throw new UsernameNotFoundException("El identificador no existe: " +
-    // e.getMessage(), e);
-    // }
   }
 
   /**

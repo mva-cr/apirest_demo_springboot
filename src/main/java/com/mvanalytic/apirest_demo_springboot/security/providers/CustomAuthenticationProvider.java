@@ -1,5 +1,6 @@
 package com.mvanalytic.apirest_demo_springboot.security.providers;
 
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -13,6 +14,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
+
 // import com.mvanalytic.sugef_test_springboot_b.services.UserDetailsServiceImpl;
 
 /**
@@ -22,6 +25,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class CustomAuthenticationProvider implements AuthenticationProvider {
+
+  // Instancia singleton de logger
+  private static final Logger logger = LoggerSingleton.getLogger(CustomAuthenticationProvider.class);
 
   @Autowired
   private UserDetailsService userDetailsService;
@@ -49,24 +55,16 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
       UserDetails userDetails = userDetailsService.loadUserByUsername(identifier);
 
-      // Verifica si el identificador contiene un '@', indicando que es un email
-      // if (identifier.contains("@")) {
-      //   userDetails = ((UserDetailsServiceImpl) userDetailsService).loadUserByEmail(identifier);
-      // } else {
-      //   userDetails = userDetailsService.loadUserByUsername(identifier);
-      // }
-
-      // Carga los detalles del usuario en función del nickname
-      // UserDetails userDetails = userDetailsService.loadUserByUsername(nickname);
-
       // Verifica si el usuario está habilitado
       if (!userDetails.isEnabled()) {
-        throw new DisabledException("Cuenta deshabilitada, contacte al administrador.");
+        logger.error("Cuenta deshabilitada");
+        throw new DisabledException("110, Cuenta deshabilitada");
       }
 
       // Verifica si las credenciales (password) son correctas
       if (!passwordEncoder.matches(rawPassword, userDetails.getPassword())) {
-        throw new BadCredentialsException("El password ingresado es incorrecto.");
+        logger.error("La contraseña no coincide con la registrada");
+        throw new BadCredentialsException("108, La contraseña no coincide con la registrada");
       }
 
       // Devuelve un token de autenticación completamente autenticado si la validación
@@ -75,7 +73,8 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     } catch (UsernameNotFoundException | DisabledException | BadCredentialsException e) {
       throw e;
     } catch (Exception e) {
-      throw new AuthenticationException("Error de autenticación inesperado: " + e.getMessage(), e) {
+      logger.error("Error de autenticación inesperado {}" + e.getMessage());
+      throw new AuthenticationException("155, Error en tiempo de ejecución " + e.getMessage(), e) {
       };
     }
   }

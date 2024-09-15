@@ -5,18 +5,10 @@ package com.mvanalytic.apirest_demo_springboot.dto.user;
  * Utilizada para transportar los datos de autenticación del usuario desde el
  * cliente hasta el servidor.
  */
-public class LoginRequest {
-  /**
-   * El nickname del usuario que intenta iniciar sesión.
-   */
-  private String nickName;
-  /**
-   * El email del usuario que intenta iniciar sesión.
-   */
+public class LoginRequestDTO {
+
+  private String nickname;
   private String email;
-  /**
-   * La contraseña del usuario que intenta iniciar sesión.
-   */
   private String password;
 
   // Getters y Setters
@@ -26,17 +18,17 @@ public class LoginRequest {
    * 
    * @return El nickname del usuario.
    */
-  public String getNickName() {
-    return nickName;
+  public String getNickname() {
+    return nickname;
   }
 
   /**
    * Establece el nickname del usuario.
    * 
-   * @param nickName El nickname a establecer para el usuario.
+   * @param nickname El nickname a establecer para el usuario.
    */
-  public void setNickName(String nickName) {
-    this.nickName = nickName;
+  public void setNickname(String nickname) {
+    this.nickname = nickname;
   }
 
   /**

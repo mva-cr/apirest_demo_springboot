@@ -45,7 +45,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
     // Define el mensaje de error
     Map<String, Object> errorDetails = new HashMap<>();
-    errorDetails.put("error", "Insufficient permissions");
+    errorDetails.put("error", "151, Permisos insuficientes");
     errorDetails.put("message", accessDeniedException.getMessage());
     errorDetails.put("timestamp", System.currentTimeMillis());
 

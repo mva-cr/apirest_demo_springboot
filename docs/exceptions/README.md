@@ -1,5 +1,7 @@
 # Implementación de manejo de errores
 
+[Retornar a la principal](../../README.md)
+
 ## `GlobalExceptionHandler`
 
 Es un manejador global de excepciones que se encarga de capturar excepciones que se lanzan en cualquier parte de la aplicación, la cuales por supuesto se deben agregar los respectivos método
@@ -152,3 +154,70 @@ Spring Security se basa en la configuración de seguridad y el contexto en el qu
 
 - Se utiliza `GlobalExceptionHandler` para manejar excepciones lanzadas en otros contextos de la aplicación que no están relacionados con la autenticación.
 - Por ejemplo, si un método del servicio (UserService.getUserByEmail) lanza `UsernameNotFoundException`, esta será capturada por el manejador global porque no ocurre durante el proceso de autenticación.
+
+## Estructura de los mensajes de error enviados por el servidor
+
+Los códigos de error detallados se definen con base en la siguiente tabla:
+
+| Código | Detalle                                              | Enviado por          |
+| :----- | :--------------------------------------------------- | :------------------- |
+| 100    | Al menos una variable no debe ser nula               | Base Datos           |
+| 101    | El valor no puede ser nulo                           | Base Datos           |
+| 102    | El usuario no existe                                 | Base Datos           |
+| 103    | El nuevo valor no puede ser igual al valor actual    | Base Datos           |
+| 104    | El rol asignado no existe                            | Base Datos           |
+| 105    | El nickname ingresado ya existe                      | Base Datos           |
+| 106    | El correo ingresado ya existe                        | Base Datos y Backend |
+| 107    | La contraseña es nula                                | Base Datos           |
+| 108    | La contraseña no coincide con la registrada          | Base Datos           |
+| 109    | La nueva contraseña es igual a la contraseña vigente | Base Datos y Backend |
+| 110    | Cuenta deshabilitada                                 | Backend              |
+| 111    | El identificador no existe                           | Backend              |
+| 112    | Las credenciales han expirado                        | Backend              |
+| 113    | El usuario no existe                                 | Backend              |
+| 114    | Error inesperado al buscar el usuario                | Backend              |
+| 115    | Error al actualizar el usuario                       | Backend              |
+| 116    | Error al actualizar el nickname                      | Backend              |
+| 117    | Error al actualizar el correo                        | Backend              |
+| 118    | Error al actualizar la contraseña                    | Backend              |
+| 119    | No puede acceder a información de otro usuario       | Backend              |
+| 120    | El id ingresado es nulo                              | Backend              |
+| 121    | El nombre ingresado es nulo                          | Backend              |
+| 122    | El apellido ingresado es nulo                        | Backend              |
+| 123    | El correo no cumple el formato definido              | Backend              |
+| 124    | El nickname no cumple el formato definido            | Backend              |
+| 125    | La contraseña no cumple el formato definido          | Backend              |
+| 126    | El idioma es nulo                                    | Backend              |
+| 127    | El status ingresado es nulo                          | Backend              |
+| 128    | La activación ingresada es nula                      | Backend              |
+| 129    | El nombre del rol es nulo                            | Backend              |
+| 130    | El nombre excede los 50 caracteres                   | Backend              |
+| 131    | El apellido excede los 50 caracteres                 | Backend              |
+| 132    | El segundo apellido excede los 50 caracteres         | Backend              |
+| 133    | El nombre del rol excede los 50 caracteres           | Backend              |
+| 134    | El idioma debe ser de 2 caracteres                   | Backend              |
+| 135    | El nombre no cumple el formato definido              | Backend              |
+| 136    | El apellido no cumple el formato definido            | Backend              |
+| 137    | El segundo apellido no cumple el formato definido    | Backend              |
+| 138    | El idioma no cumple el formato definido              | Backend              |
+| 139    | El rol no cumple el formato definido                 | Backend              |
+| 150    | No autorizado                                        | Backend              |
+| 151    | Permisos insuficientes                               | Backend              |
+| 152    | Token expirado                                       | Backend              |
+| 153    | Token JWT nulo o inválido                            | Backend              |
+| 154    | No se pudo configurar autenticación                  | Backend              |
+| 155    | Error de autenticación inesperado                    | Backend              |
+| 156    | Error en tiempo de ejecución                         | Backend              |
+| 157    | Autenticación insuficiente                           | Backend              |
+
+El mensaje estará compuesto por el código separado una coma (,) y el detalle, de forma que al `Frontend` el mesaje de error llegue como el siguiente ejemplo:
+
+```
+{
+    "error": "151, Permisos insuficientes"
+}
+```
+
+De esta forma se puede separa el mensaje en dos elmentos, el código y una descripción del mismo de forma que con el código se pueda personalizar y generar el idioma que se desee.
+
+[Retornar a la principal](../../README.md)

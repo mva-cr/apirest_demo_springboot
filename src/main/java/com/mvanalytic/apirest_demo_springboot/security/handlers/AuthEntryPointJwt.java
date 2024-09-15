@@ -58,18 +58,18 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
     Map<String, String> jsonResponse = new HashMap<>();
 
     if (authException instanceof UsernameNotFoundException) {
-      jsonResponse.put("error", "El identificador no existe.");
+      jsonResponse.put("error", "111, El identificador no existe");
     } else if (authException instanceof BadCredentialsException) {
-      jsonResponse.put("error", "El password ingresado es incorrecto.");
+      jsonResponse.put("error", "108, La contraseña no coincide con la registrada");
     } else if (authException instanceof DisabledException) {
       jsonResponse.put("error",
-          "Su cuenta se encuentra deshabilitada, favor comunicarse con el administrador de la aplicación.");
+          "110, Cuenta deshabilitada ");
     } else if (authException instanceof CredentialsExpiredException) {
-      jsonResponse.put("error", "Token expirado");
+      jsonResponse.put("error", "152, Token expirado");
     } else if (authException instanceof InsufficientAuthenticationException) {
-      jsonResponse.put("error", "Insufficient permissions o ha expirado");
+      jsonResponse.put("error", "151, Permisos insuficientes -");
     } else {
-      jsonResponse.put("error", "Unauthorized");
+      jsonResponse.put("error", "150, No autorizado");
     }
 
     // Convierte el mapa en una cadena JSON

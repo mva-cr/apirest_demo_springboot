@@ -2,6 +2,9 @@ package com.mvanalytic.apirest_demo_springboot.dto.user;
 
 import java.io.Serializable;
 
+/**
+ * Clase que representa la el rol del usuario
+ */
 public class AuthorityDTO implements Serializable {
 
   private static final long serialVersionUID = 1L;

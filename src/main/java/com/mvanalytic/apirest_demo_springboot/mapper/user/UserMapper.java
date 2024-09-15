@@ -1,19 +1,15 @@
 package com.mvanalytic.apirest_demo_springboot.mapper.user;
 
 import java.util.HashSet;
-// import java.util.Set;
-// import java.util.stream.Collector;
 import java.util.stream.Collectors;
-
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
 import com.mvanalytic.apirest_demo_springboot.domain.user.Authority;
 import com.mvanalytic.apirest_demo_springboot.domain.user.User;
-import com.mvanalytic.apirest_demo_springboot.dto.user.AdminUserDTO;
+import com.mvanalytic.apirest_demo_springboot.dto.user.AdminUserResponseDTO;
 import com.mvanalytic.apirest_demo_springboot.dto.user.AuthorityDTO;
-import com.mvanalytic.apirest_demo_springboot.dto.user.JwtResponse;
-import com.mvanalytic.apirest_demo_springboot.dto.user.UserProfileDTO;
-import com.mvanalytic.apirest_demo_springboot.dto.user.UserRegistrationDTO;
+import com.mvanalytic.apirest_demo_springboot.dto.user.JwtResponseDTO;
+import com.mvanalytic.apirest_demo_springboot.dto.user.UserProfileResponseDTO;
+import com.mvanalytic.apirest_demo_springboot.dto.user.UserRegistrationRequestDTO;
 
 // import org.springframework.security.core.GrantedAuthority;
 
@@ -30,13 +26,13 @@ public class UserMapper {
    * @param user Entidad User a convertir
    * @return DTO AdminUserDTO
    */
-  public static AdminUserDTO convertUserToAdminUserDTO(User user) {
-    AdminUserDTO adminUserDTO = new AdminUserDTO();
+  public static AdminUserResponseDTO convertUserToAdminUserDTO(User user) {
+    AdminUserResponseDTO adminUserDTO = new AdminUserResponseDTO();
     adminUserDTO.setId(user.getId());
     adminUserDTO.setFirstName(user.getFirstName());
     adminUserDTO.setLastName(user.getLastName());
     adminUserDTO.setSecondLastName(user.getSecondLastName());
-    adminUserDTO.setNickName(user.getNickname());
+    adminUserDTO.setNickname(user.getNickname());
     adminUserDTO.setEmail(user.getEmail());
     adminUserDTO.setLanguageKey(user.getLanguageKey());
     adminUserDTO.setStatus(user.isStatus());
@@ -65,14 +61,14 @@ public class UserMapper {
    * @param adminUserDTO DTO objeto AdminUserDTO a convertir
    * @return User Entidad
    */
-  public static User convertAdminUserDTOToUser(AdminUserDTO adminUserDTO) {
+  public static User convertAdminUserDTOToUser(AdminUserResponseDTO adminUserDTO) {
     User user = new User();
     user.setId(adminUserDTO.getId());
     user.setFirstName(adminUserDTO.getFirstName());
     user.setLastName(adminUserDTO.getLastName());
     user.setSecondLastName(
-        adminUserDTO.getSecondLastName().isEmpty() ? null : adminUserDTO.getSecondLastName());
-    user.setNickname(adminUserDTO.getNickName());
+        adminUserDTO.getSecondLastName() == null ? null : adminUserDTO.getSecondLastName());
+    user.setNickname(adminUserDTO.getNickname());
     user.setEmail(adminUserDTO.getEmail());
     user.setLanguageKey(adminUserDTO.getLanguageKey());
     user.setStatus(adminUserDTO.isStatus());
@@ -106,14 +102,14 @@ public class UserMapper {
    * @param user Entidad a convertir
    * @return UserProfileDTO Entidad
    */
-  public static UserProfileDTO convertUserToUserProfileDTO(User user) {
-    UserProfileDTO userProfileDTO = new UserProfileDTO();
+  public static UserProfileResponseDTO convertUserToUserProfileDTO(User user) {
+    UserProfileResponseDTO userProfileDTO = new UserProfileResponseDTO();
     userProfileDTO.setId(user.getId());
     userProfileDTO.setFirstName(user.getFirstName());
     userProfileDTO.setLastName(user.getLastName());
     userProfileDTO.setSecondLastName(
-        user.getSecondLastName().isEmpty() ? null : user.getSecondLastName());
-    userProfileDTO.setNickName(user.getNickname());
+        user.getSecondLastName() == null ? null : user.getSecondLastName());
+    userProfileDTO.setNickname(user.getNickname());
     userProfileDTO.setEmail(user.getEmail());
     userProfileDTO.setLanguageKey(user.getLanguageKey());
 
@@ -126,13 +122,13 @@ public class UserMapper {
    * @param userProfileDTO Entidad a convertir
    * @return User Entidad
    */
-  public static User convertUserProfileDTOToUser(UserProfileDTO userProfileDTO) {
+  public static User convertUserProfileDTOToUser(UserProfileResponseDTO userProfileDTO) {
     User user = new User();
     user.setId(userProfileDTO.getId());
     user.setFirstName(userProfileDTO.getFirstName());
     user.setLastName(userProfileDTO.getLastName());
     user.setSecondLastName(userProfileDTO.getSecondLastName());
-    user.setNickname(userProfileDTO.getNickName());
+    user.setNickname(userProfileDTO.getNickname());
     user.setEmail(userProfileDTO.getEmail());
     user.setLanguageKey(userProfileDTO.getLanguageKey());
 
@@ -147,13 +143,13 @@ public class UserMapper {
    * @param user Entidad a convertir
    * @return UserRegistrationDTO Entidad
    */
-  public static UserRegistrationDTO convertUserToUserRegistrationDTO(User user) {
-    UserRegistrationDTO userRegistrationDTO = new UserRegistrationDTO();
+  public static UserRegistrationRequestDTO convertUserToUserRegistrationDTO(User user) {
+    UserRegistrationRequestDTO userRegistrationDTO = new UserRegistrationRequestDTO();
     userRegistrationDTO.setFirstName(user.getFirstName());
     userRegistrationDTO.setLastName(user.getLastName());
     userRegistrationDTO.setSecondLastName(
-        user.getSecondLastName().isEmpty() ? null : user.getSecondLastName());
-    userRegistrationDTO.setNickName(user.getNickname());
+        user.getSecondLastName() == null ? null : user.getSecondLastName());
+    userRegistrationDTO.setNickname(user.getNickname());
     userRegistrationDTO.setEmail(user.getEmail());
     userRegistrationDTO.setPassword(user.getPassword());
     userRegistrationDTO.setLanguageKey(user.getLanguageKey());
@@ -167,12 +163,12 @@ public class UserMapper {
    * @param userRegistrationDTO Entidad a convertir
    * @return User entidad
    */
-  public static User convertUserRegistrationDTOToUser(UserRegistrationDTO userRegistrationDTO) {
+  public static User convertUserRegistrationDTOToUser(UserRegistrationRequestDTO userRegistrationDTO) {
     User user = new User();
     user.setFirstName(userRegistrationDTO.getFirstName());
     user.setLastName(userRegistrationDTO.getLastName());
     user.setSecondLastName(userRegistrationDTO.getSecondLastName());
-    user.setNickname(userRegistrationDTO.getNickName());
+    user.setNickname(userRegistrationDTO.getNickname());
     user.setEmail(userRegistrationDTO.getEmail());
     user.setLanguageKey(userRegistrationDTO.getLanguageKey());
     user.setPassword(userRegistrationDTO.getPassword());
@@ -182,10 +178,10 @@ public class UserMapper {
 
   // User - JwtResponse y viceversa
 
-  public static JwtResponse convertUserToJwtResponse(User user) {
-    JwtResponse jwtResponse = new JwtResponse();
+  public static JwtResponseDTO convertUserToJwtResponse(User user) {
+    JwtResponseDTO jwtResponse = new JwtResponseDTO();
     jwtResponse.setId(user.getId());
-    jwtResponse.setNickName(user.getNickname());
+    jwtResponse.setNickname(user.getNickname());
     jwtResponse.setFirstname(user.getFirstName());
     jwtResponse.setLastName(user.getLastName());
     jwtResponse.setSecondLastName(user.getSecondLastName());
@@ -194,7 +190,5 @@ public class UserMapper {
 
     return jwtResponse;
   }
-
-  // TODO: hacer mapper de UserAuditDTO con User
 
 }

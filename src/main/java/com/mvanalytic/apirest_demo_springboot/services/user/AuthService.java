@@ -13,7 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.mvanalytic.apirest_demo_springboot.dto.user.JwtResponse;
+import com.mvanalytic.apirest_demo_springboot.dto.user.JwtResponseDTO;
 import com.mvanalytic.apirest_demo_springboot.utility.JwtUtils;
 import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
 
@@ -47,7 +47,7 @@ public class AuthService {
    * @param password   La contraseña del usuario.
    * @return Respuesta JWT que contiene el token y el nombre de usuario.
    */
-  public JwtResponse authenticateUser(String identifier, String password) {
+  public JwtResponseDTO authenticateUser(String identifier, String password) {
     try {
       // Intenta autenticar usando el AuthenticationManager
       Authentication authentication = authenticationManager.authenticate(
@@ -62,7 +62,7 @@ public class AuthService {
       String jwt = jwtUtils.generateJwtToken(authentication);
 
       // Devuelve la respuesta del JWT con el username del UserDetails
-      JwtResponse jwtResponse = new JwtResponse();
+      JwtResponseDTO jwtResponse = new JwtResponseDTO();
       // Se crea y se carga el User según su identifier
       // User user = new User();
       // if (identifier.contains("@")) {
@@ -74,7 +74,7 @@ public class AuthService {
       // jwtResponse = UserMapper.convertUserToJwtResponse(user);
       // Se carga el token
       jwtResponse.setToken(jwt);
-      // jwtResponse.setNickName(userDetails.getUsername());
+      // jwtResponse.setNickname(userDetails.getUsername());
       // jwtResponse.setStatusCode(200);
       // jwtResponse.set(jwt);
       // return jwtResponse;
@@ -82,26 +82,26 @@ public class AuthService {
 
     } catch (UsernameNotFoundException e) {
       // Manejo de excepción cuando el nickname no existe
-      logger.error("El identificador no existe {}", e.getMessage());
-      throw new UsernameNotFoundException("El identificador no existe.");
+      logger.error("El identificador no existe ", e.getMessage());
+      throw new UsernameNotFoundException("111, El identificador no existe");
     } catch (BadCredentialsException e) {
       // Maneja el caso cuando el password es incorrecto
-      logger.error("El password ingresado es incorrecto {}", e.getMessage());
-      throw new BadCredentialsException("El password ingresado es incorrecto.");
+      logger.error("La contraseña no coincide con la registrada {}", e.getMessage());
+      throw new BadCredentialsException("108, La contraseña no coincide con la registrada");
 
     } catch (CredentialsExpiredException e) {
       // Maneja el caso cuando las credenciales han expirado
       logger.error("Las credenciales han expirado {}", e.getMessage());
-      throw new CredentialsExpiredException("Las credenciales han expirado. Por favor, inicia sesión nuevamente.");
+      throw new CredentialsExpiredException("112, Las credenciales han expirado");
 
     } catch (DisabledException e) {
       // Maneja el caso cuando la cuenta está deshabilitada
       logger.error("Cuenta deshabilitada {}", e.getMessage());
-      throw new DisabledException("Cuenta deshabilitada, contacte al administrador.");
+      throw new DisabledException("110, Cuenta deshabilitada");
     } catch (Exception e) {
       // Manejo de cualquier otra excepción de autenticación
       logger.error("Error en la autenticación {}", e.getMessage());
-      throw new RuntimeException("Error en la autenticación: " + e.getMessage(), e);
+      throw new RuntimeException("155, Error en tiempo de ejecución " + e.getMessage(), e);
     }
 
   }

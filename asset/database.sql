@@ -167,7 +167,7 @@ CREATE TABLE user_audit
   -- Valor anterior del nickname
   password_changed BIT CONSTRAINT DF_password_changed_user_audit DEFAULT ((0)) NOT NULL,
   -- Valor anteror del atributo de idioma
-  language_key NVARCHAR(2) NOT NULL,
+  language_key NVARCHAR(2) NULL,
   -- Indica si la contraseña fue cambiada
   activated BIT NULL,
   -- Valor anterior del activated
@@ -253,84 +253,49 @@ GO
 -- Trigger
 -- ===============================================================
 
--- ===============================================================
--- Author: Mario Martínez Lanuza
--- Create date: 2024-09-08
--- Description: Trigger para asignar automáticamente el rol 'ROLE_USER' a nuevos usuarios si dicho rol existe
--- ===============================================================
-IF EXISTS (SELECT 1
-FROM sys.triggers
-WHERE object_id = OBJECT_ID(N'[dbo].[trg_add_user_role]'))
-BEGIN
-  DROP TRIGGER [dbo].[trg_add_user_role];
-END
-GO
-
-CREATE TRIGGER trg_add_user_role
-ON user_mva
-AFTER INSERT
-AS
-BEGIN
-  SET NOCOUNT ON;
-
-  -- Recorrer cada fila que ha sido insertada en la tabla 'user_mva'
-  DECLARE @id_user BIGINT;
-
-  SELECT @id_user = id
-  FROM inserted;
-
-  -- Verificar si el rol 'ROLE_USER' existe en la tabla 'authority'
-  IF EXISTS (SELECT 1
-  FROM authority
-  WHERE name = 'ROLE_USER')
-    BEGIN
-    -- Si el rol existe, inserta el registro en 'user_authority' con el rol 'ROLE_USER'
-    INSERT INTO user_authority
-      (user_id, authority_name)
-    VALUES
-      (@id_user, 'ROLE_USER');
-  END
-
--- No se realiza ninguna acción si el rol no existe
-END;
-GO
 
 -- ===============================================================
 -- Author: Mario Martínez Lanuza
 -- Create date: 2024-09-08
--- Description: Trigger para modificar automáticamente el rol del user entre ROLE_USER y ROLE_UNAUTHORIZE
+-- Description: Trigger para actualizar el rol a ROLE_UNAUTHORIZE
+-- cuando se modifica el status a 0, previamente el status es 1 y
+-- el rol actual no es ROLE_UNAUTHORIZE
 -- ===============================================================
 IF EXISTS (SELECT 1
 FROM sys.triggers
-WHERE object_id = OBJECT_ID(N'[dbo].[trg_update_user_authority]'))
+WHERE object_id = OBJECT_ID(N'[dbo].[trg_update_user_authority_on_status_change]'))
 BEGIN
-  DROP TRIGGER [dbo].[trg_update_user_authority];
+  DROP TRIGGER [dbo].[trg_update_user_authority_on_status_change];
 END
 GO
 
-CREATE TRIGGER trg_update_user_authority
+CREATE TRIGGER trg_update_user_authority_on_status_change
 ON user_mva
 AFTER UPDATE
 AS
 BEGIN
-  -- Verificar si el valor de 'status' ha cambiado
-  IF EXISTS (SELECT 1
-  FROM inserted i JOIN deleted d ON i.id = d.id
-  WHERE d.status <> i.status)
-  BEGIN
-    -- Actualizar a 'ROLE_USER' cuando el status es 1
-    UPDATE ua
-      SET ua.authority_name = 'ROLE_USER'
-      FROM user_authority ua
-      JOIN INSERTED i ON ua.user_id = i.id
-      WHERE i.status = 1;
+  -- Declarar variables para el nuevo y el estado anterior, el ID del usuario, y el rol actual
+  DECLARE @new_status BIT, @current_status BIT, @id_user BIGINT, @current_role NVARCHAR(50);
 
-    -- Actualizar a 'ROLE_UNAUTHORIZE' cuando el status es 0
+  -- Obtener los estados anteriores y nuevos de la tabla insertada y eliminada
+  SELECT @new_status = i.status, @current_status = d.status, @id_user = i.id
+  FROM inserted i
+    JOIN deleted d ON i.id = d.id;
+
+  -- Obtener el rol actual del usuario
+  SELECT TOP 1
+    @current_role = authority_name
+  FROM user_authority
+  WHERE user_id = @id_user;
+
+  -- Verificar si se cumplen las condiciones para actualizar el rol
+  IF @new_status = 0 AND @new_status <> @current_status AND @current_role <> 'ROLE_UNAUTHORIZE'
+  BEGIN
+    -- Actualizar la tabla user_authority con el nuevo rol 'ROLE_UNAUTHORIZE'
     UPDATE ua
       SET ua.authority_name = 'ROLE_UNAUTHORIZE'
       FROM user_authority ua
-      JOIN INSERTED i ON ua.user_id = i.id
-      WHERE i.status = 0;
+      WHERE ua.user_id = @id_user;
   END
 END;
 
@@ -421,12 +386,15 @@ BEGIN
     i.user_id,
     i.authority_name,
     GETDATE(),
-    CASE WHEN d.user_id IS NULL THEN 'ASSIGNED' ELSE 'REVOKED' END
+    CASE 
+      WHEN i.authority_name <> 'ROLE_UNAUTHORIZE' THEN 'ASSIGNED' 
+      ELSE 'REVOKED' 
+    END
   FROM
-    inserted i
-    LEFT JOIN
-    deleted d ON i.user_id = d.user_id AND i.authority_name = d.authority_name;
+    inserted i;
+-- Eliminamos el LEFT JOIN ya que no es necesario en esta lógica
 END;
+
 
 GO
 
@@ -434,12 +402,15 @@ GO
 -- Procedimientos almacenados
 -- ===============================================================
 
-GO
-
 -- ===============================================================
 -- Author: Mario Martínez Lanuza
 -- Create date: 2024-09-08
 -- Description: Procedimiento almacenado para actualizar selectivamente los atributos 'activated' y 'status'.
+-- Previo a realizar el update en la tabla user_mva realiza tres validaciones:
+-- Primera: Al menos uno de los parametros nullables no debe ser NULL
+-- Segunda: Verifica que el id del usuario ingresado existe.
+-- Tercera: Si los dos parámetros no son NULL no deben se igual al valor previo o si uno es NULL
+-- el otro no debe ser a su valor previo.
 -- Importate: Este procedimiento activará cualquier Trigger de 'AFTER UPDATE' definido en user_mva,
 -- se recomiende incluir lógica en los triggers para verificar cambios efectivos en los datos
 -- y evitandor ejecuciones innecesarias que podrían afectar el rendimiento.
@@ -460,37 +431,72 @@ AS
 BEGIN
   SET NOCOUNT ON;
 
+  -- Verificar si al menos uno de los parámetros tiene un valor no nulo
+  IF @activated IS NULL AND @status IS NULL
+  BEGIN
+    RAISERROR('100, Al menos una variable no debe ser nula', 16, 1);
+    RETURN;
+  END
+
+  -- Verificar si el id_user existe en la tabla user_mva
+  IF NOT EXISTS (SELECT 1
+  FROM user_mva
+  WHERE id = @id_user)
+  BEGIN
+    RAISERROR('102, El usuario no existe', 16, 1);
+    RETURN;
+  END
+
+  -- Carga de los valores previos
+  DECLARE @current_activated BIT, @current_status BIT;
+  SELECT @current_activated = activated, @current_status = status
+  FROM user_mva
+  WHERE id = @id_user;
+
+  -- Verificar si los parámetros proporcionados son iguales a los valores existentes
+  IF ((@activated = @current_activated AND @status = @current_status) OR
+    (@activated = @current_activated) AND (@status IS NULL) OR
+    (@activated IS NULL AND @status = @current_status))
+  BEGIN
+    RAISERROR('103, El nuevo valor no puede ser igual al valor actual', 16, 1);
+    RETURN;
+  END
+
   BEGIN TRY
-        BEGIN TRANSACTION
+    BEGIN TRANSACTION
 
-        -- Actualizar configuraciones críticas de usuario controladas por administradores
-        UPDATE user_mva
-        SET activated = COALESCE(@activated, activated),
-            status = COALESCE(@status, status)
-        WHERE id = @id_user;
+    -- Actualizar configuraciones críticas de usuario controladas por administradores
+    UPDATE user_mva
+    SET activated = COALESCE(@activated, activated),
+        status = COALESCE(@status, status)
+    WHERE id = @id_user;
 
-        COMMIT TRANSACTION
-    END TRY
-    BEGIN CATCH
-        ROLLBACK TRANSACTION;
-        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
-        RAISERROR (@ErrorMessage, 16, 1);
-    END CATCH
+    COMMIT TRANSACTION
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRANSACTION;
+    DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+    RAISERROR(@ErrorMessage, 16, 1);
+  END CATCH
 END;
+
 
 GO
 
 -- ===============================================================
 -- Author: Mario Martínez Lanuza
 -- Create date: 2024-09-08
--- Description: Este procedimiento almacenado se utiliza para actualizar
--- el rol de un usuario en la base de datos, condicionando la asignación
--- de roles 'ROLE_ADMIN' y 'ROLE_USER' al estado activo del usuario (status = 1).
--- Para el rol 'ROLE_UNAUTHORIZED', el procedimiento verifica si el usuario
--- está activo y, de ser necesario, cambia su estado a inactivo (status = 0).
--- Este procedimiento confía en un trigger existente para actualizar
--- automáticamente el rol en la tabla user_authority cuando se modifica el status.
--- El rol no puede ser null
+-- Description: Actualiza el rol de un usuario
+-- Validaciones:
+--  El id del user debe existir
+--  El rol no debe ser null
+--  El rol debe existir
+--  El rol asignado debe ser diferente al existente. Si el rol actual es 
+-- 'ROLE_ADMIN' y se va a pasar a 'ROLE_USER' o viceversa solo se actualiza
+-- la tabla user_authority. Pero si se va a cambiar a 'ROLE_UNAUTHORIZE'
+-- se verifica que el 'status' de la tabla user_mva sea diferente de 0, y se
+-- cambia a status = 0 en esta tabla, otro trigger actualiza la tabla user_authority
+-- Importante: Esto procedimiento activa Trigger.
 -- ===============================================================
 IF EXISTS (SELECT *
 FROM sys.objects
@@ -502,51 +508,108 @@ GO
 
 CREATE PROCEDURE sp_update_user_role_with_status_check
   @id_user BIGINT,
-  @Role NVARCHAR(50)
--- Los roles posibles son 'ROLE_ADMIN', 'ROLE_USER', 'ROLE_UNAUTHORIZED'
+  @role NVARCHAR(50)
+-- Los roles posibles son 'ROLE_ADMIN', 'ROLE_USER', 'ROLE_UNAUTHORIZE'
 AS
 BEGIN
   SET NOCOUNT ON;
 
   -- Verificar que el role no sea nulo
-  IF @Role IS NULL
+  IF @role IS NULL
   BEGIN
-    RAISERROR('El role no puede ser nulo.', 16, 1);
+    RAISERROR('101, El valor no puede ser nulo', 16, 1);
     RETURN;
   END
 
-  DECLARE @CurrentStatus BIT;
+  -- Verificar si el id_user existe en la tabla user_mva
+  IF NOT EXISTS (SELECT 1
+  FROM user_mva
+  WHERE id = @id_user)
+  BEGIN
+    RAISERROR('102, El usuario no existe', 16, 1);
+    RETURN;
+  END
+
+  -- Declaración de variables
+  DECLARE @current_status BIT;
+  DECLARE @current_role NVARCHAR(50);
+
   -- Obtener el status actual del usuario
-  SELECT @CurrentStatus = status
+  SELECT @current_status = status
   FROM user_mva
   WHERE id = @id_user;
 
+  -- Obtener el rol actual del usuario
+  SELECT TOP 1
+    @current_role = authority_name
+  FROM user_authority
+  WHERE user_id = @id_user;
+
+  -- Verificar si el rol proporcionado es igual al rol existente
+  IF @current_role = @role
+  BEGIN
+    RAISERROR('103, El nuevo valor no puede ser igual al valor actual', 16, 1);
+    RETURN;
+  END
+
+  -- Verificar que el rol exista
+  IF NOT EXISTS (SELECT 1
+  FROM authority
+  WHERE name = @role)
+  BEGIN
+    RAISERROR('104, El rol asignado no existe', 16, 1);
+    RETURN;
+  END
+
   BEGIN TRY
     BEGIN TRANSACTION
-        
-    -- Asignar 'ROLE_ADMIN' o 'ROLE_USER' solo si el status es 1 (activo)
-    IF @Role IN ('ROLE_ADMIN', 'ROLE_USER') AND @CurrentStatus = 1
+    -- Verificar si el usuario no tiene ningún rol asignado
+    IF @current_role IS NULL
     BEGIN
+      -- Asignar el rol proporcionado
+      INSERT INTO user_authority (user_id, authority_name)
+      VALUES (@id_user, @role);
+    END
+    
+    -- Condición para 'ROLE_USER' o 'ROLE_ADMIN': Actualizar status a 1 si el status es 0
+    IF @role IN ('ROLE_USER', 'ROLE_ADMIN') AND @current_status = 0
+    BEGIN
+    UPDATE user_mva
+      SET status = 1
+      WHERE id = @id_user;
+
     UPDATE user_authority
-      SET authority_name = @Role
+      SET authority_name = @role
       WHERE user_id = @id_user;
   END
-    ELSE IF @Role = 'ROLE_UNAUTHORIZED'
+
+    -- Condición para cambio entre 'ROLE_ADMIN' y 'ROLE_USER' si el status es 1
+    IF @role IN ('ROLE_ADMIN', 'ROLE_USER') AND @current_status = 1
     BEGIN
-    -- Verificar si el usuario está activo y cambiarlo a inactivo si es necesario
-    IF @CurrentStatus <> 0
-      BEGIN
-      UPDATE user_mva
+    UPDATE user_authority
+      SET authority_name = @role
+      WHERE user_id = @id_user;
+  END
+
+    -- Condición para 'ROLE_UNAUTHORIZE': Si el usuario está activo, cambiarlo a inactivo
+    IF @role = 'ROLE_UNAUTHORIZE' AND @current_status <> 0
+    BEGIN
+    UPDATE user_mva
         SET status = 0
         WHERE id = @id_user;
-    END
-  -- No se necesita un segundo UPDATE aquí debido al trigger existente
+
+    UPDATE user_authority
+        SET authority_name = @role
+        WHERE user_id = @id_user;
   END
-    ELSE
+
+  -- Condición para 'ROLE_UNAUTHORIZE': Si el usuario NO está activo, cambiarlo a inactivo
+    IF @role = 'ROLE_UNAUTHORIZE' AND @current_status = 0
     BEGIN
-      -- Si el role es 'ROLE_ADMIN' o 'ROLE_USER' y el status no es 1, retornar error
-      THROW 50001, 'El usuario debe estar activo para asignar estos roles.', 1;
-    END
+    UPDATE user_authority
+        SET authority_name = @role
+        WHERE user_id = @id_user;
+  END
 
     COMMIT TRANSACTION
   END
@@ -557,18 +620,17 @@ BEGIN
   DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
   DECLARE @ErrorSeverity INT = ERROR_SEVERITY();
   DECLARE @ErrorState INT = ERROR_STATE();
-  RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
+  RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState);
   END CATCH
 END;
-GO
-
 
 GO
 
 -- ===============================================================
 -- Author: Mario Martínez Lanuza
 -- Create date: 2024-09-08
--- Description: Procedimiento almacenado para actualizar selectivamente los atributos 'first_name', 'last_name y 'email'.
+-- Description: Procedimiento almacenado para actualizar selectivamente los atributos:
+--  'first_name', 'last_name y 'email'. Entos no deben ser igual a los
 -- Importate: Este procedimiento activará cualquier Trigger de 'AFTER UPDATE' definido en user_mva,
 -- se recomiende incluir lógica en los triggers para verificar cambios efectivos en los datos
 -- y evitandor ejecuciones innecesarias que podrían afectar el rendimiento.
@@ -590,6 +652,44 @@ CREATE PROCEDURE sp_update_user_by_role_user
 AS
 BEGIN
   SET NOCOUNT ON;
+
+  -- Verificar si al menos uno de los parámetros tiene un valor no nulo
+  IF @first_name IS NULL AND @last_name IS NULL AND @second_last_name IS NULL AND @language_key IS NULL
+  BEGIN
+    RAISERROR('100, Al menos una variable no debe ser nula', 16, 1);
+    RETURN;
+  END
+
+  -- Verificar si el id_user existe en la tabla user_mva
+  IF NOT EXISTS (SELECT 1
+  FROM user_mva
+  WHERE id = @id_user)
+  BEGIN
+    RAISERROR('102, El usuario no existe', 16, 1);
+    RETURN;
+  END
+
+  -- Carga de los valores previos
+  DECLARE @current_first_name NVARCHAR(50), @current_last_name NVARCHAR(50),
+   @current_second_last_name NVARCHAR (50), @current_language_key NVARCHAR(2);
+
+  -- Obtener los valores actuales del usuario
+  SELECT @current_first_name = first_name,
+    @current_last_name = last_name,
+    @current_second_last_name = second_last_name,
+    @current_language_key = language_key
+  FROM user_mva
+  WHERE id = @id_user;
+
+  -- Verificar si los parámetros proporcionados son iguales a los valores existentes
+  IF (
+      (@current_first_name = @first_name) OR (@current_last_name = @last_name) OR
+    (@current_second_last_name = @second_last_name) OR (@current_language_key = @language_key)
+    )
+    BEGIN
+    RAISERROR('103, El nuevo valor no puede ser igual al valor actual', 16, 1);
+    RETURN;
+  END
 
   BEGIN TRY
         BEGIN TRANSACTION
@@ -617,6 +717,8 @@ GO
 -- Author: Mario Martínez Lanuza
 -- Create date: 2024-09-08
 -- Description: Procedimiento para cambiar el nickname de un usuario
+-- No debe ser nulo, debe ser diferente a los activos en la base y
+-- diferente al del propio usuario
 -- ===============================================================
 IF EXISTS (SELECT *
 FROM sys.objects
@@ -638,7 +740,16 @@ BEGIN
     -- Validar que el nuevo nickname no sea NULL
     IF @NewNickname IS NULL
     BEGIN
-    RAISERROR('El nickname no puede ser nulo.', 16, 1);
+    RAISERROR('101, El valor no puede ser nulo', 16, 1);
+    RETURN;
+  END
+
+   -- Verificar si el id_user existe en la tabla user_mva
+  IF NOT EXISTS (SELECT 1
+  FROM user_mva
+  WHERE id = @id_user)
+  BEGIN
+    RAISERROR('102, El usuario no existe', 16, 1);
     RETURN;
   END
 
@@ -647,7 +758,16 @@ BEGIN
   FROM user_mva
   WHERE nickname = @NewNickname AND id <> @id_user)
     BEGIN
-    RAISERROR('El nickname ya está en uso.', 16, 1);
+    RAISERROR('105, El nickname ingresado ya existe', 16, 1);
+    RETURN;
+  END
+
+  -- Verificar si el nuevo nickname no sea el mismo
+    IF EXISTS(SELECT 1
+  FROM user_mva
+  WHERE nickname = @NewNickname AND id = @id_user)
+    BEGIN
+    RAISERROR('103, El nuevo valor no puede ser igual al valor actual', 16, 1);
     RETURN;
   END
 
@@ -666,13 +786,12 @@ BEGIN
 END;
 GO
 
-
-GO
-
 -- ===============================================================
 -- Author: Mario Martínez Lanuza
 -- Create date: 2024-09-08
 -- Description: Procedimiento para cambiar el email de un usuario
+-- El usuario debe existir, y el email debe ser diferente utilizado
+-- por otros usuario y el mismo usuario
 -- ===============================================================
 IF EXISTS (SELECT *
 FROM sys.objects
@@ -694,7 +813,16 @@ BEGIN
     -- Verificar que el nuevo email no sea NULL
     IF @NewEmail IS NULL
     BEGIN
-    RAISERROR('El email proporcionado no puede ser nulo.', 16, 1);
+    RAISERROR('101, El valor no puede ser nulo', 16, 1);
+    RETURN;
+  END
+
+    -- Verificar si el id_user existe en la tabla user_mva
+  IF NOT EXISTS (SELECT 1
+  FROM user_mva
+  WHERE id = @id_user)
+  BEGIN
+    RAISERROR('102, El usuario no existe', 16, 1);
     RETURN;
   END
 
@@ -703,7 +831,16 @@ BEGIN
   FROM user_mva
   WHERE email = @NewEmail AND id <> @id_user)
     BEGIN
-    RAISERROR('El email ya está en uso.', 16, 1);
+    RAISERROR('106, El correo ingresado ya existe', 16, 1);
+    RETURN;
+  END
+
+      -- Verificar si el nuevo email ya está en uso por otro usuario
+    IF EXISTS(SELECT 1
+  FROM user_mva
+  WHERE email = @NewEmail AND id = @id_user)
+    BEGIN
+    RAISERROR('103, El nuevo valor no puede ser igual al valor actual', 16, 1);
     RETURN;
   END
 
@@ -722,14 +859,12 @@ BEGIN
 END;
 GO
 
-GO
-
 -- ===============================================================
 -- Author: Mario Martínez Lanuza
 -- Create date: 2024-09-08
 -- Description: Procedimiento para cambiar la contraseña de un usuario
 -- Nota: La nueva contraseña debe ser enviada ya hasheada y no puede NULL
--- NULL
+-- Debe ser diferente a la actual y el usuario debe existir
 -- ===============================================================
 IF EXISTS (SELECT *
 FROM sys.objects
@@ -755,29 +890,53 @@ BEGIN
     -- Verifica que la nueva contraseña no sea NULL
     IF @NewPassword IS NULL
     BEGIN
-    RAISERROR('El hash del password no puede ser nulo', 16, 1);
+    RAISERROR('101, El valor no puede ser nulo', 16, 1);
     RETURN
   END
 
-    -- Verifica que la contraseña actual no sea NULL
+      -- Verifica que la contraseña actual no sea NULL
     IF @CurrentPassword IS NULL
     BEGIN
-    RAISERROR('El hash del password actual no puede ser nulo', 16, 1);
+    RAISERROR('107, La contraseña es nula', 16, 1);
     RETURN
   END
 
-    -- Verificar la contraseña actual
-    IF NOT EXISTS(SELECT 1
+    -- Verificar si el id_user existe en la tabla user_mva
+  IF NOT EXISTS (SELECT 1
   FROM user_mva
-  WHERE id = @id_user AND password_hash = HASHBYTES('SHA2_256', @CurrentPassword))
-    BEGIN
-    RAISERROR('La contraseña actual no es correcta.', 16, 1);
+  WHERE id = @id_user)
+  BEGIN
+    RAISERROR('102, El usuario no existe', 16, 1);
+    RETURN;
+  END
+
+  -- Verificar que la contraseña actual sea la misma que la de la base de datos
+  IF NOT EXISTS (SELECT 1
+  FROM user_mva
+  WHERE id = @id_user AND password_hash = @CurrentPassword)
+  BEGIN
+    RAISERROR('108, La contraseña no coincide con la registrada', 16, 1);
+    RETURN;
+  END
+
+  DECLARE @old_password NVARCHAR(255);
+
+  -- Cargar la contraseña actual
+
+  SELECT @old_password = password_hash
+  FROM user_mva
+  WHERE id = @id_user
+
+  -- verificicar que la nueva contraseña sea diferente a la nueva
+  IF @old_password = @NewPassword
+  BEGIN
+    RAISERROR('109, La nueva contraseña es igual a la contraseña vigente', 16, 1);
     RETURN;
   END
 
     -- Actualizar la contraseña hasheada
     UPDATE user_mva
-    SET password_hash = HASHBYTES('SHA2_256', @NewPassword)
+    SET password_hash = @NewPassword
     WHERE id = @id_user;
 
     COMMIT TRANSACTION

@@ -17,3 +17,5 @@ Hay ciertas situaciones donde es beneficioso o necesario que un DTO implemente S
 ## ¿Cuándo no implementar `Serializable` un DTO?
 
 Si el DTO se utiliza solo para la comunicación interna dentro de una misma aplicación (por ejemplo, entre controladores y servicios), y no necesita ser transmitido a través de la red, almacenado, o guardado en caché distribuida, entonces no es necesario que implemente `Serializable`.
+
+[Retornar a la principal](../../README.md)
