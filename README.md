@@ -2,12 +2,28 @@
 
 Esta proyecto contiene los elementos necesarios para la construcción de una [`ARIRest`](./docs/api/README.md).
 
+La conexión a una única base de datos.
+
 Está implementada con las siguientes versiones:
 
 1. `Spring Boot`: 3.3.3
 2. `java.version`: 17
 3. `Database`: SQL Server 2022
 4. `Lenguage`: java
+
+## Implementaciones:
+
+1. inicio de sesión implementando la [autenticación](./docs/login/README.md).
+2. manejo de [perfiles](./docs/perfiles/README.md).
+3. [capas de seguridad de la aplicación](./docs/securtyAcces/README.md).
+4. [Reglas de negocio](./docs/busines-rules/README.md)
+5. variables de: [`activationKey`, `resetKey`, `resetDate` y `verificación de tiempo`](./docs/createUser/README.md)
+6. [base de datos](./asset/database.sql), se incluyen los [roles a utilizar](./asset/data.sql) y se definen sus [aspectos técnicos](./docs/dababases/README.md)
+7. [serialización](./docs/dto-serializable/README.md).
+8. manejo de [excepciones personalizadas](./docs/exceptions/README.md) de forma que al `frontend` se retorne un `String` que contiene un numero y un texto separado por una coma (,).
+9. uso de [logg](./docs/logger/README.md).
+10. [mapper](./docs/mapper/README.md).
+11. uso de dos ambientes definidos en los [propiedades](./docs/properties/README.md).
 
 ## Estructura del proyecto
 
@@ -96,20 +112,6 @@ src/main/java/com/mvanalitic/sugef_test_springboot_b
     ├── application-prod.properties             # Gestión de configuraciones en el entorno de producción
     └── application.properties                  # Gestión de configuraciones globales y de inicio.
 ```
-
-## Implementaciones:
-
-1. inicio de sesión implementando la [autenticación](./docs/login/README.md).
-2. manejo de [perfiles](./docs/perfiles/README.md).
-3. [capas de seguridad de la aplicación](./docs/securtyAcces/README.md).
-4. [Reglas de negocio](./docs/busines-rules/README.md)
-5. variables de: [`activationKey`, `resetKey`, `resetDate` y `verificación de tiempo`](./docs/createUser/README.md)
-6. [base de datos](./asset/database.sql), se incluyen los [roles a utilizar](./asset/data.sql) y se definen sus [aspectos técnicos](./docs/dababases/README.md)
-7. [serialización](./docs/dto-serializable/README.md).
-8. manejo de [excepciones personalizadas](./docs/exceptions/README.md) de forma que al `frontend` se retorne un `String` que contiene un numero y un texto separado por una coma (,).
-9. uso de [logg](./docs/logger/README.md).
-10. [mapper](./docs/mapper/README.md).
-11. uso de dos ambientes definidos en los [propiedades](./docs/properties/README.md).
 
 ## Comandos base
 
