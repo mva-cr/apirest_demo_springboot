@@ -65,11 +65,11 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
       jsonResponse.put("error",
           "110, Cuenta deshabilitada ");
     } else if (authException instanceof CredentialsExpiredException) {
-      jsonResponse.put("error", "152, Token expirado");
+      jsonResponse.put("error", "502, Token expirado");
     } else if (authException instanceof InsufficientAuthenticationException) {
-      jsonResponse.put("error", "151, Permisos insuficientes -");
+      jsonResponse.put("error", "501, Permisos insuficientes");
     } else {
-      jsonResponse.put("error", "150, No autorizado");
+      jsonResponse.put("error", "500, No autorizado");
     }
 
     // Convierte el mapa en una cadena JSON

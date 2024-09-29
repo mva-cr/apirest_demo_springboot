@@ -4,12 +4,12 @@ package com.mvanalytic.apirest_demo_springboot.dto.user;
  * Clase que representa la solicitud de cambio de email del usuaro
  * con sesión activa
  */
-public class UserEmailUpdateRequestDTO {
+public class UserEmailRequestDTO {
   
   private Long id;
   private String email;
   
-  public UserEmailUpdateRequestDTO() {
+  public UserEmailRequestDTO() {
   }
 
   public Long getId() {

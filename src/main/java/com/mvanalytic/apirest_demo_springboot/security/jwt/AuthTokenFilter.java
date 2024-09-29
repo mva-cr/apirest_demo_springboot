@@ -54,7 +54,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
       // Verifica si la URL de la solicitud es una de las que no requiere token
       String requestUri = request.getRequestURI();
-      if (requestUri.startsWith("/api/auth")) {
+      if (requestUri.startsWith("/api/auth") ||
+          requestUri.startsWith("/api/public") ||
+          requestUri.equals("/favicon.ico")) {
         // Si es una solicitud de login, no se requiere token, así que continúa
         filterChain.doFilter(request, response);
         return;
@@ -75,22 +77,22 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         // Si el token es nulo o no es válido, se registra un mensaje de error
         logger.error("Token JWT nulo o inválido para la solicitud a {}", request.getRequestURI());
         throw new InsufficientAuthenticationException(
-            "153, Token JWT nulo o inválido " + request.getRequestURI());
+            "503, Token JWT nulo o inválido " + request.getRequestURI());
       }
 
     } catch (CredentialsExpiredException e) {
       logger.error("Las credenciales han expirado: {}", e.getMessage());
       // Configura la respuesta con un error 401 y el mensaje correspondiente
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error: 152, Token expirado");
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error: 502, Token expirado");
       return;
     } catch (InsufficientAuthenticationException e) {
       // Manejo de excepción para autenticación insuficiente
       logger.error("Error de autenticación insuficiente: {}", e.getMessage());
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error: 157, Autenticación insuficiente");
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error: 507, Autenticación insuficiente");
     } catch (Exception e) {
       logger.error("No se puede configurar la autenticación del usuario: {}", e.getMessage());
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-          "Error: 154, No se pudo configurar autenticación " + e.getMessage());
+          "Error: 504, No se pudo configurar la autenticación " + e.getMessage());
     }
 
     // Continúa con el siguiente filtro en la cadena

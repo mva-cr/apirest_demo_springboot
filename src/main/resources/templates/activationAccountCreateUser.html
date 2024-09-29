@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<!-- Aplica en la creación de un usuario por parte de ROLE_ADMIN-->
+<html xmlns:th="http://www.thymeleaf.org" lang="${#locale.language}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        color: #333333;
+      }
+      .container {
+        width: 80%;
+        margin: 0 auto;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+      }
+      .header {
+        text-align: center;
+      }
+      .header img {
+        width: 150px;
+      }
+      .content {
+        margin-top: 20px;
+        text-align: left;
+      }
+      .content h1 {
+        color: #002a54; /* Color corporativo */
+      }
+      .button {
+        display: inline-block; /* ancho dependa del texto */
+        cursor: pointer;
+        text-align: center;
+        background-color: white; /* Color corporativo */
+        border-color: #185229;
+        border-style: solid;
+        border-width: 2px;
+        color: #002a54 !important;
+        padding: 10px 25px;
+        border-radius: 5px;
+        text-decoration: none !important;
+        margin: 5px 0px;
+      }
+      .button:hover {
+        background-color: rgba(
+          0,
+          64,
+          113,
+          0.1
+        ) !important; /* Color corporativo */
+        color: #002a54 !important;
+      }
+      .footer {
+        margin-top: 40px;
+        text-align: center;
+        color: #888888;
+      }
+      .footer:hover {
+        color: #004071;
+        font-size: larger;
+      }
+      .company:hover {
+        color: white;
+        background-color: #004071;
+        border-radius: 5px;
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <img src="cid:logo_mv_analytic" alt="MV Analytic Logo" />
+      </div>
+
+      <div class="content">
+        <h1 th:text="#{email.activation.greeting(${fullName})}">
+          Hola, {nombre completo}
+        </h1>
+
+        <p>
+          <span th:text="#{email.activation.new.text1}">
+            Te damos la bienvenido. Tu cuenta ha sido creada por un
+            administrador de
+          </span>
+          <strong th:text="#{email.company.name}" class="company">
+            MV Analytic</strong
+          >
+          <span th:text="#{email.activation.new.text2}"
+            >Para finalizar la activación de tu cuenta, sigue estos pasos:
+          </span>
+        </p>
+        <p th:text="#{email.activation.new.text3}">
+          1. Haz clic en el siguiente enlace para activar tu cuenta:
+        </p>
+        <!-- corresponde a @PostMapping("/activate-account-with-temporaty-password/{id}/{keyValue}") -->
+        <a
+          th:href="@{|${baseUrl}/api/public/activate-account-with-temporaty-password/${userKey.id}/${userKey.keyValue}|}"
+          th:text="#{button.activation.text}"
+          class="button"
+          style="text-decoration: none !important"
+        >
+          Activar Cuenta
+        </a>
+
+        <p th:text="#{email.activation.text3}">
+          Si el enlace no funciona, por favor copia y pega la siguiente URL en
+          tu navegador.
+        </p>
+
+        <div class="button">
+          <a
+            th:text="@{|${baseUrl}/api/public/activate-account-with-temporaty-password/${userKey.id}/${userKey.keyValue}|}"
+            style="text-decoration: none !important"
+          >
+            Enlace
+          </a>
+        </div>
+
+        <p th:text="#{email.activation.new.text4}">
+          2. Usa la siguiente contraseña temporal en el formulario de activación
+          que aparecerá.
+        </p>
+
+        <p
+          th:text="#{email.activation.new.tempPassword(${temporaryPassword})}"
+          class="button"
+          style="
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: medium;
+            color: white;
+            cursor: pointer;
+            text-decoration: none;
+          "
+        >
+          Contraseña temporal:
+        </p>
+
+        <p th:text="#{email.activation.new.text5}">
+          3. A continuación, deberás ingresar tu nueva contraseña en dicho
+          formulario.
+        </p>
+
+        <p th:text="#{email.activation.text4}">
+          Estamos encantados de que formes parte de nuestra comunidad y
+          esperamos que nuestros servicios sean oportunos.
+        </p>
+        <p th:text="#{email.activation.text5}">
+          Si tienes alguna pregunta, no dudes en ponerte en contacto con nuestro
+          equipo de soporte.
+        </p>
+      </div>
+
+      <div class="footer">
+        <p th:text="#{email.regards}">Saludos cordiales,</p>
+        <p>
+          <span th:utext="#{email.signature}">El equipo de soporte de </span>
+          <strong th:text="#{email.company.name}" class="company"
+            >MV Analytic
+          </strong>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

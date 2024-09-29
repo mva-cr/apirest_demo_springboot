@@ -1,14 +1,20 @@
 package com.mvanalytic.apirest_demo_springboot.mapper.user;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import com.mvanalytic.apirest_demo_springboot.domain.user.Authority;
 import com.mvanalytic.apirest_demo_springboot.domain.user.User;
+import com.mvanalytic.apirest_demo_springboot.domain.user.UserAuthority;
+import com.mvanalytic.apirest_demo_springboot.domain.user.UserAuthorityId;
 import com.mvanalytic.apirest_demo_springboot.dto.user.AdminUserResponseDTO;
 import com.mvanalytic.apirest_demo_springboot.dto.user.AuthorityDTO;
 import com.mvanalytic.apirest_demo_springboot.dto.user.JwtResponseDTO;
+import com.mvanalytic.apirest_demo_springboot.dto.user.UserAuthorityRequestDTO;
 import com.mvanalytic.apirest_demo_springboot.dto.user.UserProfileResponseDTO;
+import com.mvanalytic.apirest_demo_springboot.dto.user.UserRegistrationByAdminRequestDTO;
 import com.mvanalytic.apirest_demo_springboot.dto.user.UserRegistrationRequestDTO;
 
 // import org.springframework.security.core.GrantedAuthority;
@@ -176,6 +182,24 @@ public class UserMapper {
     return user;
   }
 
+  /**
+   * Convierte un objeto UserRegistrationDTO a un User
+   * 
+   * @param userRegistrationDTO Entidad a convertir
+   * @return User entidad
+   */
+  public static User convertUserRegistrationByAdminDTOToUser(UserRegistrationByAdminRequestDTO userRegistrationByAdminRequestDTO) {
+    User user = new User();
+    user.setFirstName(userRegistrationByAdminRequestDTO.getFirstName());
+    user.setLastName(userRegistrationByAdminRequestDTO.getLastName());
+    user.setSecondLastName(userRegistrationByAdminRequestDTO.getSecondLastName());
+    user.setNickname(userRegistrationByAdminRequestDTO.getNickname());
+    user.setEmail(userRegistrationByAdminRequestDTO.getEmail());
+    user.setLanguageKey(userRegistrationByAdminRequestDTO.getLanguageKey());
+
+    return user;
+  }
+
   // User - JwtResponse y viceversa
 
   public static JwtResponseDTO convertUserToJwtResponse(User user) {
@@ -189,6 +213,37 @@ public class UserMapper {
     jwtResponse.setLanguageKey(user.getLanguageKey());
 
     return jwtResponse;
+  }
+
+  /**
+     * Convierte un UserAuthorityRequestDTO a una lista de entidades UserAuthority.
+     *
+     * @param userAuthorityRequestDTO El objeto UserAuthorityRequestDTO que contiene el ID de usuario y las autoridades.
+     * @return Una lista de objetos UserAuthority para ser persistidos en la base de datos.
+     */
+    public static List<UserAuthority> convertUserAuthorityRequestDTOToUserAuthority(UserAuthorityRequestDTO userAuthorityRequestDTO) {
+      List<UserAuthority> userAuthorities = new ArrayList<>();
+
+      // Convertir cada AuthorityDTO en un UserAuthority
+      for (AuthorityDTO authorityDTO : userAuthorityRequestDTO.getAuthorities()) {
+          // Crear una nueva instancia de UserAuthorityId usando el ID del usuario y el nombre de la autoridad
+          UserAuthorityId userAuthorityId = new UserAuthorityId(userAuthorityRequestDTO.getUserId(), authorityDTO.getName());
+
+          // Crear una nueva instancia de UserAuthority
+          UserAuthority userAuthority = new UserAuthority();
+          userAuthority.setId(userAuthorityId);
+
+          // Establecer el User y Authority
+
+          User user = new User();
+          user.setId(userAuthorityRequestDTO.getUserId());
+          userAuthority.setUser(user);
+          userAuthority.setAuthority(new Authority(authorityDTO.getName()));
+
+          userAuthorities.add(userAuthority);
+      }
+
+      return userAuthorities;
   }
 
 }

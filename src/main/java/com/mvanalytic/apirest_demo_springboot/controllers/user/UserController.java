@@ -10,11 +10,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.mvanalytic.apirest_demo_springboot.domain.user.User;
-import com.mvanalytic.apirest_demo_springboot.dto.user.UserEmailUpdateRequestDTO;
-import com.mvanalytic.apirest_demo_springboot.dto.user.UserNicknameUpdateRequestDTO;
-import com.mvanalytic.apirest_demo_springboot.dto.user.UserPasswordUpdateRequestDTO;
+import com.mvanalytic.apirest_demo_springboot.dto.user.UserEmailRequestDTO;
+import com.mvanalytic.apirest_demo_springboot.dto.user.UserNicknameRequestDTO;
+import com.mvanalytic.apirest_demo_springboot.dto.user.UserPasswordRequestDTO;
 import com.mvanalytic.apirest_demo_springboot.dto.user.UserProfileResponseDTO;
-import com.mvanalytic.apirest_demo_springboot.dto.user.UserProfileUpdateRequestDTO;
+import com.mvanalytic.apirest_demo_springboot.dto.user.UserProfileRequestDTO;
 import com.mvanalytic.apirest_demo_springboot.mapper.user.UserMapper;
 import com.mvanalytic.apirest_demo_springboot.services.user.UserService;
 import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
@@ -35,11 +35,8 @@ public class UserController {
   // Instancia singleton de logger
   private static final Logger logger = LoggerSingleton.getLogger(UserController.class);
 
-  private final UserValidationService userValidationService;
-
-  public UserController() {
-    this.userValidationService = new UserValidationService();
-  }
+  @Autowired
+  private UserValidationService userValidationService;
 
   @Autowired
   private UserService userService;
@@ -74,7 +71,7 @@ public class UserController {
   @PatchMapping("/update/profile")
   @PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
   public ResponseEntity<UserProfileResponseDTO> updateProfileUser(
-      @RequestBody UserProfileUpdateRequestDTO userProfileUpdateRequestDTO) {
+      @RequestBody UserProfileRequestDTO userProfileUpdateRequestDTO) {
 
     // Valida el acceso del usuario autenticado
     validateUserAccess(userProfileUpdateRequestDTO.getId());
@@ -100,7 +97,7 @@ public class UserController {
   @PatchMapping("/update/nickname")
   @PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
   public ResponseEntity<UserProfileResponseDTO> updateNickname(
-      @RequestBody UserNicknameUpdateRequestDTO userNicknameUpdateRequestDTO) {
+      @RequestBody UserNicknameRequestDTO userNicknameUpdateRequestDTO) {
 
     // Valida el acceso del usuario autenticado
     validateUserAccess(userNicknameUpdateRequestDTO.getId());
@@ -126,7 +123,7 @@ public class UserController {
   @PatchMapping("/update/email")
   @PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
   public ResponseEntity<UserProfileResponseDTO> updateEmail(
-      @RequestBody UserEmailUpdateRequestDTO userEmailUpdateRequestDTO) {
+      @RequestBody UserEmailRequestDTO userEmailUpdateRequestDTO) {
 
     // Valida el acceso del usuario autenticado
     validateUserAccess(userEmailUpdateRequestDTO.getId());
@@ -152,7 +149,7 @@ public class UserController {
   @PatchMapping("/update/password")
   @PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
   public ResponseEntity<String> updatPassword(
-      @RequestBody UserPasswordUpdateRequestDTO userPasswordUpdateRequestDTO) {
+      @RequestBody UserPasswordRequestDTO userPasswordUpdateRequestDTO) {
 
     // Valida el acceso del usuario autenticado
     validateUserAccess(userPasswordUpdateRequestDTO.getId());

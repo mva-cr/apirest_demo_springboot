@@ -4,13 +4,13 @@ package com.mvanalytic.apirest_demo_springboot.dto.user;
  * Clase que representa la solicitud de cambio de contraseña del usuario
  * con sesión activa
  */
-public class UserPasswordUpdateRequestDTO {
+public class UserPasswordRequestDTO {
 
   private Long id;
   private String newPassword;
   private String oldPassword;
   
-  public UserPasswordUpdateRequestDTO() {
+  public UserPasswordRequestDTO() {
   }
   public Long getId() {
     return id;

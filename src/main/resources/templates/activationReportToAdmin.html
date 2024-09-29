@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<!-- Aplica en el reenvío de activación para un usuario por parte de ROLE_ADMIN -->
+<html xmlns:th="http://www.thymeleaf.org" lang="${#locale.language}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        color: #333333;
+      }
+      .container {
+        width: 80%;
+        margin: 0 auto;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        border-radius: 8px;
+        background-color: white !important;
+      }
+      .header {
+        text-align: center;
+      }
+      .header img {
+        width: 150px;
+      }
+      .content {
+        margin-top: 20px;
+        text-align: left;
+      }
+      .content h1 {
+        color: #002a54; /* Color corporativo */
+      }
+      .button {
+        display: inline-block; /* ancho dependa del texto */
+        cursor: pointer;
+        text-align: center;
+        background-color: white; /* Color corporativo */
+        border-color: #185229;
+        border-style: solid;
+        border-width: 2px;
+        color: #002A54 !important;
+        padding: 10px 25px;
+        border-radius: 5px;
+        text-decoration: none !important;
+        margin: 5px 0px;
+      }
+      .button:hover {
+        background-color: rgba(0, 64, 113, 0.1) !important; /* Color corporativo */
+        color: #002A54 !important;
+      }
+      .footer {
+        margin-top: 40px;
+        text-align: center;
+        color: #888888;
+      }
+      .footer:hover {
+        color: #004071;
+        font-size: larger;
+      }
+      .company:hover {
+        color: white;
+        background-color: #004071;
+        border-radius: 5px;
+        padding: 10px;
+      }
+      
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      text-align: left;
+      padding: 8px;
+      font-weight: normal;
+    }
+
+    tr {
+      border-bottom: 1px solid #f1f1f1; /* Añade una línea sutil entre las filas */
+    }
+
+    /* Ajuste para la segunda columna */
+    tbody th:nth-child(2) {
+      white-space: nowrap; /* Para que el texto no se divida en varias líneas */
+      margin-right: 10px; /* Margen derecho */
+      width: 1%; /* Ajusta la columna al contenido más pequeño posible */
+      padding-right: 10px; /* Asegura que el margen se vea correctamente */
+    }
+    tbody th:first-child {
+      width: 30px; /* Para los bullets */
+    }
+
+    @media screen and (max-width: 600px) {
+      table, tbody, th, tr {
+        display: block;
+        width: 100%;
+      }
+      
+      tbody th:first-child {
+        display: inline-block;
+        width: 20px; /* Ajuste responsivo para bullet */
+      }
+      
+      th {
+        display: block;
+        width: 100%;
+      }
+    }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <table style="width: 100%; text-align: center; border: 0;">
+          <tr>
+            <td style="text-align: center !important;">
+              <img src="cid:logo_mv_analytic" alt="MV Analytic Logo" style="display: block; margin: 0 auto; width: 150px;" />
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="content">
+        <h1 th:text="#{email.admin.activation.greeting(${adminFullName})}">
+          Hola, {nombre completo}
+        </h1>
+
+        <p>
+          <span th:text="#{email.admin.activation.body}">
+            Nos complace informarle que un nuevo usuario ha activado su cuenta en la aplicación
+          </span>
+          <strong th:text="#{email.company.name}"  class="company">
+            MV Analytic
+          </strong>
+          <span th:text="#{email.admin.activation.body2}">
+            A continuación, le proporcionamos los detalles del nuevo usuario registrado:
+          </span>
+        </p>
+
+        <table>
+          <tbody>
+            <tr>
+              <th>●</th>
+              <th th:text="#{email.admin.activation.text.userFullName}">
+                Nombre completo:
+              </th>
+              <th th:text="${userFullName}">
+                { nombre completo }
+              </th>
+            </tr>
+            <tr>
+              <th>●</th>
+              <th th:text="#{email.admin.activation.text.userEmail}">
+                Correo electrónico:
+              </th>
+              <th th:text="${userMail}">
+                { correo }
+              </th>
+            </tr>
+            <tr>
+              <th>●</th>
+              <th th:text="#{email.admin.activation.text.userNickname}">
+                nickname
+              </th>
+              <th th:text="${userNickname}">
+                { nickname }
+              </th>
+            </tr>
+          </tbody>
+        </table>
+
+        <p th:text="#{email.admin.activation.reminder}"
+        style="text-decoration-line: underline; text-decoration-color: #002A54; font-weight: bold; font-style: italic; color: #002A54;">
+          Le recordamos verificar el contrato del usuario y proceder con la asignación de los roles correspondientes según su perfil y necesidades dentro de la plataforma.
+        </p>
+
+        <p th:text="#{email.admin.assignRole.text}">
+          Para asignar el rol de usuario, por favor haz clic en el siguiente enlace o copia y pega la URL en tu navegador:
+        </p>
+        <!-- corresponde a @PatchMapping("/update/role") -->
+        <a
+          th:href="@{|${baseUrl}/api/admin/users/update/role|}"
+          th:text="#{button.activation.text}"
+          class="button"
+          style="text-decoration: none !important"
+        >
+          Enlace
+        </a>
+
+        <p th:text="#{email.activation.text3}">
+          Si el enlace no funciona, por favor copia y pega la siguiente URL en
+          tu navegador.
+        </p>
+
+        <!-- <div class="button"> -->
+          <a class="button"
+            th:text="@{|${baseUrl}/api/admin/users/update/role|}"
+            style="text-decoration: none !important"
+          >
+            Enlace
+          </a>
+        <!-- </div> -->
+
+        <p>
+          <span th:text="#{email.admin.activation.thanks}">
+            Gracias por su atención y por su continuo liderazgo en
+          </span>
+          <strong th:text="#{email.company.name}" class="company"
+            >MV Analytic
+          </strong>
+        </p>
+
+      <div class="footer">
+        <p th:text="#{email.regards}">Saludos cordiales,</p>
+        <p>
+          <span th:utext="#{email.signature}">El equipo de soporte de </span>
+          <strong th:text="#{email.company.name}" class="company"
+            >MV Analytic
+          </strong>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

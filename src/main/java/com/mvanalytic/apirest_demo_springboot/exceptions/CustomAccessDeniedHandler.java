@@ -1,4 +1,4 @@
-package com.mvanalytic.apirest_demo_springboot.security.handlers;
+package com.mvanalytic.apirest_demo_springboot.exceptions;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -45,7 +45,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
     // Define el mensaje de error
     Map<String, Object> errorDetails = new HashMap<>();
-    errorDetails.put("error", "151, Permisos insuficientes");
+    errorDetails.put("error", "501, Permisos insuficientes");
     errorDetails.put("message", accessDeniedException.getMessage());
     errorDetails.put("timestamp", System.currentTimeMillis());
 

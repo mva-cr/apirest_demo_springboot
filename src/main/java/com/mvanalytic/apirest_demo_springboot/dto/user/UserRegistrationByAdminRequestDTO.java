@@ -1,25 +1,19 @@
 package com.mvanalytic.apirest_demo_springboot.dto.user;
 
 /**
- * Clase que representa la solicitud para cambiar la información del
- * usuario. Esta información solo puede ser modificada por el usuario
- * dueño de la cuenta. En esta clase no se aplican las validaciones
+ * DTO para la transferencia de datos al registrar un nuevo usuario.
+ * Incluye únicamente los campos necesarios para el registro.
  */
-public class UserProfileUpdateRequestDTO {
-  
-  private Long id;
+public class UserRegistrationByAdminRequestDTO {
+
   private String firstName;
   private String lastName;
   private String secondLastName;
-  private String languageKey;
+  private String email;
+  private String nickname;
+  private String languageKey = "es";
   
-  public UserProfileUpdateRequestDTO() {
-  }
-  public Long getId() {
-    return id;
-  }
-  public void setId(Long id) {
-    this.id = id;
+  public UserRegistrationByAdminRequestDTO() {
   }
   public String getFirstName() {
     return firstName;
@@ -39,6 +33,18 @@ public class UserProfileUpdateRequestDTO {
   public void setSecondLastName(String secondLastName) {
     this.secondLastName = secondLastName;
   }
+  public String getEmail() {
+    return email;
+  }
+  public void setEmail(String email) {
+    this.email = email;
+  }
+  public String getNickname() {
+    return nickname;
+  }
+  public void setNickname(String nickname) {
+    this.nickname = nickname;
+  }
   public String getLanguageKey() {
     return languageKey;
   }
@@ -46,5 +52,4 @@ public class UserProfileUpdateRequestDTO {
     this.languageKey = languageKey;
   }
 
-  
 }

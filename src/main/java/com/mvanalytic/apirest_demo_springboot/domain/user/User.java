@@ -1,6 +1,5 @@
 package com.mvanalytic.apirest_demo_springboot.domain.user;
 
-import java.time.Instant;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -13,7 +12,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -55,7 +53,7 @@ public class User implements UserDetails {
   @Size(max = 50)
   @Column(name = "second_last_name", length = 50, nullable = true)
   private String secondLastName;
-  
+
   @NotNull
   @Email
   @Size(min = 5, max = 254)
@@ -102,19 +100,6 @@ public class User implements UserDetails {
   @Size(min = 2, max = 2)
   @Column(name = "language_key", length = 2, nullable = false)
   private String languageKey = "es";
-
-  @Size(max = 36)
-  @Column(name = "activation_key", length = 36)
-  @JsonIgnore
-  private String activationKey;
-
-  @Size(max = 36)
-  @Column(name = "reset_key", length = 36)
-  @JsonIgnore
-  private String resetKey;
-
-  @Column(name = "reset_date", columnDefinition = "DATETIME2")
-  private Instant resetDate = null;
 
   @JsonIgnore
   @ManyToMany(fetch = FetchType.EAGER) // Asegura que las autoridades se carguen con el usuario
@@ -209,30 +194,6 @@ public class User implements UserDetails {
     this.languageKey = languageKey;
   }
 
-  public String getActivationKey() {
-    return activationKey;
-  }
-
-  public void setActivationKey(String activationKey) {
-    this.activationKey = activationKey;
-  }
-
-  public String getResetKey() {
-    return resetKey;
-  }
-
-  public void setResetKey(String resetKey) {
-    this.resetKey = resetKey;
-  }
-
-  public Instant getResetDate() {
-    return resetDate;
-  }
-
-  public void setResetDate(Instant resetDate) {
-    this.resetDate = resetDate;
-  }
-
   public Set<Authority> getAuthoritySet() {
     return authorities;
   }
@@ -288,9 +249,6 @@ public class User implements UserDetails {
     result = prime * result + (status ? 1231 : 1237);
     result = prime * result + (activated ? 1231 : 1237);
     result = prime * result + ((languageKey == null) ? 0 : languageKey.hashCode());
-    result = prime * result + ((activationKey == null) ? 0 : activationKey.hashCode());
-    result = prime * result + ((resetKey == null) ? 0 : resetKey.hashCode());
-    result = prime * result + ((resetDate == null) ? 0 : resetDate.hashCode());
     result = prime * result + ((authorities == null) ? 0 : authorities.hashCode());
     return result;
   }
@@ -312,18 +270,15 @@ public class User implements UserDetails {
         (password != null ? password.equals(other.password) : other.password == null) &&
         (status == other.status) &&
         (languageKey != null ? languageKey.equals(other.languageKey) : other.languageKey == null) &&
-        (activationKey != null ? activationKey.equals(other.activationKey) : other.activationKey == null) &&
-        (resetKey != null ? resetKey.equals(other.resetKey) : other.resetKey == null) &&
-        (resetDate != null ? resetDate.equals(other.resetDate) : other.resetDate == null) &&
         (authorities != null ? authorities.equals(other.authorities) : other.authorities == null);
   }
 
   @Override
   public String toString() {
-    return "User [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", secondLastName=" + secondLastName + ", email=" + email + ", nickname="
+    return "User [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", secondLastName="
+        + secondLastName + ", email=" + email + ", nickname="
         + nickname + ", password=" + password + ", status=" + status + ", activated=" + activated + ", languageKey="
-        + languageKey + ", activationKey=" + activationKey + ", resetKey=" + resetKey + ", resetDate=" + resetDate
-        + ", authorities=" + authorities + "]";
+        + languageKey + ", authorities=" + authorities + "]";
   }
 
 }

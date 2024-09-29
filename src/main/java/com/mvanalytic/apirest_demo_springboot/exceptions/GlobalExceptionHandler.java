@@ -1,5 +1,6 @@
-package com.mvanalytic.apirest_demo_springboot.exception;
+package com.mvanalytic.apirest_demo_springboot.exceptions;
 
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -177,6 +178,78 @@ public class GlobalExceptionHandler {
     Map<String, String> response = new HashMap<>();
     response.put("error", ex.getMessage());
     return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+  }
+
+  /**
+   * Maneja excepciones de tipo MailSendException lanzadas en cualquier parte de
+   * la aplicación.
+   * 
+   * @param ex La excepción MailSendException capturada.
+   * @return ResponseEntity que contiene un mapa con el mensaje de error y un
+   *         estado HTTP 500 (INTERNAL_SERVER_ERROR).
+   */
+  @ExceptionHandler(MailSendException.class)
+  public ResponseEntity<Object> handleMailSendException(MailSendException ex) {
+    Map<String, String> response = new HashMap<>();
+    response.put("error", ex.getMessage());
+    return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  /**
+   * Maneja la excepción UserAlreadyActivatedException lanzada cuando se
+   * intenta activar una cuenta que ya está activada.
+   * 
+   * Este método captura la excepción y devuelve una respuesta HTTP con el
+   * código de estado 400 (BAD_REQUEST) junto con el mensaje de error
+   * proporcionado en la excepción.
+   *
+   * @param ex La excepción UserAlreadyActivatedException capturada.
+   * @return ResponseEntity que contiene el mensaje de error y el estado HTTP 400.
+   */
+  @ExceptionHandler(UserAlreadyActivatedException.class)
+  public ResponseEntity<String> handleUserAlreadyActivatedException(UserAlreadyActivatedException ex) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+  }
+
+  /**
+   * Maneja excepciones del tipo FileNotFoundException.
+   * <p>
+   * Este método se invoca cuando se lanza una excepción de tipo
+   * {@link FileNotFoundException} en cualquier parte de la aplicación. Crea una
+   * respuesta JSON personalizada con un mensaje de error y una descripción
+   * detallada del problema, devolviendo un código de estado HTTP 400 (Bad
+   * Request).
+   * 
+   * @param ex la excepción {@link FileNotFoundException} capturada.
+   * @return un objeto {@link ResponseEntity} que contiene la respuesta de error
+   *         en formato JSON con el código de estado HTTP 400.
+   */
+  @ExceptionHandler(FileNotFoundException.class)
+  public ResponseEntity<Object> handleFileNotFoundException(FileNotFoundException ex) {
+    Map<String, String> response = new HashMap<>();
+    response.put("error", "archivo no encontrado");
+    response.put("details", ex.getMessage());
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+  }
+
+  /**
+   * Maneja excepciones del tipo SecurityException.
+   * <p>
+   * Este método se invoca cuando se lanza una excepción de tipo
+   * {@link SecurityException} en cualquier parte de la aplicación.
+   * Crea una respuesta JSON personalizada con un mensaje de error y una
+   * descripción detallada del problema, devolviendo un código de estado HTTP 403
+   * (Forbidden).
+   * 
+   * @param ex la excepción {@link SecurityException} capturada.
+   * @return un objeto {@link ResponseEntity} que contiene la respuesta de error
+   *         en formato JSON con el código de estado HTTP 403.
+   */
+  @ExceptionHandler(SecurityException.class)
+  public ResponseEntity<Object> handleSecurityException(SecurityException ex) {
+    Map<String, String> response = new HashMap<>();
+    response.put("error", ex.getMessage());
+    return new ResponseEntity<>(response, HttpStatus.FORBIDDEN); // Devolver un código 403 Forbidden
   }
 
 }
