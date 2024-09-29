@@ -4,12 +4,12 @@ package com.mvanalytic.apirest_demo_springboot.dto.user;
  * Clase que representa la solicitud de cambio de nickname del usuario
  * que hace la petición.
  */
-public class UserNicknameUpdateRequestDTO {
+public class UserNicknameRequestDTO {
 
   private Long id;
   private String nickname;
 
-  public UserNicknameUpdateRequestDTO() {
+  public UserNicknameRequestDTO() {
   }
 
   public Long getId() {

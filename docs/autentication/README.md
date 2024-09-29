@@ -1,8 +1,24 @@
-# Inicio de sesión
+# Autenticación
 
 [Retornar a la principal](../../README.md)
 
-## Flujo de Inicio de Sesión (Login)
+Este cubre varios procesos:
+
+1. creación de cuanta
+2. inicio de sesión
+3. Restablecimiento de contraseña
+
+## creación de cuenta
+
+Se implementa la creación de usuario por parte del administrador `ROLE_ADMIN`, al cearlo se le envía un correo al usuario con un link de autenticación, que contiene el `id` y el `keyVaue` que se generan en la creación, solo requiere dar clic a ese link y el proceso activición de la cuenta se realiza.
+
+Una vez creada la cuenta y activada, es necesario que el administrador le asigne un rol de lo contrario las solicitudes de este último serán denegadas.
+
+Al iniciar sesión se le envía un `token` de tipo `Bearer` para que se incluya en el encabezado de cada solicitud en el `frontend`.
+
+## Inicio de sesión
+
+### Flujo de Inicio de Sesión (Login)
 
 1. **Solicitud de Autenticación desde el Cliente**: El proceso comienza cuando el cliente (puede ser el frontend o Postman) envía una solicitud HTTP POST al endpoint de login. En tu caso, la URL es:
 
@@ -56,7 +72,7 @@ server.servlet.session.timeout=15m
 
 Que son 15 minutos.
 
-# Tiempo de expiración del token JWT
+### Tiempo de expiración del token JWT
 
 El tiempo de expiración del token JWT comienza a contar a partir del momento en que el token es emitido. Esto se especifica en el método generateJwtToken al usar la función setIssuedAt(new Date()). Es decir, desde el momento en que se genera y se emite el token, la cuenta regresiva para la expiración comienza.
 
@@ -67,5 +83,41 @@ app.jwtExpirationMs=3600000
 ```
 
 Tiempo de vida del token de autenticación en milisegundos: 1 hora = 1000 _ 60 _ 60
+
+## Restablecimiento de contraseña
+
+Para implementar el proceso de restablecimiento de contraseña (reset password), se deben seguir varios pasos que incluyen la generación de un token temporal, el envío de un correo electrónico con el enlace para cambiar la contraseña y la actualización de la misma en la base de datos una vez que el usuario proporcione una nueva contraseña.
+
+**Proceso Completo para Reset Password**
+
+1. Solicitud de restablecimiento de contraseña:
+
+- El usuario proporciona su email en una página del frontend.
+- El sistema genera un token temporal (similar a cómo se hace con la activación de cuenta) y lo almacena en la base de datos.
+- Se envía un correo electrónico al usuario con un enlace para restablecer su contraseña. Este enlace incluye el token temporal.
+
+2. Generación de token de restablecimiento:
+
+- Similar al token de activación, se genera un UUID que será utilizado como resetKey y se asocia al usuario.
+- Este token tiene una fecha de expiración que limita el tiempo que el enlace es válido.
+
+3. Envio del correo:
+
+- El correo contiene un enlace con el formato http://localhost:8080/password-change/{id}/{resetKey}, donde id es el ID del usuario y resetKey es el token generado.
+- El correo explica al usuario que haga clic en el enlace para restablecer su contraseña.
+
+4. Pantalla de restablecimiento de contraseña:
+
+- El usuario hace clic en el enlace, lo que lo lleva a una pantalla donde puede ingresar su nueva contraseña.
+- En esta pantalla, el token (resetKey) ya está incluido en la URL y el backend lo validará.
+
+5. Verificación y cambio de contraseña:
+
+- El sistema verifica el token, el ID del usuario y que el token no haya expirado.
+- Si todo es correcto, el sistema acepta la nueva contraseña, la hashea (usando BCrypt o un algoritmo similar) y la almacena en la base de datos.
+
+6. Confirmación:
+
+- El sistema envía una confirmación al usuario de que su contraseña ha sido cambiada.
 
 [Retornar a la principal](../../README.md)

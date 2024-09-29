@@ -116,11 +116,8 @@ CREATE TABLE user_mva
   password_hash NVARCHAR(60) NOT NULL,
   language_key NVARCHAR(2) CONSTRAINT DF_language_key_user_mva DEFAULT ('es') NOT NULL,
   activated BIT CONSTRAINT DF_activated_user_mva DEFAULT ((0)) NOT NULL,
-  status BIT CONSTRAINT DF_status_user_mva DEFAULT ((1)) NOT NULL,
-  activation_key NVARCHAR(36),
-  reset_key NVARCHAR(36),
-  reset_date DATETIME2,
-  CONSTRAINT PK_id_user_mva  PRIMARY KEY CLUSTERED (id),
+  status BIT CONSTRAINT DF_status_user_mva DEFAULT ((1)) NOT NULL
+    CONSTRAINT PK_id_user_mva  PRIMARY KEY CLUSTERED (id),
   CONSTRAINT UK_email_user_mva UNIQUE(email),
   CONSTRAINT UK_nickname_user_mva UNIQUE(nickname)
 )
@@ -133,10 +130,20 @@ GO
 -- Author: Mario Martínez Lanuza
 -- Create date: 2024-09-08
 -- Description: Tabla de Roles por user
+-- Clave primaria compuesta: Garantiza la unicidad de la combinación
+-- de user_id, authority_name para que un usuario no pueda tener el
+-- mismo rol más de una vez.
+-- Claves foráneas: Aseguran que cada referencia (user_id y authority_name)
+-- exista en sus respectivas tablas (user_mva y authority).
+-- ON DELETE CASCADE en FK_user_id_user_authority significa que
+-- cuando se elimina un usuario de la tabla user_mva, todas las
+-- entradas correspondientes al user_id en la tabla user_authority
+-- también serán eliminadas automáticamente. Similar para el caso
+-- ON DELETE CASCADE en FK_name_user_authority
 -- ===============================================================
 CREATE TABLE user_authority
 (
-  user_id SMALLINT NOT NULL,
+  user_id BIGINT NOT NULL,
   authority_name NVARCHAR(50) NOT NULL,
   CONSTRAINT PK_user_id_authority_name_user_auth PRIMARY KEY CLUSTERED (user_id, authority_name),
   CONSTRAINT FK_user_id_user_authority FOREIGN KEY (user_id) REFERENCES user_mva(id) ON DELETE CASCADE,
@@ -181,21 +188,50 @@ CREATE TABLE user_audit
   CONSTRAINT FK_id_user_user_audit FOREIGN KEY (id_user) REFERENCES user_mva(id)
 );
 
+
+-- ===============================================================
+-- Author: Mario Martínez Lanuza
+-- Create date: 2024-09-16
+-- Description: Tabla llaves por usuario
+-- ===============================================================
+CREATE TABLE user_key
+(
+  id BIGINT NOT NULL IDENTITY(1,1),
+  id_user BIGINT NOT NULL,
+  -- llave para activar una cuenta o restablecer el password
+  key_value NVARCHAR(36) NOT NULL,
+  -- Fecha de creación del key
+  created_at DATETIME2 CONSTRAINT DF_created_at_user_user_key DEFAULT (GETDATE()) NOT NULL,
+  -- Tipo de llave: 'ACCOUNT_ACTIVATION', 'PASSWORD_RESET'
+  key_purpose NVARCHAR(20) NOT NULL,
+  CONSTRAINT PK_id_user_key PRIMARY KEY CLUSTERED (id),
+  CONSTRAINT FK_id_user_user_key FOREIGN KEY (id_user) REFERENCES user_mva(id)
+)
+
 GO
 
 -- ===============================================================
 -- Author: Mario Martínez Lanuza
+-- Descripción:
 -- Create date: 2024-09-08
 -- Description: Tabla rastrea intentos de inicio de sesión fallidos y exitosos
 -- ===============================================================
 CREATE TABLE login_attempt
 (
   id_attempt BIGINT NOT NULL IDENTITY(1,1),
+  -- Referencia al usuario que intentó iniciar sesión; puede ser NULL
+  --  si el intento de inicio de sesión fue anónimo o si el usuario no fue identificado
+  -- correctamente.
   id_user BIGINT NULL,
-  -- Puede ser NULL para intentos con usuario no identificado
+  -- Marca de tiempo que registra cuándo se realizó el intento de inicio de sesión.
+  -- Por defecto, se establece con la función getdate()
   attempt_time DATETIME2 CONSTRAINT DF_attempt_time_login_attempt DEFAULT(GETDATE()) NOT NULL,
+  -- Dirección IP desde la cual se realizó el intento de inicio de sesión.
   ip_address NVARCHAR(50) NOT NULL,
+  -- Información del agente de usuario (por ejemplo, el navegador o 
+  -- la aplicación utilizada para iniciar sesión).
   user_agent NVARCHAR(255) NULL,
+  -- Resultado del intento de inicio de sesión, que puede ser 'SUCCESS' (éxito) o 'FAILED' (fallido).
   attempt_result NVARCHAR(10) NOT NULL,
   -- 'SUCCESS', 'FAILED'
   CONSTRAINT PK_id_attempt_login_attempt PRIMARY KEY CLUSTERED (id_attempt),
@@ -500,13 +536,13 @@ GO
 -- ===============================================================
 IF EXISTS (SELECT *
 FROM sys.objects
-WHERE object_id = OBJECT_ID(N'[dbo].[sp_update_user_role_with_status_check]') AND type in (N'P', N'PC'))
+WHERE object_id = OBJECT_ID(N'[dbo].[sp_user_authority_update]') AND type in (N'P', N'PC'))
 BEGIN
-  DROP PROCEDURE [dbo].[sp_update_user_role_with_status_check]
+  DROP PROCEDURE [dbo].[sp_user_authority_update]
 END
 GO
 
-CREATE PROCEDURE sp_update_user_role_with_status_check
+CREATE PROCEDURE sp_user_authority_update
   @id_user BIGINT,
   @role NVARCHAR(50)
 -- Los roles posibles son 'ROLE_ADMIN', 'ROLE_USER', 'ROLE_UNAUTHORIZE'
@@ -566,10 +602,12 @@ BEGIN
     -- Verificar si el usuario no tiene ningún rol asignado
     IF @current_role IS NULL
     BEGIN
-      -- Asignar el rol proporcionado
-      INSERT INTO user_authority (user_id, authority_name)
-      VALUES (@id_user, @role);
-    END
+    -- Asignar el rol proporcionado
+    INSERT INTO user_authority
+      (user_id, authority_name)
+    VALUES
+      (@id_user, @role);
+  END
     
     -- Condición para 'ROLE_USER' o 'ROLE_ADMIN': Actualizar status a 1 si el status es 0
     IF @role IN ('ROLE_USER', 'ROLE_ADMIN') AND @current_status = 0
@@ -948,5 +986,423 @@ BEGIN
   END CATCH
 END;
 
+-- ===============================================================
+-- Author: Mario Martínez Lanuza
+-- Create date: 2024-09-12
+-- Description: Procedimiento para activar la cuenta de un usuario
+-- utilizando una clave de activación proporcionada. La clave de 
+-- activación debe ser válida, no estar expirada, y el usuario debe 
+-- existir en el sistema. El procedimiento no elimina la clave de 
+-- activación para fines de auditoría.
+-- Nota: El procedimiento verifica si el usuario ya está activado y 
+-- si la clave de activación está dentro del período de validez 
+-- establecido.
+-- ===============================================================
 
+IF EXISTS (SELECT *
+FROM sys.objects
+WHERE object_id = OBJECT_ID(N'[dbo].[sp_activate_account]') AND type IN (N'P', N'PC'))
+BEGIN
+  DROP PROCEDURE [dbo].[sp_activate_account]
+END
+GO
+
+CREATE PROCEDURE [dbo].[sp_activate_account]
+  @id BIGINT,
+  -- ID de la tabla user_key
+  @key_value NVARCHAR(36),
+  -- Clave de activación proporcionada
+  @expiry_hours INT
+-- Número de horas antes de que la clave de activación expire
+AS
+BEGIN
+  SET NOCOUNT ON;
+
+  -- ===============================================================
+  -- Validaciones iniciales de los parámetros
+  -- ===============================================================
+  IF @id IS NULL OR @key_value IS NULL OR @expiry_hours IS NULL
+    BEGIN
+    RAISERROR('146, Parámetros nulos', 16, 1);
+    RETURN;
+  END
+
+  -- ===============================================================
+  -- Declaración de variables para almacenar la información de la clave
+  -- ===============================================================
+  DECLARE @key_type NVARCHAR(10);
+  -- Tipo de clave (e.g., 'ACCOUNT_ACTIVATION')
+  DECLARE @created_at DATETIME2;
+  -- Fecha de creación de la clave
+  DECLARE @id_user BIGINT;
+  -- ID del usuario asociado a la clave
+  DECLARE @user_activated BIT;
+  -- Estado de activación del usuario
+
+  -- ===============================================================
+  -- Obtener la información de la clave de activación desde la tabla user_key
+  -- ===============================================================
+  SELECT @key_type = key_purpose,
+    @created_at = created_at,
+    @id_user = id_user
+  -- ID del usuario asociado
+  FROM user_key
+  WHERE id = @id
+    AND key_value = @key_value
+    AND key_purpose = 'ACCOUNT_ACTIVATION';
+
+  -- ===============================================================
+  -- Verificación de la existencia del usuario en la tabla user_mva
+  -- ===============================================================
+  IF NOT EXISTS (SELECT 1
+  FROM user_mva
+  WHERE id = @id_user)
+    BEGIN
+    RAISERROR('143, No existe usuario asociado con la clave de activación aportada', 16, 1);
+    RETURN;
+  END
+
+  -- ===============================================================
+  -- Verificación de expiración de la clave de activación
+  -- ===============================================================
+  IF DATEDIFF(HOUR, @created_at, GETDATE()) > @expiry_hours
+    BEGIN
+    RAISERROR('147, La clave de activación ha expirado', 16, 1);
+    RETURN;
+  END
+
+  -- ===============================================================
+  -- Verificación del estado de activación del usuario
+  -- ===============================================================
+  SELECT @user_activated = activated
+  FROM user_mva
+  WHERE id = @id_user;
+
+  IF @user_activated = 1
+    BEGIN
+    RAISERROR('148, La cuenta ya ha sido activada', 16, 1);
+    RETURN;
+  END
+
+  -- ===============================================================
+  -- Activación del usuario y manejo de errores
+  -- ===============================================================
+  BEGIN TRY
+        BEGIN TRANSACTION;
+
+        -- Activar el usuario en la tabla user_mva
+        UPDATE user_mva
+        SET activated = 1
+        WHERE id = @id_user;
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        ROLLBACK TRANSACTION;
+        -- Capturar y relanzar cualquier error que ocurra durante la transacción
+        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+        DECLARE @ErrorSeverity INT = ERROR_SEVERITY();
+        DECLARE @ErrorState INT = ERROR_STATE();
+        RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState);
+    END CATCH
+END;
+GO
+
+-- ===============================================================
+-- Author: Mario Martínez Lanuza
+-- Create date: 2024-09-18
+-- Description: Procedimiento para restablecer la contraseña de un usuario. El
+-- procedimiento recibe el id y la clave de restablecimiento de la tabla user_key.
+-- Si la clave es válida y no ha expirado, la contraseña del usuario se actualiza
+-- en la tabla user_mva, y no podrá reactivarse incluso si el tiempo de expiración
+-- no ha finalizado. La verificación de si es el password igual al anterior
+-- no se realiza ya que los hash cambian, esto se hace en la logica del backend
+-- ===============================================================
+IF EXISTS (SELECT *
+FROM sys.objects
+WHERE object_id = OBJECT_ID(N'[dbo].[sp_change_password_by_reset]') AND type in (N'P', N'PC'))
+BEGIN
+  DROP PROCEDURE [dbo].[sp_change_password_by_reset];
+END;
+GO
+
+CREATE PROCEDURE sp_change_password_by_reset
+  @id BIGINT,
+  -- ID de la tabla user_key
+  @key_value NVARCHAR(36),
+  -- Clave de restablecimiento proporcionada
+  @new_password NVARCHAR(60),
+  -- Nueva contraseña (ya hasheada)
+  @expiry_hours INT
+-- Tiempo de expiración en horas (proporcionado desde la aplicación)
+AS
+BEGIN
+  SET NOCOUNT ON;
+
+  -- ===============================================================
+  -- Validaciones iniciales de los parámetros
+  -- ===============================================================
+  IF @id IS NULL OR @key_value IS NULL OR @new_password IS NULL OR @expiry_hours IS NULL
+  BEGIN
+    RAISERROR('146, Parámetros nulos', 16, 1);
+    RETURN;
+  END
+
+  -- ===============================================================
+  -- Declaración de variables para manejar la lógica
+  -- ===============================================================
+  DECLARE @id_user BIGINT;
+  -- ID del usuario asociado
+  DECLARE @created_at DATETIME2;-- Fecha de creación de la clave
+  DECLARE @user_password NVARCHAR(60);
+  -- Contraseña actual del usuario
+  DECLARE @admin_key NVARCHAR(36);
+  -- Clave agregada por ROLE_ADMIN
+
+  -- ===============================================================
+  -- Obtener la información de la clave de restablecimiento desde la tabla user_key
+  -- ===============================================================
+  SELECT TOP 1
+    @id_user = id_user,
+    @created_at = created_at
+  FROM user_key
+  WHERE id = @id
+    AND key_value = @key_value
+    AND key_purpose = 'PASSWORD_RESET'
+  ORDER BY created_at DESC;;
+
+  -- ===============================================================
+  -- Verificación de claves de activación administradas
+  -- ===============================================================
+  SELECT TOP 1
+    @admin_key = key_value
+  FROM user_key
+  WHERE id_user = @id_user
+    AND key_value = @key_value
+    AND key_purpose = 'PASSWORD_ADMIN'
+  ORDER BY created_at DESC;
+
+
+  -- ===============================================================
+  -- Verificación si ya ha sido activada 
+  -- ===============================================================
+  IF @key_value = @admin_key
+  BEGIN
+    RAISERROR('148, La cuenta ya ha sido activada', 16, 1);
+    RETURN;
+  END
+
+
+  -- Verificar que la clave de restablecimiento es válida
+  IF @id_user IS NULL
+  BEGIN
+    RAISERROR('145, No existe usuario asociado con la clave de restablecimiento aportada', 16, 1);
+    RETURN;
+  END
+
+  -- ===============================================================
+  -- Verificación de expiración de la clave de restablecimiento
+  -- ===============================================================
+  IF DATEDIFF(MINUTE, @created_at, GETDATE()) > (@expiry_hours * 60)
+  BEGIN
+    RAISERROR('153, La clave de restablecimiento ha expirado', 16, 1);
+    RETURN;
+  END
+
+  -- ===============================================================
+  -- Actualizar la contraseña del usuario en user_mva y manejar errores
+  -- ===============================================================
+  BEGIN TRY
+    BEGIN TRANSACTION;
+
+    -- Actualizar la contraseña del usuario
+    UPDATE user_mva
+    SET password_hash = @new_password
+    WHERE id = @id_user;
+
+     -- Agregar registro del administrador para que solo se utilice una vez
+    INSERT INTO user_key
+    (id_user, key_value, created_at, key_purpose)
+  VALUES
+    (@id_user, @key_value, GETDATE(), 'PASSWORD_ADMIN');
+
+    COMMIT TRANSACTION;
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRANSACTION;
+    -- Capturar y relanzar cualquier error que ocurra durante la transacción
+    DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @ErrorSeverity INT = ERROR_SEVERITY();
+    DECLARE @ErrorState INT = ERROR_STATE();
+    RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState);
+  END CATCH
+END;
+GO
+
+-- ===============================================================
+-- Author: Mario Martínez Lanuza
+-- Create date: 2024-09-23
+-- Description: Procedimiento para crear un nuevo usuario en la tabla user_mva
+-- y generar una clave de activación en la tabla user_key. Se verifican 
+-- duplicidades en el correo y nickname antes de realizar la inserción.
+-- ===============================================================
+IF EXISTS (SELECT *
+FROM sys.objects
+WHERE object_id = OBJECT_ID(N'[dbo].[sp_create_user_and_key]') AND type IN (N'P', N'PC'))
+BEGIN
+  DROP PROCEDURE [dbo].[sp_create_user_and_key];
+END;
+GO
+
+CREATE PROCEDURE sp_create_user_and_key
+  @first_name NVARCHAR(100),
+  @last_name NVARCHAR(100),
+  @second_last_name NVARCHAR(100) = NULL,
+  -- Este campo puede ser NULL
+  @email NVARCHAR(255),
+  @nickname NVARCHAR(100),
+  @password_hash NVARCHAR(255),
+  @language_key NVARCHAR(10),
+  @key_value NVARCHAR(36),
+  @key_purpose NVARCHAR(20),
+  @created_at DATETIME2,
+  @id_user_key BIGINT OUTPUT
+-- salida
+AS
+BEGIN
+  SET NOCOUNT ON;
+
+  -- ===============================================================
+  -- Verificar si el correo ya existe (fuera de la transacción)
+  -- ===============================================================
+  IF EXISTS (SELECT 1
+  FROM user_mva
+  WHERE email = @email)
+  BEGIN
+    RAISERROR('106, El correo ingresado ya existe', 16, 1);
+    RETURN;
+  END
+
+  -- ===============================================================
+  -- Verificar si el nickname ya existe (fuera de la transacción)
+  -- ===============================================================
+  IF EXISTS (SELECT 1
+  FROM user_mva
+  WHERE nickname = @nickname)
+  BEGIN
+    RAISERROR('105, El nickname ingresado ya existe', 16, 1);
+    RETURN;
+  END
+
+  -- Iniciar la transacción solo después de validar
+  BEGIN TRY
+    BEGIN TRANSACTION;
+
+    -- ===============================================================
+    -- Insertar el nuevo usuario en la tabla user_mva
+    -- ===============================================================
+    INSERT INTO user_mva
+    (first_name, last_name, second_last_name, email, nickname, password_hash, language_key)
+  VALUES
+    (@first_name, @last_name, @second_last_name, @email, @nickname, @password_hash, @language_key);
+
+    -- Obtener el ID del usuario recién insertado
+    DECLARE @id_user BIGINT;
+    SET @id_user = SCOPE_IDENTITY();
+
+    -- ===============================================================
+    -- Insertar la clave de activación en la tabla user_key
+    -- ===============================================================
+    INSERT INTO user_key
+    (id_user, key_value, created_at, key_purpose)
+  VALUES
+    (@id_user, @key_value, @created_at, @key_purpose);
+
+    -- Obtener el ID de la tabla user_key
+    SET @id_user_key = SCOPE_IDENTITY();
+
+    -- Confirmar la transacción
+    COMMIT TRANSACTION;
+
+  END TRY
+  BEGIN CATCH
+    -- Si ocurre un error, realizar un rollback
+    ROLLBACK TRANSACTION;
+
+    -- Capturar y lanzar el mensaje de error
+    DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+    RAISERROR(@ErrorMessage, 16, 1);
+  END CATCH
+END;
+GO
+
+-- ===============================================================
+-- Author: Mario Martínez Lanuza
+-- Create date: 2024-09-23
+-- Description: Procedimiento para actualizar la contraseña de un usuario
+-- en la tabla user_mva y registrar una nueva clave de activación en la tabla 
+-- user_key asociada a ese usuario. Las dos operaciones se realizan dentro de
+-- una transacción.
+-- ===============================================================
+IF EXISTS (SELECT *
+FROM sys.objects
+WHERE object_id = OBJECT_ID(N'[dbo].[sp_update_password_and_insert_key]') AND type IN (N'P', N'PC'))
+BEGIN
+  DROP PROCEDURE [dbo].[sp_update_password_and_insert_key];
+END;
+GO
+
+CREATE PROCEDURE sp_update_password_and_insert_key
+  @id BIGINT,
+  -- ID del usuario en user_mva
+  @tempPassword NVARCHAR(255),
+  -- Nueva contraseña en formato hash
+  @key_value NVARCHAR(36),
+  -- Valor de la clave de activación
+  @key_purpose NVARCHAR(20),
+  -- Propósito de la clave ('ACCOUNT_ACTIVATION', 'PASSWORD_RESET', etc.)
+  @created_at DATETIME2,
+  -- Fecha y hora de creación
+  @id_user_key BIGINT OUTPUT
+-- salida
+AS
+BEGIN
+  SET NOCOUNT ON;
+
+  -- Iniciar la transacción
+  BEGIN TRY
+    BEGIN TRANSACTION;
+
+    -- ===============================================================
+    -- Actualizar el password del usuario en la tabla user_mva
+    -- ===============================================================
+    UPDATE user_mva
+    SET password_hash = @tempPassword
+    WHERE id = @id;
+
+    -- ===============================================================
+    -- Insertar la nueva clave de activación en la tabla user_key
+    -- ===============================================================
+    INSERT INTO user_key
+    (id_user, key_value, created_at, key_purpose)
+  VALUES
+    (@id, @key_value, @created_at, @key_purpose);
+
+    -- Obtener el ID de la tabla user_key
+    SET @id_user_key = SCOPE_IDENTITY();
+
+    -- Confirmar la transacción si todo fue exitoso
+    COMMIT TRANSACTION;
+    
+  END TRY
+  BEGIN CATCH
+    -- Si ocurre un error, realizar un rollback
+    ROLLBACK TRANSACTION;
+
+    -- Capturar y lanzar el mensaje de error
+    DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+    RAISERROR(@ErrorMessage, 16, 1);
+  END CATCH
+END;
+GO
 

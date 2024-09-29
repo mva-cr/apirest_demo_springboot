@@ -7,20 +7,12 @@ import java.util.Set;
  * un usario, esta solicitud solo el ROLE_ADMIN la puede
  * procesar
  */
-public class UserRoleUpdateRequestDTO {
+public class UserAuthorityRequestDTO {
 
-  private Long id;
+  private Long userId;
   private Set<AuthorityDTO> authorities;
 
-  public UserRoleUpdateRequestDTO() {
-  }
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
+  public UserAuthorityRequestDTO() {
   }
 
   public Set<AuthorityDTO> getAuthorities() {
@@ -29,6 +21,14 @@ public class UserRoleUpdateRequestDTO {
 
   public void setAuthorities(Set<AuthorityDTO> authorities) {
     this.authorities = authorities;
+  }
+
+  public Long getUserId() {
+    return userId;
+  }
+
+  public void setUserId(Long userId) {
+    this.userId = userId;
   }
 
 }

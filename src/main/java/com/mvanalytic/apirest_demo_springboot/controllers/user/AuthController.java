@@ -7,9 +7,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mvanalytic.apirest_demo_springboot.domain.user.User;
 import com.mvanalytic.apirest_demo_springboot.dto.user.JwtResponseDTO;
 import com.mvanalytic.apirest_demo_springboot.dto.user.LoginRequestDTO;
+import com.mvanalytic.apirest_demo_springboot.dto.user.UserRegistrationRequestDTO;
 import com.mvanalytic.apirest_demo_springboot.mapper.user.UserMapper;
 import com.mvanalytic.apirest_demo_springboot.services.user.AuthService;
 import com.mvanalytic.apirest_demo_springboot.services.user.UserService;
+import com.mvanalytic.apirest_demo_springboot.utility.UserValidationService;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -22,6 +25,49 @@ public class AuthController {
 
   @Autowired
   private UserService userService;
+
+  @Autowired
+  private UserValidationService userValidationService;
+
+  // @Autowired
+  // private UserKeyServiceImpl userKeyServiceImpl;
+
+  // @Autowired
+  // private AppUtility appUtility;
+
+  // @Autowired
+  // private MailService mailServiceImpl;
+
+  /**
+   * Registra un nuevo usuario en el sistema.
+   * Solo usuarios con el rol ROLE_ADMIN pueden acceder a este método.
+   *
+   * @param user El usuario a registrar.
+   * @return Una respuesta indicando el éxito del registro.
+   */
+  @PostMapping("/register")
+  public ResponseEntity<String> registerUser(@RequestBody UserRegistrationRequestDTO userRegistrationDTO) {
+
+    // validar los datos de la solicitud
+    userValidationService.validateUserRegistrationRequestDTO(userRegistrationDTO);
+
+    // Mapear el DTO a la entidad User
+    User user = UserMapper.convertUserRegistrationDTOToUser(userRegistrationDTO);
+
+    // Envio a procesar solicitud
+    userService.registerUser(user, false);
+
+    // Generar la clave de activación
+    // UserKey userKey = appUtility.generateKey(user, true);
+
+    // Registrar la clave en la base de datos
+    // userKeyServiceImpl.registerKeyValue(userKey);
+
+    // Enviar el correo de activación
+
+    // mailServiceImpl.sendActivationEmail(user, userKey);
+    return ResponseEntity.ok("Usuario registrado exitosamente");
+  }
 
   /**
    * Autentica al usuario utilizando su nickname.

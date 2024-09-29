@@ -119,6 +119,13 @@
             <version>2.6.0</version> <!-- Herramienta para generar documentación OpenAPI/Swagger -->
         </dependency>
 
+        <!-- permite procesar plantillas HTML en el lado del servidor, reemplazando marcadores de posición con contenido dinámico-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+
+
         <!-- Dependencias para desarrollo y pruebas -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

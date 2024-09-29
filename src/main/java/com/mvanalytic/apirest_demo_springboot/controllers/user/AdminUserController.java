@@ -2,7 +2,6 @@ package com.mvanalytic.apirest_demo_springboot.controllers.user;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,10 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.mvanalytic.apirest_demo_springboot.domain.user.User;
 import com.mvanalytic.apirest_demo_springboot.dto.user.AdminUserResponseDTO;
-import com.mvanalytic.apirest_demo_springboot.dto.user.UserRegistrationRequestDTO;
-import com.mvanalytic.apirest_demo_springboot.dto.user.UserRoleUpdateRequestDTO;
-import com.mvanalytic.apirest_demo_springboot.dto.user.UserStatusUpdateRequestDTO;
+import com.mvanalytic.apirest_demo_springboot.dto.user.ResendActivationRequestDTO;
+import com.mvanalytic.apirest_demo_springboot.dto.user.UserAuthorityRequestDTO;
+import com.mvanalytic.apirest_demo_springboot.dto.user.UserRegistrationByAdminRequestDTO;
+import com.mvanalytic.apirest_demo_springboot.dto.user.UserStatusRequestDTO;
 import com.mvanalytic.apirest_demo_springboot.mapper.user.UserMapper;
+import com.mvanalytic.apirest_demo_springboot.services.user.UserAuthorityService;
 import com.mvanalytic.apirest_demo_springboot.services.user.UserService;
 import com.mvanalytic.apirest_demo_springboot.utility.UserValidationService;
 
@@ -29,11 +30,11 @@ public class AdminUserController {
   @Autowired
   private UserService userService;
 
-  private final UserValidationService userValidationService;
+  @Autowired
+  private UserAuthorityService userAuthorityService;
 
-  public AdminUserController() {
-    this.userValidationService = new UserValidationService();
-  }
+  @Autowired
+  private UserValidationService userValidationService;
 
   /**
    * Registra un nuevo usuario en el sistema.
@@ -44,18 +45,57 @@ public class AdminUserController {
    */
   @PostMapping("/register")
   @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-  public ResponseEntity<String> registerUser(@RequestBody UserRegistrationRequestDTO userRegistrationDTO) {
+  public ResponseEntity<String> registerUser(
+      @RequestBody UserRegistrationByAdminRequestDTO userRegistrationByAdminRequestDTO) {
 
-    // validar
-    userValidationService.validateUserRegistrationRequestDTO(userRegistrationDTO);
-    String activationKey = UUID.randomUUID().toString();
-    User user = new User();
+    // validar los datos de la solicitud
+    userValidationService.validateUserRegistrationByAdminRequestDTO(userRegistrationByAdminRequestDTO);
 
-    user = UserMapper.convertUserRegistrationDTOToUser(userRegistrationDTO);
-    user.setActivationKey(activationKey);
+    // Mapear el DTO a la entidad User
+    User user = UserMapper.convertUserRegistrationByAdminDTOToUser(userRegistrationByAdminRequestDTO);
 
-    userService.registerUser(user);
+    // Envio a procesar solicitud
+    userService.registerUser(user, true);
+
     return ResponseEntity.ok("Usuario registrado exitosamente");
+  }
+
+  /**
+   * Controlador para reenviar un enlace de activación a un usuario.
+   *
+   * Este método maneja solicitudes POST en la ruta "/resend-activation". Recibe
+   * un objeto DTO que contiene el correo electrónico del usuario y, después de
+   * validar el formato del correo, envía una solicitud al servicio para reenviar
+   * el enlace de activación.
+   * 
+   * @param resendActivationRequestDTO DTO que contiene la información del correo
+   *                                   electrónico del usuario.
+   * 
+   * @return ResponseEntity<String> con un mensaje de éxito si el correo es válido
+   *         y el proceso de reenvío se completa sin errores.
+   *         - Si el correo es válido, se envía un código HTTP 200 (OK) y un
+   *         mensaje indicando que el nuevo enlace ha sido enviado.
+   *         - Si el correo no es válido, se lanza una excepción con un código de
+   *         error específico.
+   * 
+   * @throws IllegalArgumentException Si el correo proporcionado no cumple con el
+   *                                  formato válido.
+   */
+  @PostMapping("/resend-activation")
+  public ResponseEntity<String> resendActivationLink(
+      @RequestBody ResendActivationRequestDTO resendActivationRequestDTO) {
+
+    // Validar el formato del correo electrónico usando un servicio de validación
+    if (!userValidationService.isValidEmail(resendActivationRequestDTO.getEmail(), 5, 254)) {
+      throw new IllegalArgumentException("123, El correo no cumple el formato definido");
+    }
+
+    // Llama al servicio de usuario para reenviar el enlace de activación al correo
+    // validado
+    userService.resendActivation(resendActivationRequestDTO.getEmail());
+
+    // Devuelve una respuesta HTTP 200 (OK) con un mensaje de éxito
+    return ResponseEntity.ok("Nuevo enlace de activación enviado a tu correo.");
   }
 
   /**
@@ -136,7 +176,7 @@ public class AdminUserController {
   @PatchMapping("/update")
   @PreAuthorize("hasAuthority('ROLE_ADMIN')")
   public ResponseEntity<AdminUserResponseDTO> updateStatusUser(
-      @RequestBody UserStatusUpdateRequestDTO userStatusUpdateRequestDTO) {
+      @RequestBody UserStatusRequestDTO userStatusUpdateRequestDTO) {
 
     // validar datos de entrada
     userValidationService.validateUserStatusUpdateRequestDTO(userStatusUpdateRequestDTO);
@@ -160,14 +200,14 @@ public class AdminUserController {
    */
   @PatchMapping("/update/role")
   @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-  public ResponseEntity<AdminUserResponseDTO> updateRolUser(
-      @RequestBody UserRoleUpdateRequestDTO userRoleUpdateRequestDTO) {
+  public ResponseEntity<AdminUserResponseDTO> updateUserAuthority(
+      @RequestBody UserAuthorityRequestDTO userAuthorityRequestDTO) {
 
     // validar datos de entrada
-    userValidationService.validateUserRoleUpdateRequestDTO(userRoleUpdateRequestDTO);
+    userValidationService.validateUserRoleUpdateRequestDTO(userAuthorityRequestDTO);
 
     // User user = UserMapper.convertAdminUserDTOToUser(adminUserDTO);
-    User updateUser = userService.updateRoleUser(userRoleUpdateRequestDTO);
+    User updateUser = userAuthorityService.updateUserAuthority(userAuthorityRequestDTO);
 
     AdminUserResponseDTO adminUserDTOResponse = UserMapper.convertUserToAdminUserDTO(updateUser);
 

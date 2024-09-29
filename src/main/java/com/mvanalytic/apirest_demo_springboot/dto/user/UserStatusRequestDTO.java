@@ -5,13 +5,13 @@ package com.mvanalytic.apirest_demo_springboot.dto.user;
  * status y activated, esta petición solo la puede enviar el
  * ROLE_ADMIN
  */
-public class UserStatusUpdateRequestDTO {
+public class UserStatusRequestDTO {
   
   private Long id;
   private Boolean status;
   private Boolean activated;
   
-  public UserStatusUpdateRequestDTO() {
+  public UserStatusRequestDTO() {
   }
 
   public Long getId() {

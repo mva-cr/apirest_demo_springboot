@@ -2,6 +2,7 @@ package com.mvanalytic.apirest_demo_springboot.security.config;
 
 import java.util.Arrays;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -18,12 +19,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
+import com.mvanalytic.apirest_demo_springboot.exceptions.CustomAccessDeniedHandler;
 import com.mvanalytic.apirest_demo_springboot.security.handlers.AuthEntryPointJwt;
-import com.mvanalytic.apirest_demo_springboot.security.handlers.CustomAccessDeniedHandler;
 import com.mvanalytic.apirest_demo_springboot.security.jwt.AuthTokenFilter;
 import com.mvanalytic.apirest_demo_springboot.services.user.UserDetailsServiceImpl;
-
 
 /**
  * Configura la seguridad web utilizando Spring Security.
@@ -34,11 +33,12 @@ import com.mvanalytic.apirest_demo_springboot.services.user.UserDetailsServiceIm
 @EnableMethodSecurity // Habilita el uso de @PreAuthorize
 public class SecurityConfig {
 
-  private final UserDetailsServiceImpl userDetailsServiceImpl;
+  @Autowired
+  private UserDetailsServiceImpl userDetailsServiceImpl;
 
-  public SecurityConfig(UserDetailsServiceImpl userDetailsServiceImpl) {
-    this.userDetailsServiceImpl = userDetailsServiceImpl;
-  }
+  // public SecurityConfig(UserDetailsServiceImpl userDetailsServiceImpl) {
+  // this.userDetailsServiceImpl = userDetailsServiceImpl;
+  // }
 
   /**
    * Configura la cadena de seguridad global para la aplicación.
@@ -69,9 +69,11 @@ public class SecurityConfig {
         .exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPointJwt))
         // Sin estado para la gestión de sesiones
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        // Establecimiento de las reglas de autorización a nivel de URL para la aplicación web
+        // Establecimiento de las reglas de autorización a nivel de URL para la
+        // aplicación web
         .authorizeHttpRequests(authz -> authz
-            // Permitir todos los accesos a "/api/auth/**"
+            // Permitir acceso sin autenticación a rutas publicas
+            .requestMatchers("/api/public/**", "/favicon.ico").permitAll()
             .requestMatchers("/api/auth/**").permitAll()
             // Solo usuarios con ROLE_ADMIN pueden acceder a /admin/**
             .requestMatchers(("/api/admin/**")).hasAnyAuthority("ROLE_ADMIN")
@@ -105,21 +107,9 @@ public class SecurityConfig {
    */
   @Bean
   public AuthenticationManager authManager(HttpSecurity http) throws Exception {
-    // AuthenticationManagerBuilder auth = 
-    //         http.getSharedObject(AuthenticationManagerBuilder.class);
-    // auth.authenticationProvider(CustomAuthenticationProvider) // Registra tu proveedor personalizado aquí
-    //     .userDetailsService(userDetailsServiceImpl)
-    //     .passwordEncoder(passwordEncoder());
-    // return auth.build();
     AuthenticationManagerBuilder auth = http.getSharedObject(AuthenticationManagerBuilder.class);
     auth.userDetailsService(userDetailsServiceImpl).passwordEncoder(passwordEncoder());
     return auth.build();
-    // return http.getSharedObject(AuthenticationManagerBuilder.class)
-    // .userDetailsService(userDetailsServiceImpl)
-    // .passwordEncoder(passwordEncoder()) // Asegúrate de incluir un codificador de
-    // contraseñas si es necesario
-    // .and()
-    // .build();
   }
 
   /**
