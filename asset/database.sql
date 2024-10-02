@@ -230,13 +230,22 @@ CREATE TABLE login_attempt
   ip_address NVARCHAR(50) NOT NULL,
   -- Información del agente de usuario (por ejemplo, el navegador o 
   -- la aplicación utilizada para iniciar sesión).
-  user_agent NVARCHAR(255) NULL,
+  user_agent NVARCHAR(512) NULL,
   -- Resultado del intento de inicio de sesión, que puede ser 'SUCCESS' (éxito) o 'FAILED' (fallido).
-  attempt_result NVARCHAR(10) NOT NULL,
+  attempt_result NVARCHAR(20) NOT NULL,
   -- 'SUCCESS', 'FAILED'
   CONSTRAINT PK_id_attempt_login_attempt PRIMARY KEY CLUSTERED (id_attempt),
   CONSTRAINT FK_id_user_login_attempt FOREIGN KEY (id_user) REFERENCES user_mva(id)
 );
+-- consultas de los intentos de inicio de sesión de un usuario específico
+CREATE INDEX idx_login_attempt_id_user ON login_attempt(id_user);
+-- intentos de inicio de sesión por dirección IP, especialmente para detectar posibles actividades sospechosas
+CREATE INDEX idx_login_attempt_ip_address ON login_attempt(ip_address);
+-- buscar o contar con frecuencia los intentos exitosos o fallidos, un índice en este campo ayudará.
+CREATE INDEX idx_login_attempt_attempt_result ON login_attempt(attempt_result);
+
+-- attempt_result posibles valores:
+-- SUCCESS y FAILED, LOCKED, PASSWORD_RESET, TEMPORARY_LOCKOUT
 
 GO
 
@@ -249,17 +258,43 @@ GO
 CREATE TABLE user_session
 (
   id_session NVARCHAR(128) NOT NULL,
+  -- Referencia al usuario de la sesión
   id_user BIGINT NOT NULL,
+  -- Marca de tiempo de inicio de la sesión
   start_time DATETIME2 CONSTRAINT DF_start_time_user_sesion DEFAULT(GETDATE()) NOT NULL,
+  -- Marca de tiempo de fin de la sesión
   end_time DATETIME2,
+  -- Dirección IP desde la cual se inició la sesión
   ip_address NVARCHAR(50) NOT NULL,
-  user_agent NVARCHAR(255),
+  -- Información del agente de usuario
+  user_agent NVARCHAR(512),
+  -- Estado de la sesión ('ACTIVE', 'EXPIRED', 'LOGGED_OUT')
   session_status NVARCHAR(50) NOT NULL,
-  -- 'ACTIVE', 'EXPIRED', 'LOGGED_OUT'
   CONSTRAINT PK_id_session_user_session PRIMARY KEY CLUSTERED (id_session),
   CONSTRAINT FK_id_user_user_session FOREIGN KEY (id_user) REFERENCES user_mva(id)
 );
+-- Índices adicionales para mejorar el rendimiento de las consultas
+CREATE INDEX idx_user_session_id_user ON user_session(id_user);
+CREATE INDEX idx_user_session_session_status ON user_session(session_status);
  GO
+
+-- ===============================================================
+-- Tabla para almacenar los Refresh Tokens
+-- Author: Mario Martínez Lanuza
+-- Create date: 2024-10-01
+-- Description: Tabla que almacena los tokens de refresco generados para los usuarios
+-- ===============================================================
+CREATE TABLE refresh_token (
+    id_token BIGINT NOT NULL IDENTITY(1,1),  -- ID único para el refresh token
+    token NVARCHAR(255) NOT NULL,            -- El valor del token de refresco
+    id_user BIGINT NOT NULL,                 -- Relación con el usuario (ID del usuario)
+    expiry_date DATETIME2 NOT NULL,          -- Fecha de expiración del token
+    CONSTRAINT PK_id_token_refresh_token PRIMARY KEY CLUSTERED (id_token),  -- Clave primaria
+    -- Clave foránea que hace referencia a la tabla user_mva
+    CONSTRAINT FK_user_id_refresh_token FOREIGN KEY (id_user) REFERENCES user_mva(id) ON DELETE CASCADE
+);
+
+
 
 -- ===============================================================
 -- Author: Mario Martínez Lanuza

@@ -54,23 +54,7 @@ Si las credenciales son válidas, se genera un token JWT usando JwtUtils.
 
 7. **Utilidad JWT: JwtUtils** Por medio del método `generateJwtToken(Authentication authentication)` Genera un token JWT para el usuario autenticado utilizando una clave secreta y una fecha de expiración definida.
 
-## Tiempo de expiración de la sesión HTTP
-
-`server.servlet.session.timeout` se refiere al tiempo de inactividad desde la última petición del usuario al servidor (backend) antes de que la sesión HTTP caduque.
-
-**Detalles**
-
-1. Tiempo de Inactividad: Esta propiedad mide el tiempo de inactividad, es decir, el tiempo que ha transcurrido desde la última solicitud HTTP del usuario al servidor. Cada vez que el usuario hace una nueva solicitud al servidor (como cargar una nueva página, hacer clic en un botón, enviar un formulario, etc.), este contador de tiempo se reinicia.
-
-2. Expiración de la Sesión: Si el usuario no realiza ninguna solicitud al servidor durante el período especificado (en este caso, 15 minutos), la sesión del usuario caducará. Esto significa que cualquier intento posterior de interactuar con la aplicación puede resultar en la necesidad de volver a iniciar sesión o en una respuesta que indique que la sesión ha expirado.
-
-En `application.properties`se ha definido así:
-
-```
-server.servlet.session.timeout=15m
-```
-
-Que son 15 minutos.
+<!-- TODO: verificar la continuidad -->
 
 ### Tiempo de expiración del token JWT
 
@@ -119,5 +103,124 @@ Para implementar el proceso de restablecimiento de contraseña (reset password),
 6. Confirmación:
 
 - El sistema envía una confirmación al usuario de que su contraseña ha sido cambiada.
+
+## Control del tiempo por sesión
+
+### Use de `server.servlet.session.timeout` no utilizan `JWT` (JSON Web Token)
+
+**¿Qué es `server.servlet.session.timeout`?**
+
+Esta variable define cuánto tiempo una sesión HTTP permanecerá activa en el servidor antes de caducar por inactividad. Si un usuario no realiza ninguna actividad en la aplicación dentro de ese tiempo, el servidor invalidará la sesión.
+
+- **Sesión HTTP**: Es un mecanismo en el que el servidor almacena información sobre cada usuario en un objeto HttpSession. Cada vez que un usuario hace una solicitud, el servidor usa una cookie (o URL de sesión) para identificar a la sesión correspondiente en el servidor.
+
+- **Ejemplo de uso**: Si tienes una aplicación donde manejas sesiones de usuario mediante HttpSession, esta variable indica cuánto tiempo la sesión puede estar inactiva antes de que el servidor la invalide. En este caso, 15m significa que, si el usuario no interactúa con la aplicación durante 15 minutos, el servidor terminará la sesión.
+
+**¿Cuándo se utiliza?**
+
+- **Aplicaciones basadas en sesiones HTTP**: Si tu aplicación utiliza el manejo tradicional de sesiones HTTP (almacenadas en el servidor), server.servlet.session.timeout establece el tiempo de vida de la sesión por inactividad.
+
+- **Ejemplo práctico**: Supongamos que un usuario inicia sesión en tu aplicación, y no interactúa con la misma durante 15 minutos. Si `server.servlet.session.timeout=15m`, cuando el usuario intente hacer una nueva acción después de este tiempo (15 minutos), su sesión habrá expirado, y necesitará volver a iniciar sesión.
+
+**Comparación con JWT:**
+
+- **JWT (JSON Web Token)**: La sesión no se mantiene en el servidor. El token contiene toda la información necesaria y tiene una duración específica (controlada por app.jwtExpirationMs). Cuando el token expira, el cliente debe solicitar uno nuevo.
+
+- **Sesión HTTP tradicional**: La información de la sesión (usuario autenticado, etc.) se mantiene en el servidor y está vinculada a un HttpSession. El cliente solo mantiene un identificador de sesión (normalmente en una cookie) y, cuando el tiempo de inactividad supera el tiempo configurado (en este caso, 15 minutos), la sesión expira en el servidor.
+
+**¿Deberías usarla?**
+Si tu aplicación solo usa JWT para manejar autenticación, no necesitas preocuparte por esta variable.
+Si usas sesiones HTTP tradicionales (por ejemplo, en combinación con autenticación basada en formularios o Spring Security sin JWT), esta variable es relevante para definir el tiempo de vida de las sesiones.
+
+**¿Cómo debería ser el cierre de sesión (logout) con JWT?**
+Con JWT, el concepto de "cerrar sesión" no se maneja del mismo modo que con las sesiones basadas en el servidor. Al usar JWT:
+
+- **El servidor no almacena información del token**. El token reside en el cliente y, por lo tanto, al cerrar sesión no hay sesión para invalidar en el servidor.
+- **El cierre de sesión** simplemente significa eliminar el token del cliente. Esto se puede lograr eliminando el token almacenado en el frontend (localStorage, sessionStorage, cookies, etc.).
+- **El token sigue siendo válido hasta que expira**. El backend no puede invalidar directamente un token sin un mecanismo extra como una lista de revocación (Blacklist) o invalidación de token por la modificación del secret.
+
+### Tokens de corta duración con refresh tokens
+
+Es un patrón común utilizado para mejorar la seguridad en sistemas de autenticación basados en `JWT` (`JSON Web Tokens`). Este patrón permite que los access tokens (tokens de acceso) tengan una corta vida útil, pero ofrece una manera segura de renovarlos sin que el usuario tenga que autenticarse nuevamente, mediante el uso de refresh tokens.
+
+**Conceptos clave**:
+
+1. **Access Token (Token de Acceso)**:
+
+- Es el JWT principal que contiene la información sobre la autenticación del usuario, como su identidad y los permisos (claims).
+- Tiene una vida útil **corta** (normalmente entre 15 minutos y 1 hora).
+- Se incluye en cada petición del cliente al servidor para autenticar y autorizar las solicitudes.
+- **Es vulnerable** si se compromete, pero al tener una duración corta, se reduce el impacto de un posible ataque.
+
+2. **Refresh Token (Token de Actualización)**:
+
+- Es un token que se utiliza exclusivamente para obtener un nuevo access token cuando el anterior ha expirado.
+- Se emite junto con el access token al momento de autenticación y se almacena de forma segura en el cliente (pero no debe ser accesible desde el JavaScript del frontend para mayor seguridad).
+- Tiene una vida útil más larga que el access token, por ejemplo, 1 semana o más, dependiendo de la política de seguridad.
+- No se envía con cada petición, solo cuando se necesita obtener un nuevo access token.
+- En algunos casos, el refresh token también puede ser revocado en el servidor, lo que permite un mayor control sobre la sesión del usuario.
+
+**Flujo de trabajo con access token y refresh token**:
+
+1. **Inicio de sesión (login)**:
+
+- El usuario se autentica y recibe dos tokens: un **`access token`** de corta duración y un **`refresh token`** de larga duración.
+- El `access token` se usa para autenticar cada petición del cliente al servidor, mientras que el refresh token se guarda de forma segura en el cliente (usualmente en cookies http-only o almacenamiento seguro).
+
+2. Uso del `access token`:
+
+- Mientras el `access token` esté vigente, se envía con cada solicitud al servidor.
+- Si el token expira, el usuario no puede seguir accediendo a los recursos protegidos con ese token.
+
+3. Renovación con el refresh token:
+
+- Cuando el `access token` expira, el cliente envía una solicitud al servidor para obtener un nuevo `access token`, incluyendo el refresh token.
+- El servidor verifica el refresh token:
+  - Si es válido y no ha sido revocado, emite un nuevo `access token`.
+  - Si el refresh token no es válido o ha expirado, el usuario tendrá que autenticarse de nuevo.
+- El ciclo se repite hasta que el refresh token expira o es revocado.
+
+4. Revocación del refresh token:
+
+- Si el usuario cierra sesión (logout) o si el refresh token es comprometido, se puede revocar el refresh token en el servidor.
+- Esto invalida la posibilidad de obtener nuevos `access tokens`, obligando al usuario a autenticarse de nuevo.
+
+**Ventajas del uso de tokens de corta duración con refresh token**:
+
+1. Mayor seguridad:
+
+- **`Access tokens` de corta duración** limitan el tiempo de exposición en caso de que un token sea robado o comprometido.
+- **Refresh tokens** pueden ser revocados en el servidor, proporcionando un mayor control sobre la sesión.
+
+2. **Mejora en la experiencia de usuario**:
+
+- El usuario solo tiene que autenticarse una vez (login), y mientras el refresh token sea válido, se pueden emitir nuevos `access tokens` sin necesidad de que el usuario vuelva a iniciar sesión.
+- Ofrece una sesión persistente más segura, incluso en sistemas distribuidos donde no se desea almacenar sesiones en el servidor.
+
+3. **Balance entre seguridad y usabilidad**:
+
+- Los `access tokens` cortos reducen el riesgo de comprometer una sesión, mientras que los refresh tokens permiten una experiencia sin interrupciones para el usuario.
+
+**Implementación típica**:
+
+1. **Login**:
+
+- El usuario ingresa sus credenciales y recibe tanto un `access token` (corto) como un refresh token (largo).
+
+2. **Uso del `access token`**:
+
+- El cliente incluye el `access token` en el Authorization header de cada solicitud (Bearer <token>).
+- Si el token es válido, el servidor procesa la solicitud.
+
+3. **Renovación del token**:
+
+- Cuando el `access token` expira, el cliente envía una solicitud al endpoint de "refresh token" junto con el refresh token.
+- El servidor verifica el refresh token, emite un nuevo `access token` y, opcionalmente, un nuevo refresh token.
+
+4. **Logout o revocación del refresh token**:
+
+- Cuando el usuario cierra sesión o el refresh token se compromete, el servidor invalida el refresh token. El cliente ya no puede obtener nuevos `access tokens` hasta que el usuario se autentique de nuevo.
+
+La tabla `refresh_token` de la base de datos **Solo** podrá tener una entrada por usuario, si bien la tabla lo permite y se podría justificar ya que el usuario puede tener `sesiones múltiples` por reglas de negocio se limita esta opción. Así si un usuario inicia sesión desde un navegador diferente, la sesión que haya tenido en otro se elimina y se crea la nueva.
 
 [Retornar a la principal](../../README.md)

@@ -6,7 +6,7 @@ La conexión a una única base de datos.
 
 Está implementada con las siguientes versiones:
 
-1. `Spring Boot`: 3.3.3
+1. `Spring Boot`: 3.3.3 (versión de Spring Framework: 6.1.12)
 2. `java.version`: 17
 3. `Database`: SQL Server 2022
 4. `Lenguage`: java

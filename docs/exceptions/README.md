@@ -227,6 +227,26 @@ Los códigos de error detallados se definen con base en la siguiente tabla:
 | 163    | Tipo de archivo no permitido                                           | Backend              |
 | 164    | Archivo no encontrado                                                  | Backend              |
 | 165    | Acceso no autorizado al archivo                                        | Backend              |
+| 166    | Error al intentar guardar el registro loginAttempt                     | Backend              |
+| 167    | Error al enviar el correo de intento fallido de login                  | Backend              |
+| 168    | Error inesperado al enviar el correo de intento fallido de login       | Backend              |
+| 169    | Error al cargar la url base                                            | Backend              |
+| 170    | Error al cargar la ruta de los archivos para descarga                  | Backend              |
+| 171    | Error al al formatear la fecha y hora del intento                      | Backend              |
+| 172    | Error al intentar guardar sesión del usuario                           | Backend              |
+| 173    | Error al cargar el refreshTokenDurationMs                              | Backend              |
+| 174    | Error al crear el refreshTokenDurationMs                               | Backend              |
+| 175    | Error al verificar Expiration del token                                | Backend              |
+| 176    | Error al eliminar los refresh token del id (del user)                  | Backend              |
+| 177    | Refresh token no encontrado                                            | Backend              |
+| 178    | Error al guardar el RefreshToken                                       | Backend              |
+| 179    | Error al eliminar el RefreshToken                                      | Backend              |
+| 180    | Error al verificar la expiración del refresh token                     | Backend              |
+| 181    | No existe RefreshToken del Usuario                                     | Backend              |
+| 182    | Error al intentar eliminar los RefreshToken previos a una fecha        | Backend              |
+| 183    | Error al cargar todos los refreshToken                                 | Backend              |
+| 184    | Error en el formato de la fecha y hora                                 | Backend              |
+| 185    | Error al convertir la fecha a UTC                                      | Backend              |
 | 505    | No autorizado                                                          | Backend              |
 | 501    | Permisos insuficientes                                                 | Backend              |
 | 502    | Token expirado                                                         | Backend              |

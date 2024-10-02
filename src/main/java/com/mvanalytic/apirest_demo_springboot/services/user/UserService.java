@@ -129,20 +129,6 @@ public class UserService {
     Long id = createUserAndKey(user, userKey);
     userKey.setId(id);
 
-    /**
-     * Limpiar la caché de primer nivel de Hibernate: Puedes usar EntityManager
-     * para limpiar la caché de primer nivel antes de volver a cargar el usuario.
-     */
-    // entityManager.flush();
-    /**
-     * Refrescar la entidad: Usar el método refresh de EntityManager para forzar
-     * la sincronización con la base de datos.
-     */
-    // entityManager.clear();
-
-    // UserKey newUserKey = userKeyServiceImpl.findByIdWithUser(id);
-    // System.out.println("id del user es: " + userKey.getUser().getId());
-
     if (isRoleAdmin) {
       // Enviar el correo de re-activación con clave temporal
       mailService.sendActivationAccountWithTemporaryPassword(user, userKey, passwordTemp, true);
@@ -521,7 +507,7 @@ public class UserService {
   /**
    * Obtiene un usuario por su email.
    *
-   * @param nickname El nickname del usuario a buscar.
+   * @param email El correo del usuario a buscar.
    * @return El usuario encontrado.
    */
   public User getUserByEmail(String email) {
@@ -544,12 +530,6 @@ public class UserService {
    * @param nickname El nickname del usuario a buscar.
    * @return El usuario encontrado.
    */
-  // public User getUserByNickName(String nickname) {
-  // return userRepository.findByNickname(nickname)
-  // .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con
-  // el nickname lolita: " + nickname));
-  // }
-
   public User getUserByNickName(String nickname) {
     try {
       // Intenta encontrar el usuario por su nickname

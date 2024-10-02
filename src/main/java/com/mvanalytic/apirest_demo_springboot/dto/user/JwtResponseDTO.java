@@ -20,6 +20,10 @@ public class JwtResponseDTO {
    * El token de acceso JWT emitido tras un inicio de sesión exitoso.
    */
   private String token;
+  /**
+   * El refresh token para generar nuevos access tokens cuando expire el actual.
+   */
+  private String refreshToken;
 
   /**
    * El tipo de token, que es 'Bearer' por defecto.
@@ -37,7 +41,8 @@ public class JwtResponseDTO {
    */
   public JwtResponseDTO(
       long id, String firstname, String lastName, String secondLastName,
-      String nickname, String accesToken, String email, String languageKey) {
+      String nickname, String accesToken, String email, String languageKey,
+      String refreshToken) {
     this.id = id;
     this.firstname = firstname;
     this.lastName = lastName;
@@ -46,6 +51,7 @@ public class JwtResponseDTO {
     this.email = email;
     this.languageKey = languageKey;
     this.token = accesToken;
+    this.refreshToken = refreshToken;
   }
 
   // Getters y Setters
@@ -143,6 +149,14 @@ public class JwtResponseDTO {
    */
   public void setType(String type) {
     this.type = type;
+  }
+
+  public String getRefreshToken() {
+    return refreshToken;
+  }
+
+  public void setRefreshToken(String refreshToken) {
+    this.refreshToken = refreshToken;
   }
 
 }

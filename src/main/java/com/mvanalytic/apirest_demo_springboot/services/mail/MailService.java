@@ -22,6 +22,7 @@ import com.mvanalytic.apirest_demo_springboot.utility.AppUtility;
 import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import java.time.Instant;
 
 /**
  * Servicio encargado de gestionar el envío de correos electrónicos dentro de la
@@ -412,6 +413,159 @@ public class MailService {
       logger.error("Error inesperado al enviar el correo de aviso: {}", e.getMessage());
       logger.error("Stack Trace:", e);
       throw new MailSendException("160, Error inesperado al enviar correo de aviso", e);
+    }
+  }
+
+  /**
+   * Envía un correo electrónico de notificación al usuario tras un intento
+   * fallido de inicio de sesión. El correo incluye detalles como la fecha, hora,
+   * dirección IP y plataforma desde la que se intentó iniciar sesión.
+   * 
+   * @param user      El objeto {@link User} que contiene los datos del usuario al
+   *                  que se le enviará el correo.
+   * @param ipAddress La dirección IP desde la que se realizó el intento fallido
+   *                  de inicio de sesión.
+   * @param userAgent El User-Agent que describe la plataforma o navegador desde
+   *                  el cual se realizó el intento de inicio de sesión.
+   * @param date      el instante que se registró el intento de login
+   * 
+   * @throws MailSendException Si ocurre algún error durante el envío del correo.
+   */
+  public void sendFailedLoginAttempt(
+      User user,
+      String ipAddress,
+      String userAgent,
+      Instant date) {
+    try {
+      // Configurar el Locale en función del idioma del usuario
+      Locale locale = new Locale(user.getLanguageKey());
+
+      // Forzar el Locale en el contexto actual
+      LocaleContextHolder.setLocale(locale);
+
+      // Crear el contexto de Thymeleaf y agregar variables dinámicas
+      Context context = new Context(locale);
+
+      context.setVariable("fullName", user.getFirstName() + " " + user.getLastName() +
+          (user.getSecondLastName() != null ? " " + user.getSecondLastName() : ""));
+      context.setVariable("ipAddress", ipAddress); // Dirección IP
+      context.setVariable("userAgent", userAgent); // Información del agente (plataforma)
+
+      // dar formato a la fecha y hora
+      String timeString = appUtility.formatAttemptTime(date);
+      context.setVariable("date", timeString);
+
+      // Determinar el tipo de plantilla
+      String template = "failedLoginAttemptNotification";
+
+      // Procesar la plantilla
+      String htmlContent = templateEngine.process(template, context);
+
+      // Crear el mensaje de correo HTML
+      MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+      MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+      helper.setFrom(sender);
+      helper.setTo(user.getEmail());
+
+      // Define el subject utilizando el MessageSource y el idioma actual
+      String subject = messageSource.getMessage("email.failed.login.subject", null, LocaleContextHolder.getLocale());
+      helper.setSubject(subject);
+      helper.setText(htmlContent, true);
+
+      // Adjuntar la imagen PNG como recurso embebido
+      ClassPathResource imagResource = new ClassPathResource("static/img/mvanalytic_color.png");
+
+      helper.addInline("logo_mv_analytic", imagResource, "image/png");
+
+      // Enviar el correo
+      javaMailSender.send(mimeMessage);
+
+    } catch (MailException e) {
+      logger.error("Error al enviar el correo de intento fallido de login: {}", e.getMessage());
+      throw new MailSendException("167, Error al enviar el correo de intento fallido de login", e);
+    } catch (Exception e) {
+      logger.error("Error inesperado al enviar el correo de intento fallido de login: {}", e.getMessage());
+      throw new MailSendException("168, Error inesperado al enviar el correo de intento fallido de login", e);
+    }
+  }
+
+  /**
+   * Envía un correo electrónico notificando al usuario sobre un inicio de sesión
+   * exitoso.
+   * 
+   * @param user      El objeto User que contiene la información del usuario que
+   *                  inició sesión.
+   * @param ipAddress La dirección IP desde la cual se realizó el intento de
+   *                  inicio de sesión.
+   * @param userAgent La información del agente de usuario (plataforma/dispositivo
+   *                  desde el cual se realizó el intento).
+   * @param startTime El instante en que se inició la sesión, utilizado para dar
+   *                  formato a la fecha y hora.
+   * 
+   *                  Este método genera un correo electrónico HTML,
+   *                  personalizando los detalles del inicio de sesión exitoso,
+   *                  como el nombre completo del usuario, la dirección IP, la
+   *                  plataforma utilizada y la fecha y hora del inicio de sesión.
+   *                  El correo se envía utilizando Thymeleaf para procesar una
+   *                  plantilla HTML. Si ocurre un error al enviar el correo, se
+   *                  lanza una excepción `MailSendException`.
+   */
+  public void sendSuccessfulLoginAttempt(
+      User user,
+      String ipAddress,
+      String userAgent,
+      Instant startTime) {
+    try {
+      // Configurar el Locale en función del idioma del usuario
+      Locale locale = new Locale(user.getLanguageKey());
+
+      // Forzar el Locale en el contexto actual
+      LocaleContextHolder.setLocale(locale);
+
+      // Crear el contexto de Thymeleaf y agregar variables dinámicas
+      Context context = new Context(locale);
+
+      context.setVariable("fullName", user.getFirstName() + " " + user.getLastName() +
+          (user.getSecondLastName() != null ? " " + user.getSecondLastName() : ""));
+      context.setVariable("ipAddress", ipAddress); // Dirección IP
+      context.setVariable("userAgent", userAgent); // Información del agente (plataforma)
+
+      // dar formato a la fecha y hora
+      String timeString = appUtility.formatAttemptTime(startTime);
+      context.setVariable("date", timeString);
+
+      // Determinar el tipo de plantilla
+      String template = "successfulAttempt";
+
+      // Procesar la plantilla
+      String htmlContent = templateEngine.process(template, context);
+
+      // Crear el mensaje de correo HTML
+      MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+      MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+      helper.setFrom(sender);
+      helper.setTo(user.getEmail());
+
+      // Define el subject utilizando el MessageSource y el idioma actual
+      String subject = messageSource.getMessage("email.successful.login.subject", null,
+          LocaleContextHolder.getLocale());
+      helper.setSubject(subject);
+      helper.setText(htmlContent, true);
+
+      // Adjuntar la imagen PNG como recurso embebido
+      ClassPathResource imagResource = new ClassPathResource("static/img/mvanalytic_color.png");
+
+      helper.addInline("logo_mv_analytic", imagResource, "image/png");
+
+      // Enviar el correo
+      javaMailSender.send(mimeMessage);
+
+    } catch (MailException e) {
+      logger.error("Error al enviar el correo de intento fallido de login: {}", e.getMessage());
+      throw new MailSendException("167, Error al enviar el correo de intento fallido de login", e);
+    } catch (Exception e) {
+      logger.error("Error inesperado al enviar el correo de intento fallido de login: {}", e.getMessage());
+      throw new MailSendException("168, Error inesperado al enviar el correo de intento fallido de login", e);
     }
   }
 

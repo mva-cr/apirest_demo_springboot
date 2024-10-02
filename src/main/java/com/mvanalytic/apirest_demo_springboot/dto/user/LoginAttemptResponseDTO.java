@@ -9,12 +9,12 @@ import java.time.Instant;
  */
 public class LoginAttemptResponseDTO {
 
-  private Long idAttempt;
-  private Long idUser;
-  private Instant attemptTime;
-  private String ipAddress;
-  private String userAgent;
-  private String attemptResult;
+  private Long idAttempt; // ID del intento
+    private String userEmail; // Email del usuario (en lugar de retornar el objeto completo User)
+    private Instant attemptTime; // Fecha y hora del intento
+    private String ipAddress; // Dirección IP desde donde se realizó el intento
+    private String userAgent; // Agente de usuario (detalles del navegador/dispositivo)
+    private String attemptResult; // Resultado: 'SUCCESS' o 'FAILED'
   public LoginAttemptResponseDTO() {
   }
   public Long getIdAttempt() {
@@ -23,11 +23,11 @@ public class LoginAttemptResponseDTO {
   public void setIdAttempt(Long idAttempt) {
     this.idAttempt = idAttempt;
   }
-  public Long getIdUser() {
-    return idUser;
+  public String getUserEmail() {
+    return userEmail;
   }
-  public void setIdUser(Long idUser) {
-    this.idUser = idUser;
+  public void setUserEmail(String userEmail) {
+    this.userEmail = userEmail;
   }
   public Instant getAttemptTime() {
     return attemptTime;
