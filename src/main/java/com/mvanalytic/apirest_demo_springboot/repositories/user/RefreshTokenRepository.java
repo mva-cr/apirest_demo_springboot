@@ -1,6 +1,7 @@
 package com.mvanalytic.apirest_demo_springboot.repositories.user;
 
 import java.time.Instant;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import com.mvanalytic.apirest_demo_springboot.domain.user.RefreshToken;
@@ -64,5 +65,15 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
    *         contrario, un Optional vacío.
    */
   Optional<RefreshToken> findByUserId(Long userId);
+
+  /**
+ * Encuentra todos los RefreshTokens cuya fecha de expiración está entre un rango de fechas específico.
+ * 
+ * @param startDate La fecha y hora de inicio del rango (inclusive) como un objeto Instant.
+ * @param endDate La fecha y hora de finalización del rango (inclusive) como un objeto Instant.
+ * @return Una lista de objetos RefreshToken cuya fecha de expiración esté entre las fechas proporcionadas.
+ */
+List<RefreshToken> findByExpiryDateBetween(Instant startDate, Instant endDate);
+
 
 }

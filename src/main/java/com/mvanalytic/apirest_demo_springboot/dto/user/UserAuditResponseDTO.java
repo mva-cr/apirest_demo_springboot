@@ -4,9 +4,7 @@ import java.time.Instant;
 
 /**
  * Clase que representa la información de la tabla user_audit y contiene los
- * cambios
- * que sobre cada usuario se han dado, esta solo el ROLE_ADMIN la puede acceder.
- * LoginAttemptResponseDTO.java
+ * cambios que sobre cada usuario se han dado, esta solo el ROLE_ADMIN la puede acceder.
  */
 public class UserAuditResponseDTO {
 

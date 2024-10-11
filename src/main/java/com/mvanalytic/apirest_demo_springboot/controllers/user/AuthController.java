@@ -3,10 +3,7 @@ package com.mvanalytic.apirest_demo_springboot.controllers.user;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.mvanalytic.apirest_demo_springboot.domain.user.RefreshToken;
 import com.mvanalytic.apirest_demo_springboot.domain.user.User;
 import com.mvanalytic.apirest_demo_springboot.dto.user.JwtResponseDTO;
 import com.mvanalytic.apirest_demo_springboot.dto.user.LoginRequestDTO;
@@ -16,10 +13,7 @@ import com.mvanalytic.apirest_demo_springboot.services.user.AuthService;
 import com.mvanalytic.apirest_demo_springboot.services.user.RefreshTokenService;
 import com.mvanalytic.apirest_demo_springboot.services.user.UserService;
 import com.mvanalytic.apirest_demo_springboot.utility.UserValidationService;
-
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
-
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

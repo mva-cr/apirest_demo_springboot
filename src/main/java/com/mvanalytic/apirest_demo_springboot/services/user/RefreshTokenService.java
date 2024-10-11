@@ -86,8 +86,6 @@ public class RefreshTokenService {
       // Establecer la fecha de expiración
       refreshToken.setExpiryDate(expiration);
 
-      System.out.println("expira2: " + refreshToken.getExpiryDate());
-      System.out.println("lapzo: " + appUtility.getRefreshTokenDurationMs());
       // Actualiza el RefreshToken en la base de datos
       refreshToken = saveRefreshToken(refreshToken);
 
@@ -98,8 +96,8 @@ public class RefreshTokenService {
 
       return jwtResponseDTO;
     } catch (Exception e) {
-      logger.error("Error al crear el refreshTokenDurationMs: {}", e.getMessage());
-      throw new IllegalArgumentException("174, Error al crear el refreshTokenDurationMs");
+      logger.error("Error al crear el refreshToken del id_user: {}", e.getMessage());
+      throw new IllegalArgumentException("204, Error al crear el refreshToken del id_user");
     }
   }
 
@@ -132,13 +130,10 @@ public class RefreshTokenService {
       String token = jwtUtils.generateRefreshToken(user.getUsername(), expiration);
       refreshToken.setToken(token);
 
-      // Guardar el token en la base de datos
-      saveRefreshToken(refreshToken);
-
       return refreshToken;
     } catch (Exception e) {
-      logger.error("Error al crear el refreshTokenDurationMs: {}", e.getMessage());
-      throw new IllegalArgumentException(e.getMessage());
+      logger.error("Error al crear el refreshToken del user: {}", e.getMessage());
+      throw new IllegalArgumentException("203, Error al crear el refreshToken del user");
     }
   }
 
@@ -181,7 +176,6 @@ public class RefreshTokenService {
    * @param user El objeto User cuyo refresh token será eliminado.
    * @throws IllegalArgumentException Si ocurre un error al eliminar el token.
    */
-  // TODO: pendiente en el controller
   @Transactional
   public void deleteRefreshTokenByUser(User user) {
     try {
@@ -226,7 +220,6 @@ public class RefreshTokenService {
    * @throws IllegalArgumentException Si ocurre algún error al intentar eliminar
    *                                  el token.
    */
-  // TODO: pendiente en el controller
   @Transactional
   public void deleteRefreshToken(RefreshToken refreshToken) {
     try {
@@ -238,12 +231,56 @@ public class RefreshTokenService {
   }
 
   /**
+   * Elimina un token de refresco específico de la base de datos por su ID. Este
+   * método está dentro de una transacción para asegurar que la operación se
+   * realice correctamente.
+   * 
+   * @Transactional: Se asegura de que la operación de eliminación esté incluida
+   *                 en una transacción.
+   * 
+   * @param id El ID del refresh token que se va a eliminar.
+   * @throws IllegalArgumentException Si ocurre un error durante la eliminación
+   *                                  del refresh token.
+   */
+  @Transactional
+  public void deleteRefreshTokenByIdToken(long idToken) {
+    try {
+      refreshTokenRepository.deleteById(idToken);
+    } catch (Exception e) {
+      logger.error("Error al eliminar el RefreshToken: {}", e.getMessage());
+      throw new IllegalArgumentException("179, Error al eliminar el RefreshToken");
+    }
+  }
+
+  /**
+   * Elimina todos los tokens de la tabla `refresh_token` de la base de datos.
+   * Este método se utiliza para realizar una limpieza completa de los tokens de
+   * refresco.
+   * 
+   * @Transactional: Se asegura de que la operación de eliminación se realice
+   *                 dentro de una transacción, lo que garantiza la consistencia
+   *                 de la base de datos.
+   *
+   * @throws IllegalArgumentException Si ocurre algún error durante la
+   *                                  eliminación, se lanza una excepción con un
+   *                                  mensaje explicativo.
+   */
+  @Transactional
+  public void deleteAllToken() {
+    try {
+      refreshTokenRepository.deleteAll();
+    } catch (Exception e) {
+      logger.error("Error al eliminar los RefreshTokens: {}", e.getMessage());
+      throw new IllegalArgumentException("186, Error al eliminar los RefreshTokens");
+    }
+  }
+
+  /**
    * Elimina todos los refresh tokens asociados a un usuario específico.
    *
    * @param userId El ID del usuario cuyos refresh tokens se eliminarán.
    * @throws IllegalArgumentException Si ocurre un error al eliminar los tokens.
    */
-  // TODO: pendiente en el controller
   @Transactional
   public void deleteByUserId(Long userId) {
     try {
@@ -252,14 +289,23 @@ public class RefreshTokenService {
     } catch (Exception e) {
       // Registrar el error y lanzar una excepción con un mensaje
       logger.error("Error al crear el refreshTokenDurationMs: {}", e.getMessage());
-      throw new IllegalArgumentException("176, Error al eliminar los refresh token del id (del user)");
+      throw new IllegalArgumentException("176, Error al eliminar los refresh token del id_user");
     }
   }
 
-  // TODO: pendiente en el controller
-  public RefreshToken getRefreshTokenByUser(User user) {
+  /**
+   * Obtiene el RefreshTokenResponseDTO asociado a un usuario específico.
+   *
+   * @param user El objeto `User` cuyo RefreshToken se desea obtener.
+   * @return El objeto `RefreshToken` asociado al usuario si existe.
+   * @throws IllegalArgumentException Si no se encuentra un RefreshToken asociado
+   *                                  al usuario o si ocurre algún error durante
+   *                                  la búsqueda.
+   */
+  public RefreshTokenResponseDTO getRefreshTokenByUser(User user) {
     try {
-      return refreshTokenRepository.findByUser(user).get();
+      RefreshToken refreshToken = refreshTokenRepository.findByUser(user).get();
+      return RefresTokenMapper.convertRefreshTokenResponseDTO(refreshToken);
     } catch (Exception e) {
       // Registrar el error y lanzar una excepción con un mensaje
       logger.error("Error al crear el refreshTokenDurationMs: {}", e.getMessage());
@@ -279,7 +325,6 @@ public class RefreshTokenService {
    * @throws IllegalArgumentException Si el token de refresco no se encuentra o
    *                                  ocurre un error durante la búsqueda.
    */
-  // TODO: pendiente en el controller
   public RefreshToken getRefreshTokenById(Long id) {
     try {
       RefreshToken refreshToken = refreshTokenRepository.findById(id).get();
@@ -293,6 +338,20 @@ public class RefreshTokenService {
       logger.error("Refresh token no encontrado: {}", e.getMessage());
       throw new IllegalArgumentException("177, Refresh token no encontrado");
     }
+  }
+
+  /**
+   * Obtiene un RefreshTokenResponseDTO basado en el ID del refresh token.
+   *
+   * @param id El ID del RefreshToken que se desea obtener.
+   * @return Un objeto RefreshTokenResponseDTO que contiene los datos del refresh
+   *         token asociado al ID proporcionado.
+   * @throws IllegalArgumentException Si no se encuentra un refresh token con el
+   *                                  ID proporcionado.
+   */
+  public RefreshTokenResponseDTO getRefreshTokenDTOById(Long id) {
+    RefreshToken token = getRefreshTokenById(id);
+    return RefresTokenMapper.convertRefreshTokenResponseDTO(token);
   }
 
   /**
@@ -317,8 +376,6 @@ public class RefreshTokenService {
     }
   }
 
-  // TODO: pendiente en el controller
-
   /**
    * Obtiene un refresh token de la base de datos utilizando su valor de token.
    * Este método busca un refresh token específico en la base de datos mediante su
@@ -326,13 +383,16 @@ public class RefreshTokenService {
    * lanza una IllegalArgumentException con un mensaje descriptivo.
    *
    * @param token El valor del refresh token que se desea buscar.
-   * @return El objeto RefreshToken si se encuentra en la base de datos.
+   * @return El objeto RefreshTokenResponseDTO si se encuentra en la base de
+   *         datos.
    * @throws IllegalArgumentException Si el token no es encontrado o si ocurre
    *                                  algún error durante la búsqueda.
    */
-  public RefreshToken getRefreshTokenByToken(String token) {
+  public RefreshTokenResponseDTO getRefreshTokenByToken(String token) {
     try {
-      return refreshTokenRepository.findByToken(token).get();
+      RefreshToken refreshToken = refreshTokenRepository.findByToken(token).get();
+      RefreshTokenResponseDTO responseDTO = RefresTokenMapper.convertRefreshTokenResponseDTO(refreshToken);
+      return responseDTO;
     } catch (Exception e) {
       // Registrar el error y lanzar una excepción con un mensaje
       logger.error("Refresh token no encontrado: {}", e.getMessage());
@@ -364,6 +424,34 @@ public class RefreshTokenService {
   }
 
   /**
+   * Encuentra todos los RefreshTokens cuya fecha de expiración esté entre un
+   * rango de fechas especificado, los convierte a objetos RefreshTokenResponseDTO
+   * y los devuelve.
+   * 
+   * @param startDate La fecha y hora de inicio del rango como un objeto Instant.
+   * @param endDate   La fecha y hora de finalización del rango como un objeto
+   *                  Instant.
+   * @return Una lista de objetos RefreshTokenResponseDTO que representan los
+   *         tokens que expiran dentro del rango especificado.
+   * @throws IllegalArgumentException Si ocurre algún error al intentar cargar los
+   *                                  RefreshTokens.
+   */
+  public List<RefreshTokenResponseDTO> findByExpiryDateBetween(Instant startDate, Instant endDate) {
+    try {
+      // Carga los RefreshTokens cuya fecha de expiración esté dentro del rango dado
+      List<RefreshToken> refreshTokens = refreshTokenRepository.findByExpiryDateBetween(startDate, endDate);
+      // Transforma la lista de RefreshToken a RefreshTokenResponseDTO usando el
+      // mapper
+      return refreshTokens.stream()
+          .map(RefresTokenMapper::convertRefreshTokenResponseDTO) // Usar el mapper estático
+          .collect(Collectors.toList());
+    } catch (Exception e) {
+      logger.error("Error al intentar eliminar los RefreshToken previos a una fecha: {}", e.getMessage());
+      throw new IllegalArgumentException("187, Error al cargar ResfreshTokens que vencen en el rango especificado");
+    }
+  }
+
+  /**
    * Este método obtiene todos los tokens de actualización (refresh tokens)
    * almacenados en la base de datos y los convierte a una lista de objetos DTO
    * (Data Transfer Objects) de tipo {@link RefreshTokenResponseDTO}. Se utiliza
@@ -383,7 +471,7 @@ public class RefreshTokenService {
       // Convertir la lista de RefreshToken a RefreshTokenResponseDTO utilizando el
       // mapper
       return refreshTokens.stream()
-          .map(RefresTokenMapper::convertToRefreshTokenResponseDTO) // Usar el mapper estático
+          .map(RefresTokenMapper::convertRefreshTokenResponseDTO) // Usar el mapper estático
           .collect(Collectors.toList());
     } catch (Exception e) {
       // Registrar el error y lanzar una excepción con un mensaje

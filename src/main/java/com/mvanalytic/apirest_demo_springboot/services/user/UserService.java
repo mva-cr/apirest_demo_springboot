@@ -554,6 +554,44 @@ public class UserService {
   }
 
   /**
+   * Método para obtener un usuario por su nickname. Si el usuario no existe,
+   * retorna null.
+   *
+   * @param nickname El nickname del usuario que se quiere buscar.
+   * @return Un objeto User si el usuario existe, o null si no se encuentra.
+   */
+  public User getUserByNickNameNullable(String nickname) {
+    // Intenta encontrar el usuario por su nickname
+    Optional<User> optionalUser = userRepository.findByNickname(nickname);
+
+    if (optionalUser.isPresent()) {
+      User user = optionalUser.get();
+      return user;
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Método para obtener un usuario por su correo electrónico. Si el usuario no
+   * existe, retorna null.
+   *
+   * @param email El correo electrónico del usuario que se quiere buscar.
+   * @return Un objeto User si el usuario existe, o null si no se encuentra.
+   */
+  public User getUserByEmailNullable(String email) {
+    // Intenta encontrar el usuario por su nickname
+    Optional<User> optionalUser = userRepository.findByEmail(email);
+
+    if (optionalUser.isPresent()) {
+      User user = optionalUser.get();
+      return user;
+    } else {
+      return null;
+    }
+  }
+
+  /**
    * Obtiene una lista de todos los usuarios en la base de datos.
    * 
    * @return Lista de usuarios.

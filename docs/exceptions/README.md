@@ -159,103 +159,146 @@ Spring Security se basa en la configuración de seguridad y el contexto en el qu
 
 Los códigos de error detallados se definen con base en la siguiente tabla:
 
-| Código | Detalle                                                                | Enviado por          |
-| :----- | :--------------------------------------------------------------------- | :------------------- |
-| 100    | Al menos una variable no debe ser nula                                 | Base Datos           |
-| 101    | El valor no puede ser nulo                                             | Base Datos           |
-| 102    | El usuario no existe                                                   | Base Datos           |
-| 103    | El nuevo valor no puede ser igual al valor actual                      | Base Datos           |
-| 104    | El rol asignado no existe                                              | Base Datos           |
-| 105    | El nickname ingresado ya existe                                        | Base Datos           |
-| 106    | El correo ingresado ya existe                                          | Base Datos y Backend |
-| 107    | La contraseña es nula                                                  | Base Datos           |
-| 108    | La contraseña no coincide con la registrada                            | Base Datos           |
-| 109    | La nueva contraseña es igual a la contraseña vigente                   | Base Datos y Backend |
-| 110    | Cuenta deshabilitada                                                   | Backend              |
-| 111    | El identificador no existe                                             | Backend              |
-| 112    | Las credenciales han expirado                                          | Backend              |
-| 113    | La contraseña temporal no coindice con la enviada                      | Backend              |
-| 114    | Error inesperado al buscar el usuario                                  | Backend              |
-| 115    | Error al actualizar el usuario                                         | Backend              |
-| 116    | Error al actualizar el nickname                                        | Backend              |
-| 117    | Error al actualizar el correo                                          | Backend              |
-| 118    | Error al actualizar la contraseña                                      | Backend              |
-| 119    | No puede acceder a información de otro usuario                         | Backend              |
-| 120    | El id ingresado es nulo                                                | Backend              |
-| 121    | El nombre ingresado es nulo                                            | Backend              |
-| 122    | El apellido ingresado es nulo                                          | Backend              |
-| 123    | El correo no cumple el formato definido                                | Backend              |
-| 124    | El nickname no cumple el formato definido                              | Backend              |
-| 125    | La contraseña no cumple el formato definido                            | Backend              |
-| 126    | El idioma es nulo                                                      | Backend              |
-| 127    | El status ingresado es nulo                                            | Backend              |
-| 128    | La activación ingresada es nula                                        | Backend              |
-| 129    | El nombre del rol es nulo                                              | Backend              |
-| 130    | El nombre excede los 50 caracteres                                     | Backend              |
-| 131    | El apellido excede los 50 caracteres                                   | Backend              |
-| 132    | El segundo apellido excede los 50 caracteres                           | Backend              |
-| 133    | El nombre del rol excede los 50 caracteres                             | Backend              |
-| 134    | El idioma debe ser de 2 caracteres                                     | Backend              |
-| 135    | El nombre no cumple el formato definido                                | Backend              |
-| 136    | El apellido no cumple el formato definido                              | Backend              |
-| 137    | El segundo apellido no cumple el formato definido                      | Backend              |
-| 138    | El idioma no cumple el formato definido                                | Backend              |
-| 139    | El rol no cumple el formato definido                                   | Backend              |
-| 140    | Error al enviar el correo de activación                                | Backend              |
-| 141    | Error inesperado al enviar el correo de activación                     | Backend              |
-| 142    | Error al activar cuenta                                                | Backend              |
-| 143    | No existe usuario asociado con la clave de activación aportada         | Backend              |
-| 144    | Debe proporcionar solo un identificador: correo o nickname             | Backend              |
-| 145    | No existe usuario asociado con la clave de restablecimiento aportada   | Backend              |
-| 146    | Parámetros nulos                                                       | Backend              |
-| 147    | La clave de activación ha expirado                                     | Backend              |
-| 148    | La cuenta ya ha sido activada                                          | Backend              |
-| 149    | Debe proporcionar un identificador: correo o nickname                  | Backend              |
-| 150    | No existe usuario asociado con el correo proporcionado                 | Backend              |
-| 151    | No existe usuario asociado con el nickname proporcionado               | Backend              |
-| 152    | Ya existe una solicitud de restablecimiento activa para este usuario   | Backend              |
-| 153    | La clave de restablecimiento ha expirado                               | Backend              |
-| 154    | La clave de restablecimiento no cumple el formato definido             | Backend              |
-| 155    | Error al enviar el correo de restablecimiento de contraseña            | Backend              |
-| 156    | Error inesperado al enviar el correo de restablecimiento de contraseña | Backend              |
-| 157    | Error al actualizar contraseña                                         | Backend              |
-| 158    | Error al cargar el usuario                                             | Backend              |
-| 159    | Error al cargar el tiempo de expiración                                | Backend              |
-| 160    | Error inesperado al enviar correo de aviso                             | Backend              |
-| 161    | Error contiene espacio en blanco                                       | Backend              |
-| 162    | Error correo no válido                                                 | Backend              |
-| 163    | Tipo de archivo no permitido                                           | Backend              |
-| 164    | Archivo no encontrado                                                  | Backend              |
-| 165    | Acceso no autorizado al archivo                                        | Backend              |
-| 166    | Error al intentar guardar el registro loginAttempt                     | Backend              |
-| 167    | Error al enviar el correo de intento fallido de login                  | Backend              |
-| 168    | Error inesperado al enviar el correo de intento fallido de login       | Backend              |
-| 169    | Error al cargar la url base                                            | Backend              |
-| 170    | Error al cargar la ruta de los archivos para descarga                  | Backend              |
-| 171    | Error al al formatear la fecha y hora del intento                      | Backend              |
-| 172    | Error al intentar guardar sesión del usuario                           | Backend              |
-| 173    | Error al cargar el refreshTokenDurationMs                              | Backend              |
-| 174    | Error al crear el refreshTokenDurationMs                               | Backend              |
-| 175    | Error al verificar Expiration del token                                | Backend              |
-| 176    | Error al eliminar los refresh token del id (del user)                  | Backend              |
-| 177    | Refresh token no encontrado                                            | Backend              |
-| 178    | Error al guardar el RefreshToken                                       | Backend              |
-| 179    | Error al eliminar el RefreshToken                                      | Backend              |
-| 180    | Error al verificar la expiración del refresh token                     | Backend              |
-| 181    | No existe RefreshToken del Usuario                                     | Backend              |
-| 182    | Error al intentar eliminar los RefreshToken previos a una fecha        | Backend              |
-| 183    | Error al cargar todos los refreshToken                                 | Backend              |
-| 184    | Error en el formato de la fecha y hora                                 | Backend              |
-| 185    | Error al convertir la fecha a UTC                                      | Backend              |
-| 505    | No autorizado                                                          | Backend              |
-| 501    | Permisos insuficientes                                                 | Backend              |
-| 502    | Token expirado                                                         | Backend              |
-| 503    | Token JWT nulo o inválido                                              | Backend              |
-| 504    | No se pudo configurar autenticación                                    | Backend              |
-| 505    | Error de autenticación inesperado                                      | Backend              |
-| 506    | Error en tiempo de ejecución                                           | Backend              |
-| 507    | Autenticación insuficiente                                             | Backend              |
-| 508    | Error al cargar el registro de llaves                                  | Backend              |
+| Código | Detalle                                                                  | Enviado por          |
+| :----- | :----------------------------------------------------------------------- | :------------------- |
+| 100    | Al menos una variable no debe ser nula                                   | Base Datos           |
+| 101    | El valor no puede ser nulo                                               | Base Datos           |
+| 102    | El usuario no existe                                                     | Base Datos           |
+| 103    | El nuevo valor no puede ser igual al valor actual                        | Base Datos           |
+| 104    | El rol asignado no existe                                                | Base Datos           |
+| 105    | El nickname ingresado ya existe                                          | Base Datos           |
+| 106    | El correo ingresado ya existe                                            | Base Datos y Backend |
+| 107    | La contraseña es nula                                                    | Base Datos           |
+| 108    | La contraseña no coincide con la registrada                              | Base Datos           |
+| 109    | La nueva contraseña es igual a la contraseña vigente                     | Base Datos y Backend |
+| 110    | Cuenta deshabilitada                                                     | Backend              |
+| 111    | El identificador no existe                                               | Backend              |
+| 112    | Las credenciales han expirado                                            | Backend              |
+| 113    | La contraseña temporal no coindice con la enviada                        | Backend              |
+| 114    | Error inesperado al buscar el usuario                                    | Backend              |
+| 115    | Error al actualizar el usuario                                           | Backend              |
+| 116    | Error al actualizar el nickname                                          | Backend              |
+| 117    | Error al actualizar el correo                                            | Backend              |
+| 118    | Error al actualizar la contraseña                                        | Backend              |
+| 119    | No puede acceder a información de otro usuario                           | Backend              |
+| 120    | El id ingresado es nulo                                                  | Backend              |
+| 121    | El nombre ingresado es nulo                                              | Backend              |
+| 122    | El apellido ingresado es nulo                                            | Backend              |
+| 123    | El correo no cumple el formato definido                                  | Backend              |
+| 124    | El nickname no cumple el formato definido                                | Backend              |
+| 125    | La contraseña no cumple el formato definido                              | Backend              |
+| 126    | El idioma es nulo                                                        | Backend              |
+| 127    | El status ingresado es nulo                                              | Backend              |
+| 128    | La activación ingresada es nula                                          | Backend              |
+| 129    | El nombre del rol es nulo                                                | Backend              |
+| 130    | El nombre excede los 50 caracteres                                       | Backend              |
+| 131    | El apellido excede los 50 caracteres                                     | Backend              |
+| 132    | El segundo apellido excede los 50 caracteres                             | Backend              |
+| 133    | El nombre del rol excede los 50 caracteres                               | Backend              |
+| 134    | El idioma debe ser de 2 caracteres                                       | Backend              |
+| 135    | El nombre no cumple el formato definido                                  | Backend              |
+| 136    | El apellido no cumple el formato definido                                | Backend              |
+| 137    | El segundo apellido no cumple el formato definido                        | Backend              |
+| 138    | El idioma no cumple el formato definido                                  | Backend              |
+| 139    | El rol no cumple el formato definido                                     | Backend              |
+| 140    | Error al enviar el correo de activación                                  | Backend              |
+| 141    | Error inesperado al enviar el correo de activación                       | Backend              |
+| 142    | Error al activar cuenta                                                  | Backend              |
+| 143    | No existe usuario asociado con la clave de activación aportada           | Backend              |
+| 144    | Debe proporcionar solo un identificador: correo o nickname               | Backend              |
+| 145    | No existe usuario asociado con la clave de restablecimiento aportada     | Backend              |
+| 146    | Parámetros nulos                                                         | Backend              |
+| 147    | La clave de activación ha expirado                                       | Backend              |
+| 148    | La cuenta ya ha sido activada                                            | Backend              |
+| 149    | Debe proporcionar un identificador: correo o nickname                    | Backend              |
+| 150    | No existe usuario asociado con el correo proporcionado                   | Backend              |
+| 151    | No existe usuario asociado con el nickname proporcionado                 | Backend              |
+| 152    | Ya existe una solicitud de restablecimiento activa para este usuario     | Backend              |
+| 153    | La clave de restablecimiento ha expirado                                 | Backend              |
+| 154    | La clave de restablecimiento no cumple el formato definido               | Backend              |
+| 155    | Error al enviar el correo de restablecimiento de contraseña              | Backend              |
+| 156    | Error inesperado al enviar el correo de restablecimiento de contraseña   | Backend              |
+| 157    | Error al actualizar contraseña                                           | Backend              |
+| 158    | Error al cargar el usuario                                               | Backend              |
+| 159    | Error al cargar el tiempo de expiración                                  | Backend              |
+| 160    | Error inesperado al enviar correo de aviso                               | Backend              |
+| 161    | Error contiene espacio en blanco                                         | Backend              |
+| 162    | Error correo no válido                                                   | Backend              |
+| 163    | Tipo de archivo no permitido                                             | Backend              |
+| 164    | Archivo no encontrado                                                    | Backend              |
+| 165    | Acceso no autorizado al archivo                                          | Backend              |
+| 166    | Error al intentar guardar el registro FailedLoginAttempt                 | Backend              |
+| 167    | Error al enviar el correo de intento fallido de login                    | Backend              |
+| 168    | Error inesperado al enviar el correo de intento fallido de login         | Backend              |
+| 169    | Error al cargar la url base                                              | Backend              |
+| 170    | Error al cargar la ruta de los archivos para descarga                    | Backend              |
+| 171    | Error al al formatear la fecha y hora del intento                        | Backend              |
+| 172    | Error al intentar guardar sesión del usuario                             | Backend              |
+| 173    | Error al cargar el refreshTokenDurationMs                                | Backend              |
+| 174    | Error al crear el refreshTokenDurationMs                                 | Backend              |
+| 175    | Error al verificar Expiration del token                                  | Backend              |
+| 176    | Error al eliminar los refresh token del id_user                          | Backend              |
+| 177    | Refresh token no encontrado                                              | Backend              |
+| 178    | Error al guardar el RefreshToken                                         | Backend              |
+| 179    | Error al eliminar el RefreshToken                                        | Backend              |
+| 180    | Error al verificar la expiración del refresh token                       | Backend              |
+| 181    | No existe RefreshToken del Usuario                                       | Backend              |
+| 182    | Error al intentar eliminar los RefreshToken previos a una fecha          | Backend              |
+| 183    | Error al cargar todos los refreshToken                                   | Backend              |
+| 184    | Error en el formato de la fecha y hora                                   | Backend              |
+| 185    | Error al convertir la fecha a UTC                                        | Backend              |
+| 186    | Error al eliminar los RefreshTokens                                      | Backend              |
+| 187    | Error al cargar ResfreshTokens que vencen en el rango especificado       | Backend              |
+| 188    | Error al mappear el User a AdminUserResponseDTO                          | Backend              |
+| 189    | Error al mappear el Authority a AuthorityDTO                             | Backend              |
+| 190    | Error al mappear el UserDTO a User                                       | Backend              |
+| 191    | Error al mappear el AuthorityDTO a Authority                             | Backend              |
+| 192    | Error al mappear el AdminUserResponseDTO a User                          | Backend              |
+| 193    | Error al mappear el User en UserProfileResponseDTO                       | Backend              |
+| 194    | Error al mappear el UserProfileResponseDTO a User                        | Backend              |
+| 195    | Error al mappear el User a UserRegistrationRequestDTO                    | Backend              |
+| 196    | Error al mappear el UserRegistrationRequestDTO a User                    | Backend              |
+| 197    | Error al mappear el UserRegistrationByAdminRequestDTO a User             | Backend              |
+| 198    | Error al mappear el User a JwtResponseDTO                                | Backend              |
+| 199    | Error al mappear el UserAuthorityRequestDTO a su DTO                     | Backend              |
+| 200    | Error al mappear el RefreshToken a su DTO                                | Backend              |
+| 201    | Error al mappear el FailedLoginAttempt a su DTO                          | Backend              |
+| 202    | Error al mappear el UserLoginActivity a su DTO                           | Backend              |
+| 203    | Error al crear el refreshToken del user                                  | Backend              |
+| 204    | Error al crear el refreshToken del id_user                               | Backend              |
+| 205    | Error al buscar el loginAttempt con el email                             | Backend              |
+| 206    | Error al cargar la lista de LoginAttempt                                 | Backend              |
+| 207    | Error al eliminar los loginAttempt previos a la fecha                    | Backend              |
+| 208    | Error al eliminar los FailedLoginAttempt previos a la fecha del correo   | Backend              |
+| 209    | Error al eliminar el rango de loginAttempt del idUser                    | Backend              |
+| 210    | Error al obtener lista de intentos de login                              | Backend              |
+| 211    | Error al cargar las sesiones                                             | Backend              |
+| 212    | Error al buscar la sesión por el userId y status                         | Backend              |
+| 213    | Error al buscar la sesión por el userId y rango de fechas                | Backend              |
+| 214    | Error al buscar la sesión por idAddress y estatus                        | Backend              |
+| 215    | Error al buscar la sesión por userId y página                            | Backend              |
+| 216    | Error al buscar la sesión por ipAddress y rango fechas                   | Backend              |
+| 217    | Error al buscar la sesión por useAgent y rango fechas                    | Backend              |
+| 218    | Error contar las sesiones según estatus por idUser                       | Backend              |
+| 218    | Error al borrar sesión por userId y estatus                              | Backend              |
+| 219    | Error mappear las sesiones                                               | Backend              |
+| 220    | Error al eliminar los FailedLoginAttempt previos a la fecha del nickname | Backend              |
+| 221    | Error al contar los intentos de sesión por correo                        | Backend              |
+| 222    | Error al contar los intentos de sesión por nickname                      | Backend              |
+| 223    | Error al contar los intentos de sesión por correo por rango              | Backend              |
+| 224    | Error al contar los intentos de sesión por correo por nickname           | Backend              |
+| 225    | Error al contar los intentos de sesión por ipAddress                     | Backend              |
+| 226    | Error al contar los intentos de sesión por ipAddress por rango           | Backend              |
+| 227    | Error al crear el UserLoginActivity                                      | Backend              |
+| 505    | No autorizado                                                            | Backend              |
+| 501    | Permisos insuficientes                                                   | Backend              |
+| 502    | Token expirado                                                           | Backend              |
+| 503    | Token JWT nulo o inválido                                                | Backend              |
+| 504    | No se pudo configurar autenticación                                      | Backend              |
+| 505    | Error de autenticación inesperado                                        | Backend              |
+| 506    | Error en tiempo de ejecución                                             | Backend              |
+| 507    | Autenticación insuficiente                                               | Backend              |
+| 508    | Error al cargar el registro de llaves                                    | Backend              |
 
 El mensaje estará compuesto por el código separado una coma (,) y el detalle, de forma que al `Frontend` el mesaje de error llegue como el siguiente ejemplo:
 

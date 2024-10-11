@@ -4,7 +4,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import java.time.Instant;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,8 +25,8 @@ public class JwtUtils {
   // Instancia singleton de logger
   private static final Logger logger = LoggerSingleton.getLogger(JwtUtils.class);
 
-  @Autowired
-  private AppUtility appUtility;
+  // @Autowired
+  // private AppUtility appUtility;
 
   // La clave secreta utilizada para firmar el JWT.
   @Value("${app.jwtSecret}")
@@ -169,10 +168,6 @@ public class JwtUtils {
 
     // Convierte Instant a Date
     Date expirationDate = Date.from(expiration);
-
-    // Convierte la clave secreta en una Key segura
-    System.out.println("expira " + new Date((new Date()).getTime() + appUtility.getRefreshTokenDurationMs()));
-    System.out.println("milis " + appUtility.getRefreshTokenDurationMs());
     
     return Jwts.builder()
         .setSubject(username)

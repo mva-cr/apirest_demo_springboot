@@ -1,23 +1,20 @@
 package com.mvanalytic.apirest_demo_springboot.dto.user;
+
 import java.time.Instant;
 
 /**
- * DTO que representa los detalles de una sesión de usuario,
- * diseñado para ser mostrado al administrador.
- * Facilita la auditoría de sesiones activas y pasadas con información clave
- * como la IP y el estado de la sesión.
+ * DTO que representa los detalles de una sesión de usuario fallidos y exitosos
+ * de usuarios.
  */
-public class UserSessionResponseDTO {
-
+public class UserLoginActivityResponseDTO {
   private String idSession; // ID de la sesión
   private String userEmail; // Email del usuario
-  private Instant startTime; // Inicio de la sesión
-  private Instant endTime; // Fin de la sesión, si está disponible
+  private Instant sessionTime; // Inicio de la sesión
   private String ipAddress; // Dirección IP desde donde se inició la sesión
   private String userAgent; // Agente de usuario
-  private String sessionStatus; // Estado: 'ACTIVE', 'EXPIRED', 'LOGGED_OUT'
+  private String sessionStatus; // Estado: 'ACTIVE', 'FAILED'
 
-  public UserSessionResponseDTO() {
+  public UserLoginActivityResponseDTO() {
   }
 
   public String getIdSession() {
@@ -36,20 +33,12 @@ public class UserSessionResponseDTO {
     this.userEmail = userEmail;
   }
 
-  public Instant getStartTime() {
-    return startTime;
+  public Instant getSessionTime() {
+    return sessionTime;
   }
 
-  public void setStartTime(Instant startTime) {
-    this.startTime = startTime;
-  }
-
-  public Instant getEndTime() {
-    return endTime;
-  }
-
-  public void setEndTime(Instant endTime) {
-    this.endTime = endTime;
+  public void setSessionTime(Instant sessionTime) {
+    this.sessionTime = sessionTime;
   }
 
   public String getIpAddress() {

@@ -128,4 +128,5 @@ GO
 
 Este método es útil para evitar errores durante scripts de despliegue o mantenimiento que pueden ejecutarse en entornos donde el estado actual de la base de datos puede ser desconocido. Asegura que los scripts no fallarán si el trigger ya ha sido eliminado o si nunca fue creado.
 
+
 [Retornar a la principal](../../README.md)
