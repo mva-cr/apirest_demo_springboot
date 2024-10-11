@@ -129,20 +129,6 @@ public class UserService {
     Long id = createUserAndKey(user, userKey);
     userKey.setId(id);
 
-    /**
-     * Limpiar la caché de primer nivel de Hibernate: Puedes usar EntityManager
-     * para limpiar la caché de primer nivel antes de volver a cargar el usuario.
-     */
-    // entityManager.flush();
-    /**
-     * Refrescar la entidad: Usar el método refresh de EntityManager para forzar
-     * la sincronización con la base de datos.
-     */
-    // entityManager.clear();
-
-    // UserKey newUserKey = userKeyServiceImpl.findByIdWithUser(id);
-    // System.out.println("id del user es: " + userKey.getUser().getId());
-
     if (isRoleAdmin) {
       // Enviar el correo de re-activación con clave temporal
       mailService.sendActivationAccountWithTemporaryPassword(user, userKey, passwordTemp, true);
@@ -521,7 +507,7 @@ public class UserService {
   /**
    * Obtiene un usuario por su email.
    *
-   * @param nickname El nickname del usuario a buscar.
+   * @param email El correo del usuario a buscar.
    * @return El usuario encontrado.
    */
   public User getUserByEmail(String email) {
@@ -544,12 +530,6 @@ public class UserService {
    * @param nickname El nickname del usuario a buscar.
    * @return El usuario encontrado.
    */
-  // public User getUserByNickName(String nickname) {
-  // return userRepository.findByNickname(nickname)
-  // .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con
-  // el nickname lolita: " + nickname));
-  // }
-
   public User getUserByNickName(String nickname) {
     try {
       // Intenta encontrar el usuario por su nickname
@@ -570,6 +550,44 @@ public class UserService {
     } catch (Exception e) {
       logger.error("Error inesperado al buscar usuario por nickname: {}", e.getMessage());
       throw new RuntimeException("114, Error inesperado al buscar el usuario", e);
+    }
+  }
+
+  /**
+   * Método para obtener un usuario por su nickname. Si el usuario no existe,
+   * retorna null.
+   *
+   * @param nickname El nickname del usuario que se quiere buscar.
+   * @return Un objeto User si el usuario existe, o null si no se encuentra.
+   */
+  public User getUserByNickNameNullable(String nickname) {
+    // Intenta encontrar el usuario por su nickname
+    Optional<User> optionalUser = userRepository.findByNickname(nickname);
+
+    if (optionalUser.isPresent()) {
+      User user = optionalUser.get();
+      return user;
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Método para obtener un usuario por su correo electrónico. Si el usuario no
+   * existe, retorna null.
+   *
+   * @param email El correo electrónico del usuario que se quiere buscar.
+   * @return Un objeto User si el usuario existe, o null si no se encuentra.
+   */
+  public User getUserByEmailNullable(String email) {
+    // Intenta encontrar el usuario por su nickname
+    Optional<User> optionalUser = userRepository.findByEmail(email);
+
+    if (optionalUser.isPresent()) {
+      User user = optionalUser.get();
+      return user;
+    } else {
+      return null;
     }
   }
 

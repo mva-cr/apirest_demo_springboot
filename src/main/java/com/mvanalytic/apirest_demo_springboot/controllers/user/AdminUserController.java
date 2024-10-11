@@ -105,7 +105,7 @@ public class AdminUserController {
    * @param nickname El nickname del usuario a buscar.
    * @return El usuario encontrado.
    */
-  @GetMapping("get/by-id/{id}")
+  @GetMapping("/get-by-id/{id}")
   @PreAuthorize("hasAuthority('ROLE_ADMIN')")
   public ResponseEntity<AdminUserResponseDTO> getUserById(@PathVariable Long id) {
     User user = userService.getUserById(id);
@@ -121,7 +121,7 @@ public class AdminUserController {
    * @param nickname El nickname del usuario a buscar.
    * @return El usuario encontrado.
    */
-  @GetMapping("get/by-email/{email}")
+  @GetMapping("/get-by-email/{email}")
   @PreAuthorize("hasAuthority('ROLE_ADMIN')")
   public ResponseEntity<AdminUserResponseDTO> getUserByEmail(@PathVariable String email) {
     User user = userService.getUserByEmail(email);
@@ -137,7 +137,7 @@ public class AdminUserController {
    * @param nickname El nickname del usuario a buscar.
    * @return El usuario encontrado.
    */
-  @GetMapping("get/by-nickname/{nickname}")
+  @GetMapping("/get-by-nickname/{nickname}")
   @PreAuthorize("hasAuthority('ROLE_ADMIN')")
   public ResponseEntity<AdminUserResponseDTO> getUserByNickName(@PathVariable String nickname) {
     User user = userService.getUserByNickName(nickname);
@@ -151,7 +151,7 @@ public class AdminUserController {
    * 
    * @return Lista de todos los usuarios.
    */
-  @GetMapping
+  @GetMapping("/all")
   @PreAuthorize("hasAuthority('ROLE_ADMIN')")
   public ResponseEntity<List<AdminUserResponseDTO>> getAllUsers() {
     List<User> users = userService.getAllUsers();

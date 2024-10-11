@@ -210,56 +210,84 @@ CREATE TABLE user_key
 
 GO
 
+
+-- opcion 2
 -- ===============================================================
 -- Author: Mario Martínez Lanuza
 -- Descripción:
--- Create date: 2024-09-08
--- Description: Tabla rastrea intentos de inicio de sesión fallidos y exitosos
+-- Create date: 2024-10-08
+-- Description: Tabla registra los intentos de sesión fallidos de
+-- no usuarios del sistema
 -- ===============================================================
-CREATE TABLE login_attempt
+CREATE TABLE failed_login_attempt
 (
   id_attempt BIGINT NOT NULL IDENTITY(1,1),
-  -- Referencia al usuario que intentó iniciar sesión; puede ser NULL
-  --  si el intento de inicio de sesión fue anónimo o si el usuario no fue identificado
-  -- correctamente.
-  id_user BIGINT NULL,
+  -- correo del intento
+  email NVARCHAR(254) NULL,
+  -- nickname del intento
+  nickname NVARCHAR(50) NULL,
   -- Marca de tiempo que registra cuándo se realizó el intento de inicio de sesión.
   -- Por defecto, se establece con la función getdate()
-  attempt_time DATETIME2 CONSTRAINT DF_attempt_time_login_attempt DEFAULT(GETDATE()) NOT NULL,
+  attempt_time DATETIME2 CONSTRAINT DF_attempt_time_failed_login_attempt DEFAULT(GETDATE()) NOT NULL,
   -- Dirección IP desde la cual se realizó el intento de inicio de sesión.
   ip_address NVARCHAR(50) NOT NULL,
   -- Información del agente de usuario (por ejemplo, el navegador o 
   -- la aplicación utilizada para iniciar sesión).
-  user_agent NVARCHAR(255) NULL,
-  -- Resultado del intento de inicio de sesión, que puede ser 'SUCCESS' (éxito) o 'FAILED' (fallido).
-  attempt_result NVARCHAR(10) NOT NULL,
-  -- 'SUCCESS', 'FAILED'
-  CONSTRAINT PK_id_attempt_login_attempt PRIMARY KEY CLUSTERED (id_attempt),
-  CONSTRAINT FK_id_user_login_attempt FOREIGN KEY (id_user) REFERENCES user_mva(id)
+  user_agent NVARCHAR(512) NULL,
+  CONSTRAINT PK_id_attempt_failed_login_attempt PRIMARY KEY CLUSTERED (id_attempt)
 );
-
-GO
-
 
 -- ===============================================================
 -- Author: Mario Martínez Lanuza
--- Create date: 2024-09-08
--- Description: Tabla que controla y audita sesiones activas y pasadas
+-- Create date: 2024-10-08
+-- Description: Tabla que registra los intentos de sesión de usuarios
+-- del sistema exitosos ('ACTIVE') y fallidos ('FAILED)
 -- ===============================================================
-CREATE TABLE user_session
+CREATE TABLE user_login_activity
 (
   id_session NVARCHAR(128) NOT NULL,
+  -- Referencia al usuario de la sesión
   id_user BIGINT NOT NULL,
-  start_time DATETIME2 CONSTRAINT DF_start_time_user_sesion DEFAULT(GETDATE()) NOT NULL,
-  end_time DATETIME2,
+  -- Marca de tiempo de inicio de la sesión
+  session_time DATETIME2 CONSTRAINT DF_session_time_user_login_activity DEFAULT(GETDATE()) NOT NULL,
+  -- Dirección IP desde la cual se inició la sesión
   ip_address NVARCHAR(50) NOT NULL,
-  user_agent NVARCHAR(255),
+  -- Información del agente de usuario
+  user_agent NVARCHAR(512),
+  -- Estado de la sesión ('ACTIVE', 'FAILED',)
   session_status NVARCHAR(50) NOT NULL,
-  -- 'ACTIVE', 'EXPIRED', 'LOGGED_OUT'
-  CONSTRAINT PK_id_session_user_session PRIMARY KEY CLUSTERED (id_session),
-  CONSTRAINT FK_id_user_user_session FOREIGN KEY (id_user) REFERENCES user_mva(id)
+  CONSTRAINT PK_id_session_user_login_activity PRIMARY KEY CLUSTERED (id_session),
+  CONSTRAINT FK_id_user_user_login_activity FOREIGN KEY (id_user) REFERENCES user_mva(id)
 );
+-- Índices adicionales para mejorar el rendimiento de las consultas
+CREATE INDEX idx_id_user_user_login_activity ON user_login_activity(id_user);
+CREATE INDEX idx_session_status_user_login_activity ON user_login_activity(session_status);
+
  GO
+
+-- ===============================================================
+-- Tabla para almacenar los Refresh Tokens
+-- Author: Mario Martínez Lanuza
+-- Create date: 2024-10-01
+-- Description: Tabla que almacena los tokens de refresco generados para los usuarios
+-- ===============================================================
+CREATE TABLE refresh_token
+(
+  id_token BIGINT NOT NULL IDENTITY(1,1),
+  -- ID único para el refresh token
+  token NVARCHAR(255) NOT NULL,
+  -- El valor del token de refresco
+  id_user BIGINT NOT NULL,
+  -- Relación con el usuario (ID del usuario)
+  expiry_date DATETIME2 NOT NULL,
+  -- Fecha de expiración del token
+  CONSTRAINT PK_id_token_refresh_token PRIMARY KEY CLUSTERED (id_token),
+  -- Clave primaria
+  -- Clave foránea que hace referencia a la tabla user_mva
+  CONSTRAINT FK_user_id_refresh_token FOREIGN KEY (id_user) REFERENCES user_mva(id) ON DELETE CASCADE
+);
+
+
 
 -- ===============================================================
 -- Author: Mario Martínez Lanuza
@@ -1406,3 +1434,68 @@ BEGIN
 END;
 GO
 
+-- ===============================================================
+-- Author: Mario Martínez Lanuza
+-- Create date: 2024-10-1
+-- Description: Procedimiento para actualizar eliminar de la tabla
+-- refresh_token el token del idUser si existe, insertar un nuevo
+-- registro en esta tabla, e insertar en la tabla user_login_activity
+-- un login exitoso. Todo se trata como una transacción atómica
+-- ===============================================================
+IF EXISTS (SELECT *
+FROM sys.objects
+WHERE object_id = OBJECT_ID(N'[dbo].[sp_register_successful_login]') AND type IN (N'P', N'PC'))
+BEGIN
+  DROP PROCEDURE [dbo].[sp_register_successful_login];
+END;
+GO
+
+CREATE PROCEDURE sp_register_successful_login
+@userId BIGINT,
+@newToken NVARCHAR(255),
+@expiryDate DATETIME2,
+@ipAddress NVARCHAR(50),
+@userAgent NVARCHAR(512),
+@idSession NVARCHAR(128),
+@sessionTime DATETIME2,
+@sessionStatus NVARCHAR(50)
+AS
+BEGIN
+  SET NOCOUNT ON;
+
+  -- ===============================================================
+  -- Validaciones iniciales de los parámetros
+  -- ===============================================================
+  IF @userId IS NULL OR @newToken IS NULL OR @expiryDate IS NULL OR @ipAddress IS NULL
+  OR @userAgent IS NULL OR @idSession IS NULL OR @sessionTime IS NULL OR @sessionStatus IS NULL
+  BEGIN
+    RAISERROR('146, Parámetros nulos', 16, 1);
+    RETURN;
+  END
+
+  BEGIN TRY
+      BEGIN TRANSACTION;
+
+      -- Eliminar el refreshToken antiguo
+      DELETE FROM refresh_token WHERE id_user = @userId;
+
+      -- Insertar el nuevo refreshToken
+      INSERT INTO refresh_token (token, id_user, expiry_date)
+      VALUES (@newToken, @userId, @expiryDate);
+
+      -- Registrar la sesión del usuario
+      INSERT INTO user_login_activity (id_session, id_user, session_time, ip_address, user_agent, session_status)
+      VALUES (@idSession, @userId, @sessionTime , @ipAddress, @userAgent, @sessionStatus);
+
+      -- Confirmar la transacción
+      COMMIT;
+  END TRY
+  BEGIN CATCH
+      -- Si ocurre un error, realizar un rollback
+    ROLLBACK TRANSACTION;
+
+    -- Capturar y lanzar el mensaje de error
+    DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+    RAISERROR(@ErrorMessage, 16, 1);
+  END CATCH
+END;

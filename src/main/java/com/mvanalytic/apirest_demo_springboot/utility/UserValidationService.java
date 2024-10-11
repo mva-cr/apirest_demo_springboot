@@ -524,7 +524,7 @@ public class UserValidationService {
    * @return true si el nickname cumple con el formato, la longitud y no contiene
    *         espacios; de lo contrario, false.
    */
-  private boolean isValidNickname(String nickname, int minLength, int maxLength) {
+  public boolean isValidNickname(String nickname, int minLength, int maxLength) {
     // Expresión regular que verifica el formato del nickname
     String regex = "^[_.@A-Za-z0-9-]*$";
 

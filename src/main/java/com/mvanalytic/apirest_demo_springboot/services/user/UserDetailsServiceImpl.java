@@ -59,14 +59,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
    */
 
   public UserDetails loadUser(String identifier) throws UsernameNotFoundException {
-    // try {
-    // Busca el usuario en la base de datos por su nickname
-    // Optional<User> optionalUser = userRepository.findByNickname(nickname);
-
-    // // Si no se encuentra el usuario, lanza una excepción
-    // if (optionalUser.isEmpty()) {
-    // throw new UsernameNotFoundException("El nickname no existe.");
-    // }
     User user;
 
     if (identifier.contains("@")) {
@@ -82,25 +74,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
       throw new DisabledException("110, Cuenta deshabilitada");
     }
 
-    // Convierte el stream a un array de GrantedAuthority antes de pasarlo a
-    // authorities()
-    // UserBuilder builder =
-    // org.springframework.security.core.userdetails.User.withUsername(nickname);
-    // builder.password(user.getPassword());
-
     // Convierte las autoridades del usuario a una lista de GrantedAuthority
     List<GrantedAuthority> authoritiesList = user.getAuthorities().stream()
         // Asegura que authority es del tipo correcto
         // Convierte cada Authority a GrantedAuthority
         .map(authority -> new SimpleGrantedAuthority(authority.getAuthority()))
         .collect(Collectors.toList());
-
-    // Devuelve una instancia de UserDetails utilizando la implementación de Spring
-    // Security
-
-    // builder.authorities(authoritiesList);
-    // Crea una instancia de UserDetails utilizando la implementación de Spring
-    // Security
     /**
      * Carga el nombre, el password cifrado, si está activo (true) de lo contrario no lo autentica, si su status es true
      * de lo contrario no lo autentica, y agrega los roles o authorities

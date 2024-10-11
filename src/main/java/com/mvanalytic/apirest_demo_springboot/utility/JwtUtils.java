@@ -3,10 +3,13 @@ package com.mvanalytic.apirest_demo_springboot.utility;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import java.time.Instant;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import java.util.List;
+import com.mvanalytic.apirest_demo_springboot.domain.user.User;
 import java.security.Key;
 import java.util.Date;
 import java.util.stream.Collectors;
@@ -21,6 +24,9 @@ public class JwtUtils {
 
   // Instancia singleton de logger
   private static final Logger logger = LoggerSingleton.getLogger(JwtUtils.class);
+
+  // @Autowired
+  // private AppUtility appUtility;
 
   // La clave secreta utilizada para firmar el JWT.
   @Value("${app.jwtSecret}")
@@ -49,7 +55,6 @@ public class JwtUtils {
   public String generateJwtToken(Authentication authentication) {
     UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
 
-
     // Agrega las autoridades del usuario como un "claim" en el token
     String roles = userPrincipal.getAuthorities().stream()
         // Convierte cada GrantedAuthority a su representación de cadena (nombre del
@@ -64,6 +69,33 @@ public class JwtUtils {
         .setSubject((userPrincipal.getUsername()))
         // Añade los roles del usuario como un "claim"
         .claim("roles", roles)
+        // Establece la fecha de emisión del token
+        .setIssuedAt(new Date())
+        // Establece la fecha de expiración del token
+        .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+        // Firma el token con la clave secreta usando el algoritmo HS512
+        .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+        // Genera el token como una cadena compacta
+        .compact();
+
+    return token;
+  }
+
+  public String generateJwtTokenFromUsername(User user) {
+    // Obtener los roles del usuario desde la base de datos
+    List<String> roles = user.getAuthoritySet().stream()
+        .map(authority -> authority.getName()) // Obtener el nombre del rol
+        .collect(Collectors.toList());
+
+    // Junta todos los roles en una cadena separada por comas
+    String rolesClaim = String.join(",", roles);
+
+    // Construye y devuelve el token JWT
+    String token = Jwts.builder()
+        // Establece el nombre de usuario como el "subject" del token
+        .setSubject((user.getNickname()))
+        // Añade los roles del usuario como un "claim"
+        .claim("roles", rolesClaim)
         // Establece la fecha de emisión del token
         .setIssuedAt(new Date())
         // Establece la fecha de expiración del token
@@ -131,4 +163,18 @@ public class JwtUtils {
         .getBody()
         .get("roles", String.class); // Extrae los roles del token
   }
+
+  public String generateRefreshToken(String username, Instant expiration) {
+
+    // Convierte Instant a Date
+    Date expirationDate = Date.from(expiration);
+    
+    return Jwts.builder()
+        .setSubject(username)
+        .setIssuedAt(new Date())
+        .setExpiration(expirationDate)
+        .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+        .compact();
+  }
+
 }

@@ -12,11 +12,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import com.mvanalytic.apirest_demo_springboot.services.user.UserDetailsServiceImpl;
 import com.mvanalytic.apirest_demo_springboot.utility.JwtUtils;
 import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Aplica en el reenvío de activación para un usuario por parte de ROLE_ADMIN -->
+<!-- Aplica en el reenvío de de correo por inicio de sesión -->
 <html xmlns:th="http://www.thymeleaf.org" lang="${#locale.language}">
   <head>
     <meta charset="UTF-8" />
@@ -76,20 +76,16 @@
       font-weight: normal;
       border: none; /* Eliminar bordes */
     }
-
     td, tr {
       border: none; /* Eliminar bordes */
     }
-
     /* Ajuste para la segunda columna */
-    tbody th:nth-child(2) {
+ 
+    tbody th:first-child {
       white-space: nowrap; /* Para que el texto no se divida en varias líneas */
       margin-right: 10px; /* Margen derecho */
       width: 1%; /* Ajusta la columna al contenido más pequeño posible */
       padding-right: 10px; /* Asegura que el margen se vea correctamente */
-    }
-    tbody th:first-child {
-      width: 30px; /* Para los bullets */
     }
 
     @media screen and (max-width: 600px) {
@@ -123,102 +119,70 @@
       </div>
 
       <div class="content">
-        <h1 th:text="#{email.admin.activation.greeting(${adminFullName})}">
-          Hola, {nombre completo}
+        <h1 th:text="#{email.successful.login.greeting(${fullName})}">
+          Estimado, {nombre completo}
         </h1>
 
         <p>
-          <span th:text="#{email.admin.activation.body}">
-            Nos complace informarle que un nuevo usuario ha activado su cuenta en la aplicación
-          </span>
           <strong th:text="#{email.company.name}"  class="company">
             MV Analytic
           </strong>
-          <span th:text="#{email.admin.activation.body2}">
-            A continuación, le proporcionamos los detalles del nuevo usuario registrado:
+          <span th:text="#{email.successful.login.body1}">
+            le informa que ha iniciado una sesión en la plataforma.
           </span>
         </p>
 
         <table>
           <tbody>
             <tr>
-              <th>●</th>
-              <th th:text="#{email.admin.activation.userFullName}">
-                Nombre completo:
+              <th th:text="#{email.successful.login.body2}">
+                Fecha y hora:
               </th>
-              <th th:text="${userFullName}">
-                { nombre completo }
-              </th>
-            </tr>
-            <tr>
-              <th>●</th>
-              <th th:text="#{email.admin.activation.userEmail}">
-                Correo electrónico:
-              </th>
-              <th th:text="${userMail}">
-                { correo }
+              <th>
+              <span style="font-weight: bold"
+              th:text="${date}"> {fecha} </span>
+                <span th:text="#{timezone.central.america}">(Hora de América Central) </span>
               </th>
             </tr>
             <tr>
-              <th>●</th>
-              <th th:text="#{email.admin.activation.userNickname}">
-                nickname
+              <th th:text="#{email.successful.login.body3}">
+                Direccion
               </th>
-              <th th:text="${userNickname}">
-                { nickname }
+              <th 
+              style="font-weight: bold"
+              th:text="${ipAddress}">
+                { ip }
+              </th>
+            </tr>
+            <tr>
+              <th th:text="#{email.successful.login.body4}">
+              Plataforma:
+              </th>
+              <th 
+              style="font-weight: bold"
+              th:text="${userAgent}">
+                {plataforma}
               </th>
             </tr>
           </tbody>
         </table>
 
-        <p th:text="#{email.admin.activation.reminder}"
-        style="text-decoration-line: underline; text-decoration-color: #002A54; font-weight: bold; font-style: italic; color: #002A54;">
-          Le recordamos verificar el contrato del usuario y proceder con la asignación de los roles correspondientes según su perfil y necesidades dentro de la plataforma.
-        </p>
-
-        <p th:text="#{email.admin.assignRole.text}">
-          Para asignar el rol de usuario, por favor haz clic en el siguiente enlace o copia y pega la URL en tu navegador:
-        </p>
-        <!-- corresponde a @PatchMapping("/update/role") -->
-        <a
-          th:href="@{|${baseUrl}/api/admin/users/update/role|}"
-          th:text="#{button.activation.text}"
-          class="button"
-          style="text-decoration: none !important"
-        >
-          Enlace
-        </a>
-
-        <p th:text="#{email.activation.text3}">
-          Si el enlace no funciona, por favor copia y pega la siguiente URL en
-          tu navegador.
-        </p>
-
-        <!-- <div class="button"> -->
-          <a class="button"
-            th:text="@{|${baseUrl}/api/admin/users/update/role|}"
-            style="text-decoration: none !important"
-          >
-            Enlace
-          </a>
-        <!-- </div> -->
-
         <p>
-          <span th:text="#{email.admin.activation.thanks}">
-            Gracias por su atención y por su continuo liderazgo en
+          <span th:text="#{email.successful.login.body5}">
+            Si usted no inició esta sesión y desea cambiar su contraseña, por favor ingrese a la plataforma de
           </span>
-          <strong th:text="#{email.company.name}" class="company"
-            >MV Analytic
-          </strong>
+        <strong th:text="#{email.company.name}" class="company"> MV Analytic </strong>
+        <span th:text="#{email.successful.login.body6}">y utilice la opción "Cambiar Contraseña" o "Olvidó su contraseña". También puede contactarnos para obtener asistencia. </span>
+        </p>
+
+        <p th:text="#{email.successful.login.thanks}">
+          Muchas gracias por utilizar nuestros servicios.
         </p>
 
       <div class="footer">
-        <p th:text="#{email.regards}">Saludos cordiales,</p>
         <p>
           <span th:utext="#{email.signature}">El equipo de soporte de </span>
-          <strong th:text="#{email.company.name}" class="company"
-            >MV Analytic
-          </strong>
+          <strong th:text="#{email.company.name}" class="company"> MV Analytic </strong>
         </p>
       </div>
     </div>
