@@ -10,17 +10,21 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.mvanalytic.apirest_demo_springboot.domain.user.User;
+import com.mvanalytic.apirest_demo_springboot.dto.user.JwtResponseDTO;
 import com.mvanalytic.apirest_demo_springboot.dto.user.UserEmailRequestDTO;
 import com.mvanalytic.apirest_demo_springboot.dto.user.UserNicknameRequestDTO;
 import com.mvanalytic.apirest_demo_springboot.dto.user.UserPasswordRequestDTO;
 import com.mvanalytic.apirest_demo_springboot.dto.user.UserProfileResponseDTO;
 import com.mvanalytic.apirest_demo_springboot.dto.user.UserProfileRequestDTO;
 import com.mvanalytic.apirest_demo_springboot.mapper.user.UserMapper;
+import com.mvanalytic.apirest_demo_springboot.services.user.RefreshTokenService;
 import com.mvanalytic.apirest_demo_springboot.services.user.UserService;
 import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
 import com.mvanalytic.apirest_demo_springboot.utility.UserValidationService;
 
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**
@@ -40,6 +44,9 @@ public class UserController {
 
   @Autowired
   private UserService userService;
+
+  @Autowired
+  private RefreshTokenService refreshTokenService;
 
   private void validateUserAccess(Long id) {
     // Obtener el usuario autenticado
@@ -166,4 +173,23 @@ public class UserController {
     return ResponseEntity.ok("El password se ha cambiado satisfactoriamente");
   }
 
+  /**
+   * Endpoint que permite a un usuario obtener un nuevo token JWT utilizando su
+   * refresh token. Este método recibe el ID del usuario, busca el refresh token
+   * asociado al usuario, verifica su validez y genera un nuevo token JWT junto
+   * con un nuevo refresh token. Si el refresh token ha expirado o no es válido,
+   * se maneja la excepción en el servicio correspondiente.
+   *
+   * @param id_user El ID del usuario que solicita un nuevo token.
+   * @return ResponseEntity con el nuevo JWT y el nuevo refresh token en el cuerpo
+   *         de la respuesta.
+   */
+  @PostMapping("/refresh-token/{id_user}")
+  public ResponseEntity<JwtResponseDTO> refreshToken(
+      @PathVariable Long id_user) {
+
+    JwtResponseDTO jwtResponseDTO = refreshTokenService.recreateRefreshTokenByIdUser(id_user);
+
+    return ResponseEntity.ok(jwtResponseDTO);
+  }
 }

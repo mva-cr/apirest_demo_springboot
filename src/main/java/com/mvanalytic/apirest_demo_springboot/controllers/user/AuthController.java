@@ -10,11 +10,9 @@ import com.mvanalytic.apirest_demo_springboot.dto.user.LoginRequestDTO;
 import com.mvanalytic.apirest_demo_springboot.dto.user.UserRegistrationRequestDTO;
 import com.mvanalytic.apirest_demo_springboot.mapper.user.UserMapper;
 import com.mvanalytic.apirest_demo_springboot.services.user.AuthService;
-import com.mvanalytic.apirest_demo_springboot.services.user.RefreshTokenService;
 import com.mvanalytic.apirest_demo_springboot.services.user.UserService;
 import com.mvanalytic.apirest_demo_springboot.utility.UserValidationService;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -30,9 +28,6 @@ public class AuthController {
 
   @Autowired
   private UserValidationService userValidationService;
-
-  @Autowired
-  private RefreshTokenService refreshTokenService;
 
   // @Autowired
   // private UserKeyServiceImpl userKeyServiceImpl;
@@ -107,26 +102,6 @@ public class AuthController {
         loginRequest.getPassword(),
         request);
     return ResponseEntity.ok(jwtResponse);
-  }
-
-  /**
-   * Endpoint que permite a un usuario obtener un nuevo token JWT utilizando su
-   * refresh token. Este método recibe el ID del usuario, busca el refresh token
-   * asociado al usuario, verifica su validez y genera un nuevo token JWT junto
-   * con un nuevo refresh token. Si el refresh token ha expirado o no es válido,
-   * se maneja la excepción en el servicio correspondiente.
-   *
-   * @param id_user El ID del usuario que solicita un nuevo token.
-   * @return ResponseEntity con el nuevo JWT y el nuevo refresh token en el cuerpo
-   *         de la respuesta.
-   */
-  @PostMapping("/refresh-token/{id_user}")
-  public ResponseEntity<JwtResponseDTO> refreshToken(
-      @PathVariable Long id_user) {
-
-    JwtResponseDTO jwtResponseDTO = refreshTokenService.recreateRefreshTokenByIdUser(id_user);
-
-    return ResponseEntity.ok(jwtResponseDTO);
   }
 
 }

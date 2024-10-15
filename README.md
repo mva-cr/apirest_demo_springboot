@@ -2,7 +2,11 @@
 
 Esta proyecto contiene los elementos necesarios para la construcción de una [`ARIRest`](./docs/api/README.md).
 
-La conexión a una única base de datos, la base de datos soporta que un usuario tenga más de un `Role` pero por reglas de negocio en este proyecto solo se permite un rol, de forma que por código en el backend se deshabilita esta posibilidad. Se implementa el `RefresToken` como medida alternativa para el manejo de los tiempos en la sesiones de los usuarios ya que se utiliza `JWT (Jason Web Token)` que es `stateless`, se agregan tablas de auditoría de cambios en las tablas de usuario así como el control de sesiones por usuario e intentos de login de no usuarios.
+Se implemtó la conexión a dos única base de datos:
+
+La primera corresponde a la base de datos soporta los usuarios clientes de la aplicación, si bien la base soporta más de un `Role` por reglas de negocio en este proyecto solo se permite un rol, de forma que por código en el backend se deshabilita esta posibilidad. Se implementa el `RefresToken` como medida alternativa para el manejo de los tiempos en la sesiones de los usuarios ya que se utiliza `JWT (Jason Web Token)` que es `stateless`, se agregan tablas de auditoría de cambios en las tablas de usuario así como el control de sesiones por usuario e intentos de login de no usuarios.
+
+La segunda corresponde a la base de datos del negocio propiamente, llamada en esta aplicación `business` y el nombre de la base es `trade`, de esta la implementación es mínima, y su objetivo es unicamente mostrar la conección a ambas bases.
 
 Está implementada con las siguientes versiones:
 
@@ -49,7 +53,7 @@ src/main/java/com/mvanalitic/sugef_test_springboot_b
 │
 ├── controller
 │   ├── busines/
-│   │   └── TODO:                                       # TODO:
+│   │   └── ClientTypeController.java                   # endpoint para gestionar un tipo de cliente
 │   └── files/
 │   │   └── FileController.java                         # endpoint para administrar la descarga de archivos
 │   └── user/
@@ -63,7 +67,12 @@ src/main/java/com/mvanalitic/sugef_test_springboot_b
 │
 ├── domain
 │   ├── busines/
-│   │   ├── TODO:                                       # TODO:
+│   │   ├── Client.java:                                # Representa una entidad del negocio:
+│   │   ├── ClientType.java:                            # Representa una entidad del negocio:
+│   │   ├── Country.java:                               # Representa una entidad del negocio:
+│   │   ├── Message.java:                               # Representa una entidad del negocio:
+│   │   ├── MessageType.java:                           # Representa una entidad del negocio:
+│   │   └── Subscription.java:                          # Representa una entidad del negocio:
 │   └── user/
 │       ├── Authority.java                              # Representa la autoridad o roles en el sistema
 │       ├── FailedLoginAttempt.java                     # Representa los intentos de sesión fallidos de no usuarios
@@ -120,7 +129,12 @@ src/main/java/com/mvanalitic/sugef_test_springboot_b
 │
 ├── repositories
 │   ├── busines/
-│   │   ├── TODO:                               # TODO:
+│   │   ├── ClientRepository.java:              # Interfaz de la entidad de negocio
+│   │   ├── ClientTypeRepository.java:          # Interfaz de la entidad de negocio
+│   │   ├── CountryRepository.java:             # Interfaz de la entidad de negocio
+│   │   ├── MessageRepository.java:             # Interfaz de la entidad de negocio
+│   │   ├── MessageTypeRepository.java:         # Interfaz de la entidad de negocio
+│   │   └── SubscriptionRepository.java:        # Interfaz de la entidad de negocio
 │   └── user/
 │       ├── FailedLoginAttemptRepository.java   # Interfaz de la entidad FailedLoginAttempt
 │       ├── RefreshTokenRepository.java         # Interfaz de la entidad RefreshToken
@@ -131,6 +145,9 @@ src/main/java/com/mvanalitic/sugef_test_springboot_b
 │
 └── security/
 │   ├── config/                                 # Configuración general de seguridad
+│   │   ├── datasource.java                     # Clase de configuración principal
+│   │   │  ├── BusinessDataSourceConfig         # Configuaración del DataSource customer
+│   │   │  └── CustomerDataSourceConfig         # Configuaración del DataSource User
 │   │   └── SecurityConfig.java                 # Clase de configuración principal
 │   ├── handlers/ (opcional)                    # Manejadores de excepciones de seguridad
 │   │   ├── AuthEntryPointJwt.java              # Clase para manejar errores de autenticación
@@ -141,7 +158,7 @@ src/main/java/com/mvanalitic/sugef_test_springboot_b
 │
 ├── services
 │   ├── busines/
-│   │   ├── TODO:                               # TODO:
+│   │   ├── ClientTypeService.java              # Implementación de la interfaz del negocio
 │   ├── files/
 │   │   ├── FileService.java                    # Interfaz para el servicio de manejo de archivos
 │       └── FileServiceImpl.java                # Servicio que implementa la interfaz FileService
