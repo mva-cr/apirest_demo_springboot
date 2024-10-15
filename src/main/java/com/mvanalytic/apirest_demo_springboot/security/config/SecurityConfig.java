@@ -78,7 +78,7 @@ public class SecurityConfig {
             // Solo usuarios con ROLE_ADMIN pueden acceder a /admin/**
             .requestMatchers(("/api/admin/**")).hasAnyAuthority("ROLE_ADMIN")
             // Solo usuarios con ROLE_USER pueden acceder a /user/**
-            .requestMatchers("/api/users/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
+            .requestMatchers("/api/users/**", "/api/user-bussiness/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
             // Requerir autenticación para todas las demás solicitudes
             .anyRequest().authenticated())
         // Filtro JWT antes del filtro de autenticación

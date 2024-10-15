@@ -2,7 +2,185 @@
 
 [Retornar a la principal](../../README.md)
 
-## Lógica de negocio implementada en la base de datos
+## Implementación de dos bases de datos
+
+Este proyecto implementa dos bases de datos para mantener separada la lógica de los usuarios que se conectan a la aplicación y la otra para la lógica de negocio que se está proporcionando, estas bases en este ejemplo se llaman:
+
+1. customer que contiene a los usuarios clientes de la aplicación
+2. trade, contiene lo lógica del negocio que se ofrece a los clientes
+
+Ambas bases se generaron en `SQL Server` usando puertos diferente, simulando que se pueden ubicar en diferentes fuentes, una usa el `port: 1433` y la otra el `port 1435`
+
+para esto es necesario agregar, en el caso de este proyecto que utiliza archivos `.properties` lo siguiente:
+
+```
+# Configuración de la base de datos de producción
+spring.datasource.customer.jdbc-url=jdbc:sqlserver://localhost:1435;databaseName=customer;encrypt=true;trustServerCertificate=true
+spring.datasource.customer.username=${DB_USERNAME}
+spring.datasource.customer.password=${DB_PASSWORD}
+spring.datasource.customer.driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver
+spring.jpa.customer.hibernate.dialect=org.hibernate.dialect.SQLServer2012Dialect
+# Configuración JPA para la base de datos customer
+# y asegurar que Hibernate respete la configuración específica
+spring.jpa.customer.hibernate.ddl-auto=validate
+
+
+# Base de datos 2 (business)
+spring.datasource.business.jdbc-url=jdbc:sqlserver://localhost:1433;databaseName=trade;encrypt=true;trustServerCertificate=true
+spring.datasource.business.username=${DB_USERNAME2}
+spring.datasource.business.password=${DB_PASSWORD2}
+spring.datasource.business.driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver
+spring.jpa.business.hibernate.dialect=org.hibernate.dialect.SQLServer2012Dialect
+
+# Configuración JPA para la base de datos trade
+# y asegurar que Hibernate respete la configuración específica
+spring.jpa.business.hibernate.ddl-auto=validate
+```
+
+En la ruta `com.mvanalytic.apirest_demo_springboot.security.config.datasource` se crearon los archivos de configuración, en el caso de la base de negocio:
+
+```
+
+package com.mvanalytic.apirest_demo_springboot.security.config.datasource;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import jakarta.persistence.EntityManagerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.transaction.PlatformTransactionManager;
+import javax.sql.DataSource;
+
+@Configuration
+@EnableTransactionManagement
+@EnableJpaRepositories(basePackages = "com.mvanalytic.apirest_demo_springboot.repositories.business", entityManagerFactoryRef = "businessEntityManagerFactory", transactionManagerRef = "businessTransactionManager")
+public class BusinessDataSourceConfig {
+
+  @Bean(name = "businessDataSource")
+  @ConfigurationProperties(prefix = "spring.datasource.business")
+  public DataSource businessDataSource() {
+    return DataSourceBuilder.create()
+        .type(com.zaxxer.hikari.HikariDataSource.class)
+        .build();
+  }
+
+  @Bean(name = "businessEntityManagerFactory")
+  public LocalContainerEntityManagerFactoryBean businessEntityManagerFactory(
+      EntityManagerFactoryBuilder builder,
+      @Qualifier("businessDataSource") DataSource dataSource) {
+    return builder
+        .dataSource(dataSource)
+        .packages("com.mvanalytic.apirest_demo_springboot.domain.business")
+        .persistenceUnit("business")
+        .build(); // No es necesario agregar el dialecto aquí
+  }
+
+  @Bean(name = "businessTransactionManager")
+  public PlatformTransactionManager businessTransactionManager(
+      @Qualifier("businessEntityManagerFactory") LocalContainerEntityManagerFactoryBean businessEntityManagerFactory) {
+
+    EntityManagerFactory entityManagerFactory = businessEntityManagerFactory.getObject();
+    if (entityManagerFactory == null) {
+      throw new IllegalStateException("Business EntityManagerFactory is null");
+    }
+
+    return new JpaTransactionManager(entityManagerFactory);
+  }
+}
+```
+
+Y para la base de usuarios de la applicación:
+
+```
+
+package com.mvanalytic.apirest_demo_springboot.security.config.datasource;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+import jakarta.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
+
+@Configuration
+@EnableJpaRepositories(basePackages = "com.mvanalytic.apirest_demo_springboot.repositories.user", entityManagerFactoryRef = "customerEntityManagerFactory", transactionManagerRef = "customerTransactionManager")
+public class CustomerDataSourceConfig {
+
+  @Primary
+  @Bean(name = "customerDataSource")
+  @ConfigurationProperties(prefix = "spring.datasource.customer")
+  public DataSource customerDataSource() {
+    return DataSourceBuilder.create()
+        .type(com.zaxxer.hikari.HikariDataSource.class) // Asegura que HikariCP es el pool de conexiones
+        .build();
+  }
+
+  @Primary
+  @Bean(name = "customerEntityManagerFactory")
+  public LocalContainerEntityManagerFactoryBean customerEntityManagerFactory(
+      EntityManagerFactoryBuilder builder,
+      @Qualifier("customerDataSource") DataSource dataSource) {
+    return builder
+        .dataSource(dataSource)
+        .packages("com.mvanalytic.apirest_demo_springboot.domain.user") // Cambia a tu paquete correcto
+        .persistenceUnit("customer")
+        .build(); // No es necesario agregar el dialecto aquí
+  }
+
+  @Primary
+  @Bean(name = "customerTransactionManager")
+  public PlatformTransactionManager customerTransactionManager(
+      @Qualifier("customerEntityManagerFactory") LocalContainerEntityManagerFactoryBean customerEntityManagerFactory) {
+    EntityManagerFactory entityManagerFactory = customerEntityManagerFactory.getObject();
+    if (entityManagerFactory == null) {
+      throw new IllegalStateException("Customer EntityManagerFactory is null");
+    }
+
+    return new JpaTransactionManager(entityManagerFactory);
+  }
+
+}
+```
+
+**Nota**: Los Entities deben estar creados en `filterChain` de la clase `SecurityConfig`
+
+Adicionalmente se agrega las rutas permitidas en el, ej.
+
+```
+.requestMatchers("/api/users/**", "/api/user-bussiness/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
+```
+
+y la ruta del controller es:
+
+```
+@RequestMapping("/api/user-bussiness/client-type")
+```
+
+Para efectos de prueba si bien se implmentaron todas las `entities`, los `repositories` solo se implmentó un `service` para hacer la prueba y en este falta de implmentar los DTO's los mensajes de error y lo demás.
+
+Finalmente, en el componente de arranque se agregó
+
+```
+// asegura que Spring escanee todos los componentes dentro del paquete
+// com.mvanalytic.apirest_demo_springboot y sus subpaquetes, incluidos los
+// repositorios.
+@ComponentScan(basePackages = { "com.mvanalytic.apirest_demo_springboot" })
+```
+
+## Lógica de negocio implementada en la base de datos de los usuarios
 
 ### Asignación del role
 
@@ -127,6 +305,5 @@ GO
 - `DROP TRIGGER`: Comando SQL que elimina el trigger especificado.
 
 Este método es útil para evitar errores durante scripts de despliegue o mantenimiento que pueden ejecutarse en entornos donde el estado actual de la base de datos puede ser desconocido. Asegura que los scripts no fallarán si el trigger ya ha sido eliminado o si nunca fue creado.
-
 
 [Retornar a la principal](../../README.md)
