@@ -2,7 +2,7 @@
 
 Esta proyecto contiene los elementos necesarios para la construcción de una [`ARIRest`](./docs/api/README.md).
 
-Se implemtó la conexión a dos única base de datos:
+Se implementó la conexión a dos única base de datos:
 
 La primera corresponde a la base de datos soporta los usuarios clientes de la aplicación, si bien la base soporta más de un `Role` por reglas de negocio en este proyecto solo se permite un rol, de forma que por código en el backend se deshabilita esta posibilidad. Se implementa el `RefresToken` como medida alternativa para el manejo de los tiempos en la sesiones de los usuarios ya que se utiliza `JWT (Jason Web Token)` que es `stateless`, se agregan tablas de auditoría de cambios en las tablas de usuario así como el control de sesiones por usuario e intentos de login de no usuarios.
 
@@ -32,7 +32,7 @@ Cuando el ROLE_USER crea un usuario, se crea una contraseña temporal (aleatoria
 3. [capas de seguridad de la aplicación](./docs/securtyAcces/README.md).
 4. [Reglas de negocio](./docs/busines-rules/README.md)
 5. variables de: [`activationKey`, `resetKey`, `resetDate` y `verificación de tiempo`](./docs/createUser/README.md)
-6. [base de datos](./asset/database.sql), se incluyen los [roles a utilizar](./asset/data.sql) y se definen sus [aspectos técnicos](./docs/dababases/README.md)
+6. [base de datos de usuarios](./asset/customer.sql), incluyen los [roles a utilizar](./asset/customer_data.sql), así como [la base de datos del negocio](./asset/creditos.sql) y se definen sus [aspectos técnicos](./docs/dababases/README.md)
 7. [serialización](./docs/dto-serializable/README.md).
 8. manejo de [excepciones personalizadas](./docs/exceptions/README.md) de forma que al `frontend` se retorne un `String` que contiene un numero y un texto separado por una coma (,).
 9. uso de [logg](./docs/logger/README.md).

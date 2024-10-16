@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId> <!-- Grupo del proyecto padre (Spring Boot) -->
         <artifactId>spring-boot-starter-parent</artifactId> <!-- ID de artefacto del proyecto padre -->
-        <version>3.3.3</version> <!-- Versión del proyecto padre -->
+        <version>3.3.4</version> <!-- Versión del proyecto padre -->
         <relativePath/> <!-- Busca el padre en el repositorio de Maven -->
     </parent>
 

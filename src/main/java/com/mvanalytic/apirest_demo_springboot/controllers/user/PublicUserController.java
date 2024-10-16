@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.mvanalytic.apirest_demo_springboot.domain.user.UserKey;
 import com.mvanalytic.apirest_demo_springboot.dto.user.ActivateAccountRequestDTO;
@@ -16,10 +17,15 @@ import com.mvanalytic.apirest_demo_springboot.dto.user.ChangePasswordByResetRequ
 import com.mvanalytic.apirest_demo_springboot.services.user.UserKeyServiceImpl;
 import com.mvanalytic.apirest_demo_springboot.services.user.UserService;
 import com.mvanalytic.apirest_demo_springboot.utility.UserValidationService;
+import org.apache.logging.log4j.Logger;
+import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
 
 @RestController
 @RequestMapping("/api/public")
 public class PublicUserController {
+
+  // Instancia singleton de logger
+  private static final Logger logger = LoggerSingleton.getLogger(PublicUserController.class);
 
   @Autowired
   private UserKeyServiceImpl userKeyServiceImpl;
@@ -154,7 +160,7 @@ public class PublicUserController {
    * exitosos, e procede a actualizar la contraseña del usuario. En caso
    * contrario, se devuelve un mensaje de error.
    *
-   * @param id                      El identificador del usuario que está
+   * @param idUserKey               El identificador del userKey que está
    *                                restableciendo la contraseña.
    * @param keyValue                La clave de restablecimiento proporcionada por
    *                                el usuario.
@@ -163,19 +169,20 @@ public class PublicUserController {
    * @return ResponseEntity<String> Un mensaje de éxito o un mensaje de error en
    *         caso de fallar.
    */
-  @PostMapping("/change-password-by-reset/{id}/{keyValue}")
+  @PostMapping("/change-password-by-reset/{idUserKey}/{keyValue}")
   public ResponseEntity<String> changePasswordByReset(
-      @PathVariable Long id,
+      @PathVariable Long idUserKey,
       @PathVariable String keyValue,
-      @RequestBody ChangePasswordByResetRequestDTO changePasswordByResetRequestDTO) {
+      @RequestParam String newPassword) {
     try {
-      // Valida el id y keyValue
-      userValidationService.validateResetPasswordDTO(changePasswordByResetRequestDTO, id, keyValue);
+      if (!userValidationService.isValidPassword(newPassword, 72)) {
+        throw new IllegalArgumentException("125, La contraseña no cumple el formato definido");
+      }
 
       // Envío a procesar la solicitud de cambio de contraseña
       userService.changePasswordByReset(
-          id,
-          changePasswordByResetRequestDTO.getNewPassword(),
+          idUserKey,
+          newPassword,
           keyValue);
 
       return ResponseEntity.ok("Contraseña restablecida exitosamente. Inicie sesión con su nueva contraseña");
