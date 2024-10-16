@@ -136,7 +136,8 @@ public class AuthService {
           userLoginActivity.getSessionStatus());
 
       // notificación por correo de inicio de sesion
-      sendMail(user, identifier, password, userLoginActivity.getSessionTime(), userLoginActivity.getSessionStatus());
+      sendMail(user, userLoginActivity.getIpAddress(), userLoginActivity.getUserAgent(),
+          userLoginActivity.getSessionTime(), userLoginActivity.getSessionStatus());
 
       return jwtResponse;
 

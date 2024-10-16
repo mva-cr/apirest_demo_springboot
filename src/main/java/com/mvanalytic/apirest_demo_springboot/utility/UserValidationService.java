@@ -387,7 +387,6 @@ public class UserValidationService {
     }
   }
 
-
   /**
    * Valida que el texto no contiene espacios vacíos
    * 
@@ -431,14 +430,14 @@ public class UserValidationService {
    * @return true si la contraseña cumple con los requisitos; de lo contrario,
    *         false.
    */
-  private boolean isValidPassword(String password, int maxLength) {
+  public boolean isValidPassword(String password, int maxLength) {
     // Expresión regular que requiere al menos 12 caracteres, incluyendo letras
     // mayúsculas, letras minúsculas, dígitos,
     // y caracteres especiales:
     //
     String regex = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&.,/])[A-Za-z\\d@$!%*?&.,/]{12,}$";
 
-    // Verifica si la contraseña coincide con la expresión regular
+    // Verifica si la contraseña coincide con la expresión regular;
     return password != null
         && password.length() <= maxLength
         && !password.contains(" ")

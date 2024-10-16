@@ -156,7 +156,7 @@ Método: **`GET`**
 URL:
 
 ```
-http://localhost:8080/api/admin/users/get/by-email/nombre@gmail.com
+http://localhost:8080/api/admin/users/get-by-email/nombre@gmail.com
 ```
 
 2. Consulta de un usuario por `Nickname`
@@ -165,7 +165,7 @@ Método: **`GET`**
 URL:
 
 ```
-http://localhost:8080/api/admin/users/get/by-nickname/nicnameusuario
+http://localhost:8080/api/admin/users/get-by-nickname/nicnameusuario
 ```
 
 3. Consulta de un usuario por `Id`
