@@ -58,7 +58,7 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
     Map<String, String> jsonResponse = new HashMap<>();
 
     if (authException instanceof UsernameNotFoundException) {
-      jsonResponse.put("error", "111, El identificador no existe");
+      jsonResponse.put("error", "111-88, El identificador no existe");
     } else if (authException instanceof BadCredentialsException) {
       jsonResponse.put("error", "108, La contraseña no coincide con la registrada");
     } else if (authException instanceof DisabledException) {

@@ -16,8 +16,6 @@ import com.mvanalytic.apirest_demo_springboot.dto.user.UserAuthorityRequestDTO;
 import com.mvanalytic.apirest_demo_springboot.dto.user.UserProfileResponseDTO;
 import com.mvanalytic.apirest_demo_springboot.dto.user.UserRegistrationByAdminRequestDTO;
 import com.mvanalytic.apirest_demo_springboot.dto.user.UserRegistrationRequestDTO;
-import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
-import org.apache.logging.log4j.Logger;
 
 // import org.springframework.security.core.GrantedAuthority;
 
@@ -26,9 +24,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class UserMapper {
 
-  // Instancia singleton de logger
-  private static final Logger logger = LoggerSingleton.getLogger(UserMapper.class);
-
+ 
   // User - AdminUserDTO y viceversa
 
   /**
@@ -64,7 +60,6 @@ public class UserMapper {
               .collect(Collectors.toSet()));
       return adminUserDTO;
     } catch (Exception e) {
-      logger.error("Error al mappear el User a AdminUserResponseDTO {}", e.getMessage());
       throw new IllegalArgumentException("188, Error al mappear el User a AdminUserResponseDTO");
     }
   }
@@ -85,7 +80,6 @@ public class UserMapper {
     try {
       return new AuthorityDTO(authority.getName());
     } catch (Exception e) {
-      logger.error("Error al mappear el Authority a AuthorityDTO {}", e.getMessage());
       throw new IllegalArgumentException("189, Error al mappear el Authority a AuthorityDTO");
     }
   }
@@ -127,7 +121,6 @@ public class UserMapper {
 
       return user;
     } catch (Exception e) {
-      logger.error("Error al mappear el AdminUserResponseDTO a User {}", e.getMessage());
       throw new IllegalArgumentException("192, Error al mappear el AdminUserResponseDTO a User");
     }
   }
@@ -149,7 +142,6 @@ public class UserMapper {
     try {
       return new Authority(authorityDTO.getName());
     } catch (Exception e) {
-      logger.error("Error al mappear el AuthorityDTO a Authority {}", e.getMessage());
       throw new IllegalArgumentException("191, Error al mappear el AuthorityDTO a Authority");
     }
   }
@@ -181,7 +173,6 @@ public class UserMapper {
 
       return userProfileDTO;
     } catch (Exception e) {
-      logger.error("Error al mappear el User en UserProfileResponseDTO {}", e.getMessage());
       throw new IllegalArgumentException("193, Error al mappear el User en UserProfileResponseDTO");
     }
   }
@@ -213,7 +204,6 @@ public class UserMapper {
 
       return user;
     } catch (Exception e) {
-      logger.error("Error al mappear el UserProfileResponseDTO a User {}", e.getMessage());
       throw new IllegalArgumentException("194, Error al mappear el UserProfileResponseDTO a User");
     }
   }
@@ -247,7 +237,6 @@ public class UserMapper {
 
       return userRegistrationDTO;
     } catch (Exception e) {
-      logger.error("Error al mappear el User a UserRegistrationRequestDTO {}", e.getMessage());
       throw new IllegalArgumentException("195, Error al mappear el User a UserRegistrationRequestDTO");
     }
   }
@@ -280,7 +269,6 @@ public class UserMapper {
 
       return user;
     } catch (Exception e) {
-      logger.error("Error al mappear el UserRegistrationRequestDTO a User {}", e.getMessage());
       throw new IllegalArgumentException("196, Error al mappear el UserRegistrationRequestDTO a User");
     }
   }
@@ -314,7 +302,6 @@ public class UserMapper {
 
       return user;
     } catch (Exception e) {
-      logger.error("Error al mappear el UserRegistrationByAdminRequestDTO a User {}", e.getMessage());
       throw new IllegalArgumentException("197, Error al mappear el UserRegistrationByAdminRequestDTO a User");
     }
   }
@@ -347,7 +334,6 @@ public class UserMapper {
 
       return jwtResponse;
     } catch (Exception e) {
-      logger.error("Error al mappear el User a JwtResponseDTO {}", e.getMessage());
       throw new IllegalArgumentException("198, Error al mappear el User a JwtResponseDTO");
     }
   }
@@ -398,7 +384,6 @@ public class UserMapper {
 
       return userAuthorities;
     } catch (Exception e) {
-      logger.error("Error al mappear el UserAuthorityRequestDTO a su DTO {}", e.getMessage());
       throw new IllegalArgumentException("199, Error al mappear el UserAuthorityRequestDTO a su DTO");
     }
   }

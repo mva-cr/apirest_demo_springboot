@@ -6,7 +6,6 @@ import com.mvanalytic.apirest_demo_springboot.domain.user.UserLoginActivity;
 import com.mvanalytic.apirest_demo_springboot.dto.user.UserLoginActivityResponseDTO;
 import com.mvanalytic.apirest_demo_springboot.mapper.user.UserLoginActivityMapper;
 import com.mvanalytic.apirest_demo_springboot.repositories.user.UserLoginActivityRepository;
-import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
 import java.time.Instant;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
@@ -15,13 +14,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.logging.log4j.Logger;
 
 @Service
 public class UserLoginActivityService {
-
-  // Instancia singleton de logger
-  private static final Logger logger = LoggerSingleton.getLogger(UserLoginActivityService.class);
 
   @Autowired
   private UserLoginActivityRepository userLoginActivityRepository;
@@ -43,7 +38,6 @@ public class UserLoginActivityService {
     try {
       userLoginActivityRepository.save(userLoginActivity);
     } catch (Exception e) {
-      logger.error("Error al intentar guardar sesión del usuario {}", e.getMessage(), e);
       throw new IllegalArgumentException("172, Error al intentar guardar sesión del usuario");
     }
   }
@@ -66,7 +60,6 @@ public class UserLoginActivityService {
       List<UserLoginActivityResponseDTO> uResponseDTOs = transformToDTO(userSessions);
       return uResponseDTOs;
     } catch (Exception e) {
-      logger.error("Error al cargar las sesiones: {}", e.getMessage());
       throw new IllegalArgumentException("211, Error al cargar las sesiones");
     }
   }
@@ -103,7 +96,6 @@ public class UserLoginActivityService {
       return sPage;
 
     } catch (Exception e) {
-      logger.error("Error al cargar las sesiones: {}", e.getMessage());
       throw new IllegalArgumentException("211, Error al cargar las sesiones");
     }
   }
@@ -133,7 +125,6 @@ public class UserLoginActivityService {
       List<UserLoginActivityResponseDTO> uResponseDTOs = transformToDTO(userSessions);
       return uResponseDTOs;
     } catch (Exception e) {
-      logger.error("Error buscar la sesión por el userId y status: {}", e.getMessage());
       throw new IllegalArgumentException("212, Error buscar la sesión por el userId y status y status");
     }
   }
@@ -165,7 +156,6 @@ public class UserLoginActivityService {
       List<UserLoginActivityResponseDTO> uResponseDTOs = transformToDTO(userSessions);
       return uResponseDTOs;
     } catch (Exception e) {
-      logger.error("Error al buscar la sesión por el userId y rango de fechas: {}", e.getMessage());
       throw new IllegalArgumentException("213, Error al buscar la sesión por el userId y rango de fechas");
     }
   }
@@ -191,7 +181,6 @@ public class UserLoginActivityService {
       List<UserLoginActivityResponseDTO> uResponseDTOs = transformToDTO(userSessions);
       return uResponseDTOs;
     } catch (Exception e) {
-      logger.error("Error al buscar la sesión por idAddress y estatus: {}", e.getMessage());
       throw new IllegalArgumentException("214, Error al buscar la sesión por idAddress y estatus");
     }
   }
@@ -224,7 +213,6 @@ public class UserLoginActivityService {
       Page<UserLoginActivityResponseDTO> uResponseDTOs = transformToDTOPage(userSessions);
       return uResponseDTOs;
     } catch (Exception e) {
-      logger.error("Error al buscar la sesión por userId y página: {}", e.getMessage());
       throw new IllegalArgumentException("215, Error al buscar la sesión por userId y página");
     }
   }
@@ -258,7 +246,6 @@ public class UserLoginActivityService {
       Page<UserLoginActivityResponseDTO> uResponseDTOs = transformToDTOPage(userSessions);
       return uResponseDTOs;
     } catch (Exception e) {
-      logger.error("Error al buscar la sesión por ipAddress y rango fechas: {}", e.getMessage());
       throw new IllegalArgumentException("216, Error al buscar la sesión por ipAddress y rango fechas");
     }
   }
@@ -303,7 +290,6 @@ public class UserLoginActivityService {
       Page<UserLoginActivityResponseDTO> uResponseDTOs = transformToDTOPage(userSessions);
       return uResponseDTOs;
     } catch (Exception e) {
-      logger.error("Error al buscar la sesión por useAgent y rango fechas: {}", e.getMessage());
       throw new IllegalArgumentException("217, Error al buscar la sesión por useAgent y rango fechas");
     }
   }
@@ -327,7 +313,6 @@ public class UserLoginActivityService {
       Long countSession = userLoginActivityRepository.countByUserIdAndSessionStatus(userId, sessionStatus);
       return countSession;
     } catch (Exception e) {
-      logger.error("Error contar las sesiones según estatus por idUser: {}", e.getMessage());
       throw new IllegalArgumentException("218, Error contar las sesiones según estatus por idUser");
     }
   }
@@ -348,7 +333,6 @@ public class UserLoginActivityService {
       // Elimina las sesiones del usuario con el estado especificado
       userLoginActivityRepository.deleteByUserIdAndSessionStatus(userId, sessionStatus);
     } catch (Exception e) {
-      logger.error("Error al borrar sesión por userId y estatus: {}", e.getMessage());
       throw new IllegalArgumentException("219, Error al borrar sesión por userId y estatus");
     }
   }
@@ -372,7 +356,6 @@ public class UserLoginActivityService {
           .collect(Collectors.toList());
       return uList;
     } catch (Exception e) {
-      logger.error("Error al intentar guardar el registro FailedLoginAttempt {}", e.getMessage());
       throw new IllegalArgumentException("205, Error al buscar el loginAttempt con el email");
     }
   }
@@ -400,7 +383,6 @@ public class UserLoginActivityService {
           .map(UserLoginActivityMapper::convertUserLoginActivityToUserLoginActivityResponseDTO);
       return uResponseDTOs;
     } catch (Exception e) {
-      logger.error("Error mappear las sesiones: {}", e.getMessage());
       throw new IllegalArgumentException("219, Error mappear las sesiones");
     }
   }
@@ -412,7 +394,6 @@ public class UserLoginActivityService {
       userLoginActivityRepository.spRegisterSuccessfulLogin(
           userId, newToken, expiryDate, ipAddress, userAgent, idSession, sessionTime, sessionStatus);
     } catch (Exception e) {
-      logger.error(e.getMessage());
       throw new IllegalArgumentException(e.getMessage());
     }
   }

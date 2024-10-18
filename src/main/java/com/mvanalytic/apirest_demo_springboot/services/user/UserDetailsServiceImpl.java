@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.logging.log4j.Logger;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,10 +11,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
 import com.mvanalytic.apirest_demo_springboot.domain.user.Authority;
 import com.mvanalytic.apirest_demo_springboot.domain.user.User;
-import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
 
 /**
  * Servicio para cargar los detalles de los usuarios basado en el nickname.
@@ -31,9 +28,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
   public UserDetailsServiceImpl(UserService userService) {
     this.userService = userService;
   }
-
-  // Instancia singleton de logger
-  private static final Logger logger = LoggerSingleton.getLogger(UserDetailsServiceImpl.class);
 
   @Override
   public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
@@ -70,7 +64,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     // Verifica si el usuario está habilitado
     if (!user.isStatus()) {
-      logger.error("Cuenta deshabilitada.");
       throw new DisabledException("110, Cuenta deshabilitada");
     }
 

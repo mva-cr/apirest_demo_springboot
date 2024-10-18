@@ -1,7 +1,6 @@
 package com.mvanalytic.apirest_demo_springboot.services.mail;
 
 import java.util.Locale;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -19,7 +18,6 @@ import com.mvanalytic.apirest_demo_springboot.domain.user.User;
 import com.mvanalytic.apirest_demo_springboot.domain.user.UserKey;
 import com.mvanalytic.apirest_demo_springboot.dto.user.UserProfileResponseDTO;
 import com.mvanalytic.apirest_demo_springboot.utility.AppUtility;
-import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.time.Instant;
@@ -35,13 +33,7 @@ import java.time.Instant;
  * electrónicos, y Thymeleaf como motor de plantillas para generar contenido
  * dinámico en HTML.
  * </p>
- * 
- * <p>
- * El servicio maneja excepciones relacionadas con el envío de correos, como
- * {@link MailSendException} y otras excepciones inesperadas, y registra estos
- * errores en el log utilizando {@link LoggerSingleton}.
- * </p>
- * 
+
  * <p>
  * El servicio está configurado para funcionar de manera asíncrona, permitiendo
  * enviar correos en segundo plano sin bloquear el hilo principal de la
@@ -50,9 +42,6 @@ import java.time.Instant;
  */
 @Service
 public class MailService {
-
-  // Instancia singleton de logger
-  private static final Logger logger = LoggerSingleton.getLogger(MailService.class);
 
   @Autowired
   private JavaMailSender javaMailSender;
@@ -135,14 +124,10 @@ public class MailService {
       // Enviar el correo
       javaMailSender.send(mimeMessage);
 
-      logger.info("Correo de activación enviado a: {}", user.getEmail());
     } catch (MessagingException e) {
-      logger.error("Error al enviar el correo de activación: {}", e.getMessage());
       throw new MailSendException("140, Error al enviar el correo de activación",
           e);
     } catch (Exception e) {
-      logger.error("Error inesperado al enviar el correo de activación: {}",
-          e.getMessage());
       throw new MailSendException("141, Error inesperado al enviar el correo de activación", e);
     }
   }
@@ -207,9 +192,8 @@ public class MailService {
 
       // Enviar el correo
       javaMailSender.send(mimeMessage);
-      logger.info("Correo de activación enviado a: {}", user.getEmail());
+
     } catch (Exception e) {
-      logger.error("Error al enviar correo: {}", e.getMessage());
       throw new MailSendException("156, Error inesperado al enviar el correo de restablecimiento de contraseña", e);
     }
   }
@@ -275,13 +259,10 @@ public class MailService {
 
       // Enviar el correo
       javaMailSender.send(mimeMessage);
-      logger.info("Correo de activación enviado a: {}", user.getEmail());
 
     } catch (MailException e) {
-      logger.error("Error específico al enviar el correo: {}", e.getMessage());
       throw new MailSendException("155, Error al enviar el correo de restablecimiento de contraseña", e);
     } catch (Exception e) {
-      logger.error("Error inesperado al enviar el correo de restablecimiento de contraseña: {}", e.getMessage());
       throw new MailSendException("156, Error inesperado al enviar el correo de restablecimiento de contraseña", e);
     }
   }
@@ -406,12 +387,8 @@ public class MailService {
       // Enviar el correo
       javaMailSender.send(mimeMessage);
     } catch (MailException e) {
-      logger.error("Error específico al enviar el correo: {}", e.getMessage());
-      logger.error("Stack Trace:", e);
       throw new MailSendException("160, Error inesperado al enviar correo de aviso", e);
     } catch (Exception e) {
-      logger.error("Error inesperado al enviar el correo de aviso: {}", e.getMessage());
-      logger.error("Stack Trace:", e);
       throw new MailSendException("160, Error inesperado al enviar correo de aviso", e);
     }
   }
@@ -481,10 +458,8 @@ public class MailService {
       javaMailSender.send(mimeMessage);
 
     } catch (MailException e) {
-      logger.error("Error al enviar el correo de intento fallido de login: {}", e.getMessage());
       throw new MailSendException("167, Error al enviar el correo de intento fallido de login", e);
     } catch (Exception e) {
-      logger.error("Error inesperado al enviar el correo de intento fallido de login: {}", e.getMessage());
       throw new MailSendException("168, Error inesperado al enviar el correo de intento fallido de login", e);
     }
   }
@@ -561,10 +536,8 @@ public class MailService {
       javaMailSender.send(mimeMessage);
 
     } catch (MailException e) {
-      logger.error("Error al enviar el correo de intento fallido de login: {}", e.getMessage());
       throw new MailSendException("167, Error al enviar el correo de intento fallido de login", e);
     } catch (Exception e) {
-      logger.error("Error inesperado al enviar el correo de intento fallido de login: {}", e.getMessage());
       throw new MailSendException("168, Error inesperado al enviar el correo de intento fallido de login", e);
     }
   }

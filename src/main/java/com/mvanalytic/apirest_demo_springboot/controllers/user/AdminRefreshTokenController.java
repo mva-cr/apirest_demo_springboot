@@ -15,9 +15,6 @@ import com.mvanalytic.apirest_demo_springboot.dto.user.RefreshTokenResponseDTO;
 import com.mvanalytic.apirest_demo_springboot.services.user.RefreshTokenService;
 import com.mvanalytic.apirest_demo_springboot.services.user.UserService;
 import com.mvanalytic.apirest_demo_springboot.utility.AppUtility;
-import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
-
-import org.apache.logging.log4j.Logger;
 
 /**
  * Controlador para gestionar operaciones CRUD de los Refresh Token.
@@ -28,9 +25,6 @@ import org.apache.logging.log4j.Logger;
 @RequestMapping("/api/admin/refresh-tokens")
 @PreAuthorize("hasRole('ROLE_ADMIN')")
 public class AdminRefreshTokenController {
-
-  // Instancia singleton de logger
-  private static final Logger logger = LoggerSingleton.getLogger(AdminRefreshTokenController.class);
 
   @Autowired
   private RefreshTokenService refreshTokenService;
@@ -85,7 +79,6 @@ public class AdminRefreshTokenController {
     // Validar el formato de la fecha recibida como parámetro
     if (!appUtility.isValidDateFormat(startDateString) ||
         !appUtility.isValidDateFormat(endDateString)) {
-      logger.error("Error en el formato de la fecha y hora");
       throw new IllegalArgumentException("184, Error en el formato de la fecha y hora");
     }
 
@@ -178,7 +171,6 @@ public class AdminRefreshTokenController {
   public ResponseEntity<String> deleteExpiredTokens(@PathVariable String dateString) {
     // Validar el formato de la fecha recibida como parámetro
     if (!appUtility.isValidDateFormat(dateString)) {
-      logger.error("Error en el formato de la fecha y hora");
       throw new IllegalArgumentException("184, Error en el formato de la fecha y hora");
     }
     // Convertir el string en un objeto Instant

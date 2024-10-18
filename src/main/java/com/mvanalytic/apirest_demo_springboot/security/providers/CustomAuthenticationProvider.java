@@ -1,6 +1,5 @@
 package com.mvanalytic.apirest_demo_springboot.security.providers;
 
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -14,9 +13,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
 
-// import com.mvanalytic.sugef_test_springboot_b.services.UserDetailsServiceImpl;
 
 /**
  * Proveedor personalizado de autenticación para la aplicación.
@@ -25,9 +22,6 @@ import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
  */
 @Component
 public class CustomAuthenticationProvider implements AuthenticationProvider {
-
-  // Instancia singleton de logger
-  private static final Logger logger = LoggerSingleton.getLogger(CustomAuthenticationProvider.class);
 
   @Autowired
   private UserDetailsService userDetailsService;
@@ -57,13 +51,11 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
       // Verifica si el usuario está habilitado
       if (!userDetails.isEnabled()) {
-        logger.error("Cuenta deshabilitada");
         throw new DisabledException("110, Cuenta deshabilitada");
       }
 
       // Verifica si las credenciales (password) son correctas
       if (!passwordEncoder.matches(rawPassword, userDetails.getPassword())) {
-        logger.error("La contraseña no coincide con la registrada");
         throw new BadCredentialsException("108, La contraseña no coincide con la registrada");
       }
 
@@ -73,7 +65,6 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     } catch (UsernameNotFoundException | DisabledException | BadCredentialsException e) {
       throw e;
     } catch (Exception e) {
-      logger.error("Error de autenticación inesperado {}" + e.getMessage());
       throw new AuthenticationException("155, Error en tiempo de ejecución " + e.getMessage(), e) {
       };
     }
