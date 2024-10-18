@@ -1,0 +1,53 @@
+<configuration>
+    <!-- Definir las propiedades para la ruta y el nombre del archivo de log -->
+    <property name="LOG_PATH" value="${LOG_PATH}" />
+    <property name="LOG_FILE_NAME" value="${LOG_FILE_NAME}" />
+
+    <!-- Appender para la consola -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n</pattern>
+        </encoder>
+        <!-- Filtro para definir el nivel de log en consola -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level> <!-- Mostrar solo logs de nivel INFO o superior en consola -->
+        </filter>
+    </appender>
+
+    <!-- Appender para archivo sin creación automática -->
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_PATH}/${LOG_FILE_NAME}</file>
+        <!-- define la política de rotación que será diario agregando el patrón de fecha y se retiene hasta 30 días. -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/${LOG_FILE_NAME}-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory> <!-- Retener archivos de log durante 30 días -->
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n %ex%n</pattern> <!-- %ex incluirá la traza del error -->
+        </encoder>
+        <!-- Filtro para definir el nivel de log en archivo -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level> <!-- Guardar solo logs de nivel ERROR o superior en archivo -->
+        </filter>
+    </appender>
+
+    <!-- Appender asíncrono para el archivo -->
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE"/>
+        <queueSize>500</queueSize> <!-- Tamaño de la cola de logs -->
+        <discardingThreshold>0</discardingThreshold> <!-- No descartar mensajes si la cola está llena -->
+        <includeCallerData>true</includeCallerData> <!-- Incluir información de la llamada al logger -->
+    </appender>
+
+    <!-- Configurar loggers específicos -->
+    <logger name="org.springframework.security.web.access.ExceptionTranslationFilter" level="WARN"/>
+    <logger name="org.springframework.security.web.access.intercept.AuthorizationFilter" level="WARN"/>
+    <logger name="org.springframework.web" level="WARN"/>
+    <logger name="org.springframework.security" level="WARN"/>
+
+    <!-- Logger raíz que envía los logs a consola y archivo asíncrono -->
+    <root level="ERROR">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="ASYNC_FILE"/>
+    </root>
+</configuration>

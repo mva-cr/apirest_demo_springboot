@@ -3,7 +3,7 @@ package com.mvanalytic.apirest_demo_springboot.utility;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import com.mvanalytic.apirest_demo_springboot.domain.user.User;
@@ -37,6 +37,41 @@ public class AppUtility {
   @Value("${app.jwtRefreshExpirationMs}")
   private Long refreshTokenDurationMs;
 
+  @Value("${spring.profiles.active}")
+  private String mode;
+
+  /**
+   * Método para enviar mensajes de log en la aplicación.
+   * 
+   * Dependiendo del perfil de la aplicación, se registra la información de la
+   * excepción para desarrollo, mientras que en producción se mantiene más simple.
+   *
+   * @param message  Mensaje principal del log. Puede describir el contexto o la
+   *                 operación en la cual ocurrió el error.
+   * @param eMessage Mensaje de la excepción (detalles del error), que puede ser
+   *                 registrado en modo desarrollo para facilitar el diagnóstico.
+   * @author Mario Martínez Lanuza
+   */
+  public void sendLog(String message, String eMessage) {
+    if ("dev".equals(mode)) {
+      logger.error("{}: {}", message, eMessage);
+    } else {
+      logger.error("{}", message);
+    }
+  }
+
+  public String getMode() {
+    return this.mode;
+  }
+
+  public void createLogFile(String folderName, String fileName) {
+    if ("dev".equals(getMode())) {
+      String logDirectory = LogPathConfig.getLogDirectoryPath(folderName, fileName);
+      System.setProperty("LOG_PATH", logDirectory);
+      System.setProperty("LOG_FILE_NAME", fileName);
+    }
+  }
+
   /**
    * Método para extraer el mensaje de error principal de una excepción.
    *
@@ -64,10 +99,10 @@ public class AppUtility {
    *
    * @param user                El usuario para el cual se genera la clave.
    * @param isAccountActivation Indica si la clave es para la activación de la
-   *                            cuenta.
-   *                            Si es false, se asume que es para restablecimiento
-   *                            de contraseña.
+   *                            cuenta. Si es false, se asume que es para
+   *                            restablecimiento de contraseña.
    * @return La entidad UserKey creada y registrada.
+   * @author Mario Martínez Lanuza
    */
   public UserKey generateKey(User user, boolean isAccountActivation) {
     String activationKey = getUUIDString();
@@ -90,6 +125,7 @@ public class AppUtility {
    * 
    * @return Un string que representa un UUID, en formato estándar
    *         (por ejemplo, "ddeb27fb-d9a0-4624-be4d-4615062daed4").
+   * @author Mario Martínez Lanuza
    */
   public String getUUIDString() {
     return UUID.randomUUID().toString();
@@ -117,7 +153,7 @@ public class AppUtility {
       }
 
     } catch (Exception e) {
-      logger.error("Error al verificar la expiración de la clave de restablecimiento: {}", e.getMessage());
+      sendLog("147, La clave de activación ha expirado", e.getMessage());
       throw new IllegalArgumentException("147, La clave de activación ha expirado", e);
     }
   }
@@ -144,7 +180,7 @@ public class AppUtility {
       }
 
     } catch (Exception e) {
-      logger.error("Error al verificar la expiración de la clave de restablecimiento: {}", e.getMessage());
+      sendLog("147, La clave de activación ha expirado", e.getMessage());
       throw new IllegalArgumentException("147, La clave de activación ha expirado", e);
     }
   }
@@ -170,7 +206,7 @@ public class AppUtility {
     try {
       return expirationActivation;
     } catch (Exception e) {
-      logger.error("Error al cargar el tiempo de expiración de la clave de activación: {}", e.getMessage());
+      sendLog("159, Error al cargar el tiempo de expiración", e.getMessage());
       throw new IllegalArgumentException("159, Error al cargar el tiempo de expiración");
     }
 
@@ -193,7 +229,7 @@ public class AppUtility {
     try {
       return baseUrl;
     } catch (Exception e) {
-      logger.error("Error al cargar la url base: {}", e.getMessage());
+      sendLog("169, Error al cargar la url base", e.getMessage());
       throw new IllegalArgumentException("169, Error al cargar la url base");
     }
   }
@@ -217,7 +253,7 @@ public class AppUtility {
     try {
       return storageLocation;
     } catch (Exception e) {
-      logger.error("Error al cargar la ruta de los archivos para descarga: {}", e.getMessage());
+      sendLog("170, Error al cargar la ruta de los archivos para descarga", e.getMessage());
       throw new IllegalArgumentException("170, Error al cargar la ruta de los archivos para descarga");
     }
   }
@@ -234,7 +270,7 @@ public class AppUtility {
     try {
       return refreshTokenDurationMs;
     } catch (Exception e) {
-      logger.error("Error al cargar el refreshTokenDurationMs: {}", e.getMessage());
+      sendLog("173, Error al cargar el refreshTokenDurationMs", e.getMessage());
       throw new IllegalArgumentException("173, Error al cargar el refreshTokenDurationMs");
     }
   }
@@ -267,7 +303,7 @@ public class AppUtility {
       return localDateTime.format(formatter);
 
     } catch (Exception e) {
-      logger.error("Error al formatear la fecha y hora del intento: {}", e.getMessage());
+      sendLog("171, Error al formatear la fecha y hora del intento", e.getMessage());
       throw new IllegalArgumentException("171, Error al formatear la fecha y hora del intento", e);
     }
   }
@@ -304,19 +340,19 @@ public class AppUtility {
       return utcDateTime.format(outputFormatter);
 
     } catch (Exception e) {
-      logger.error("Error al convertir la fecha a UTC: {}", e.getMessage());
+      sendLog("185, Error al convertir la fecha a UTC", e.getMessage());
       throw new IllegalArgumentException("185, Error al convertir la fecha a UTC", e);
     }
   }
 
   /**
- * Valida si una cadena de fecha sigue el formato "YYYY-MM-DDTHH:MM".
- *
- * @param dateString La fecha en formato "YYYY-MM-DDTHH:MM".
- * @return true si el formato es válido, false en caso contrario.
- */
-public boolean isValidDateFormat(String dateString) {
-  try {
+   * Valida si una cadena de fecha sigue el formato "YYYY-MM-DDTHH:MM".
+   *
+   * @param dateString La fecha en formato "YYYY-MM-DDTHH:MM".
+   * @return true si el formato es válido, false en caso contrario.
+   */
+  public boolean isValidDateFormat(String dateString) {
+    try {
       // Definir el formato esperado
       DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
 
@@ -324,11 +360,10 @@ public boolean isValidDateFormat(String dateString) {
       LocalDateTime.parse(dateString, formatter);
 
       return true;
-  } catch (DateTimeParseException e) {
+    } catch (DateTimeParseException e) {
       // Retornar false si el formato no es válido
       return false;
+    }
   }
-}
-
 
 }

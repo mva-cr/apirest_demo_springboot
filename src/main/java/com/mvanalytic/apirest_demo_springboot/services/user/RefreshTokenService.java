@@ -10,13 +10,11 @@ import com.mvanalytic.apirest_demo_springboot.dto.user.RefreshTokenResponseDTO;
 import com.mvanalytic.apirest_demo_springboot.repositories.user.RefreshTokenRepository;
 import com.mvanalytic.apirest_demo_springboot.utility.AppUtility;
 import com.mvanalytic.apirest_demo_springboot.utility.JwtUtils;
-import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.stream.Collectors;
 import com.mvanalytic.apirest_demo_springboot.mapper.user.RefresTokenMapper;
 import com.mvanalytic.apirest_demo_springboot.mapper.user.UserMapper;
-import org.apache.logging.log4j.Logger;
 import org.hibernate.Hibernate;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -28,9 +26,6 @@ import java.util.List;
  */
 @Service
 public class RefreshTokenService {
-
-  // Instancia singleton de logger
-  private static final Logger logger = LoggerSingleton.getLogger(RefreshTokenService.class);
 
   @Autowired
   private AppUtility appUtility;
@@ -96,7 +91,6 @@ public class RefreshTokenService {
 
       return jwtResponseDTO;
     } catch (Exception e) {
-      logger.error("Error al crear el refreshToken del id_user: {}", e.getMessage());
       throw new IllegalArgumentException("204, Error al crear el refreshToken del id_user");
     }
   }
@@ -132,7 +126,6 @@ public class RefreshTokenService {
 
       return refreshToken;
     } catch (Exception e) {
-      logger.error("Error al crear el refreshToken del user: {}", e.getMessage());
       throw new IllegalArgumentException("203, Error al crear el refreshToken del user");
     }
   }
@@ -161,7 +154,6 @@ public class RefreshTokenService {
 
       return refreshTokenRepository.save(refreshToken);
     } catch (Exception e) {
-      logger.error("Error al guardar el RefreshToken: {}", e.getMessage());
       throw new IllegalArgumentException("178, Error al guardar el RefreshToken");
     }
   }
@@ -181,7 +173,6 @@ public class RefreshTokenService {
     try {
       refreshTokenRepository.deleteByUser(user);
     } catch (Exception e) {
-      logger.error("Error al eliminar el RefreshToken: {}", e.getMessage());
       throw new IllegalArgumentException("179, Error al eliminar el RefreshToken");
     }
   }
@@ -204,7 +195,6 @@ public class RefreshTokenService {
         throw new IllegalArgumentException("177, Refresh token ha expirado");
       }
     } catch (Exception e) {
-      logger.error("Error al verificar la expiración del refresh token: {}", e.getMessage());
       throw new IllegalArgumentException("180, Error al verificar la expiración del refresh token");
     }
   }
@@ -225,7 +215,6 @@ public class RefreshTokenService {
     try {
       refreshTokenRepository.delete(refreshToken);
     } catch (Exception e) {
-      logger.error("Error al eliminar el RefreshToken: {}", e.getMessage());
       throw new IllegalArgumentException("179, Error al eliminar el RefreshToken");
     }
   }
@@ -247,7 +236,6 @@ public class RefreshTokenService {
     try {
       refreshTokenRepository.deleteById(idToken);
     } catch (Exception e) {
-      logger.error("Error al eliminar el RefreshToken: {}", e.getMessage());
       throw new IllegalArgumentException("179, Error al eliminar el RefreshToken");
     }
   }
@@ -270,7 +258,6 @@ public class RefreshTokenService {
     try {
       refreshTokenRepository.deleteAll();
     } catch (Exception e) {
-      logger.error("Error al eliminar los RefreshTokens: {}", e.getMessage());
       throw new IllegalArgumentException("186, Error al eliminar los RefreshTokens");
     }
   }
@@ -288,7 +275,6 @@ public class RefreshTokenService {
       refreshTokenRepository.deleteByUser(userService.getUserById(userId));
     } catch (Exception e) {
       // Registrar el error y lanzar una excepción con un mensaje
-      logger.error("Error al crear el refreshTokenDurationMs: {}", e.getMessage());
       throw new IllegalArgumentException("176, Error al eliminar los refresh token del id_user");
     }
   }
@@ -308,7 +294,6 @@ public class RefreshTokenService {
       return RefresTokenMapper.convertRefreshTokenResponseDTO(refreshToken);
     } catch (Exception e) {
       // Registrar el error y lanzar una excepción con un mensaje
-      logger.error("Error al crear el refreshTokenDurationMs: {}", e.getMessage());
       throw new IllegalArgumentException("181, No existe RefreshToken del Usuario");
     }
   }
@@ -335,7 +320,6 @@ public class RefreshTokenService {
       return refreshToken;
     } catch (Exception e) {
       // Registrar el error y lanzar una excepción con un mensaje
-      logger.error("Refresh token no encontrado: {}", e.getMessage());
       throw new IllegalArgumentException("177, Refresh token no encontrado");
     }
   }
@@ -371,7 +355,6 @@ public class RefreshTokenService {
       return refreshTokenRepository.findByUserId(id).get();
     } catch (Exception e) {
       // Registrar el error y lanzar una excepción
-      logger.error("Refresh token no encontrado: {}", e.getMessage());
       throw new IllegalArgumentException("177, Refresh token no encontrado");
     }
   }
@@ -395,7 +378,6 @@ public class RefreshTokenService {
       return responseDTO;
     } catch (Exception e) {
       // Registrar el error y lanzar una excepción con un mensaje
-      logger.error("Refresh token no encontrado: {}", e.getMessage());
       throw new IllegalArgumentException("177, Refresh token no encontrado");
     }
   }
@@ -418,7 +400,6 @@ public class RefreshTokenService {
       refreshTokenRepository.deleteByExpiryDateBefore(instant);
     } catch (Exception e) {
       // Registrar el error y lanzar una excepción con un mensaje
-      logger.error("Error al intentar eliminar los RefreshToken previos a una fecha: {}", e.getMessage());
       throw new IllegalArgumentException("182, Error al intentar eliminar los RefreshToken previos a una fecha");
     }
   }
@@ -446,7 +427,6 @@ public class RefreshTokenService {
           .map(RefresTokenMapper::convertRefreshTokenResponseDTO) // Usar el mapper estático
           .collect(Collectors.toList());
     } catch (Exception e) {
-      logger.error("Error al intentar eliminar los RefreshToken previos a una fecha: {}", e.getMessage());
       throw new IllegalArgumentException("187, Error al cargar ResfreshTokens que vencen en el rango especificado");
     }
   }
@@ -475,7 +455,6 @@ public class RefreshTokenService {
           .collect(Collectors.toList());
     } catch (Exception e) {
       // Registrar el error y lanzar una excepción con un mensaje
-      logger.error("Error al intentar eliminar los RefreshToken previos a una fecha: {}", e.getMessage());
       throw new IllegalArgumentException("183, Error al cargar todos los refreshToken");
     }
   }

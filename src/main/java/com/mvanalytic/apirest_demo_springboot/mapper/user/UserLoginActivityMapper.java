@@ -1,17 +1,12 @@
 package com.mvanalytic.apirest_demo_springboot.mapper.user;
 
-import org.apache.logging.log4j.Logger;
 import com.mvanalytic.apirest_demo_springboot.domain.user.UserLoginActivity;
 import com.mvanalytic.apirest_demo_springboot.dto.user.UserLoginActivityResponseDTO;
-import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
 
 /**
  * Clase que realiza conversiones entre UserLoginActivity y su DTO's
  */
 public class UserLoginActivityMapper {
-
-  // Instancia singleton de logger
-  private static final Logger logger = LoggerSingleton.getLogger(UserLoginActivityMapper.class);
 
   /**
    * Convierte un objeto `UserLoginActivity` en un `UserLoginActivityResponseDTO`.
@@ -39,7 +34,6 @@ public class UserLoginActivityMapper {
 
       return dto;
     } catch (Exception e) {
-      logger.error("Error al mappear el UserLoginActivity a su DTO {}", e.getMessage());
       throw new IllegalArgumentException("202, Error al mappear el UserLoginActivity a su DTO");
     }
   }

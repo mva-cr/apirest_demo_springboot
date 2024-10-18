@@ -1,6 +1,5 @@
 package com.mvanalytic.apirest_demo_springboot.services.user;
 
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -9,16 +8,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.mvanalytic.apirest_demo_springboot.domain.user.UserKey;
 import com.mvanalytic.apirest_demo_springboot.repositories.user.UserKeyRepository;
 import com.mvanalytic.apirest_demo_springboot.utility.AppUtility;
-import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 
 @Service
 public class UserKeyServiceImpl {
-
-  // Instancia singleton de logger
-  private static final Logger logger = LoggerSingleton.getLogger(UserKeyServiceImpl.class);
 
   /**
    * Para cuando se necesita manejar procedimientos almacenados que no se ajustan
@@ -51,10 +46,6 @@ public class UserKeyServiceImpl {
       return userKeyRepository.findByIdWithUser(id)
           .orElseThrow(() -> new EntityNotFoundException("102, El usuario no existe"));
     } catch (Exception e) {
-      // Loguea el error con el mensaje de excepción
-      logger.error("El usuario no existe con el id: {}", id, e.getMessage());
-      // Relanza la excepción para que sea manejada por otros manejadores de
-      // excepciones
       throw e;
     }
   }
@@ -70,7 +61,6 @@ public class UserKeyServiceImpl {
     try {
       return userKeyRepository.save(userKey);
     } catch (Exception e) {
-      logger.error("Error al registrar el valor de la llave: {}", e.getMessage());
       throw new IllegalArgumentException("508, Error al cargar el registro de llaves");
     }
 
@@ -109,7 +99,6 @@ public class UserKeyServiceImpl {
     } catch (Exception e) {
       // Obtiene solo el mensaje del procedimiento almacenado
       String errorMessage = appUtility.extractErrorMessage(e.getMessage());
-      logger.error(errorMessage);
       throw new IllegalArgumentException(errorMessage); // Lanza solo el mensaje relevante
     }
 
@@ -165,10 +154,7 @@ public class UserKeyServiceImpl {
           id,
           keyValue,
           expiracionTimeActivation);
-
-      logger.info("usuario activado exitosamente");
     } catch (Exception e) {
-      logger.error(e.getMessage());
       throw new IllegalArgumentException(e.getMessage());
     }
   }

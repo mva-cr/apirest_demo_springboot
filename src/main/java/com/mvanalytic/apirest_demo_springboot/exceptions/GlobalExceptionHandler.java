@@ -3,7 +3,7 @@ package com.mvanalytic.apirest_demo_springboot.exceptions;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +14,7 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-
+import com.mvanalytic.apirest_demo_springboot.utility.AppUtility;
 import jakarta.persistence.EntityNotFoundException;
 
 /**
@@ -32,6 +32,9 @@ import jakarta.persistence.EntityNotFoundException;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+  @Autowired
+  private AppUtility appUtility;
+
   /**
    * Maneja la excepción EntityNotFoundException lanzada en cualquier parte de la
    * aplicación.
@@ -45,6 +48,7 @@ public class GlobalExceptionHandler {
     // Maneja la excepción de entidad no encontrada
     Map<String, String> response = new HashMap<>();
     response.put("error", ex.getLocalizedMessage());
+    appUtility.sendLog(ex.getLocalizedMessage(), "");
     return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
   }
 
@@ -61,6 +65,7 @@ public class GlobalExceptionHandler {
     // Maneja excepciones de tipo Runtime
     Map<String, String> response = new HashMap<>();
     response.put("error", ex.getMessage());
+    appUtility.sendLog(ex.getMessage(), "");
     return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
@@ -77,6 +82,7 @@ public class GlobalExceptionHandler {
     // Maneja excepciones de tipo Runtime
     Map<String, String> response = new HashMap<>();
     response.put("erro", ex.getMessage());
+    appUtility.sendLog(ex.getMessage(), "");
     return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
@@ -93,6 +99,7 @@ public class GlobalExceptionHandler {
     // Maneja excepciones de tipo IllegalArgumentException
     Map<String, String> response = new HashMap<>();
     response.put("error", ex.getMessage());
+    appUtility.sendLog(ex.getMessage(), "");
     return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
   }
 
@@ -109,6 +116,7 @@ public class GlobalExceptionHandler {
     // Maneja excepciones de tipo CredentialsExpiredException
     Map<String, String> response = new HashMap<>();
     response.put("error", ex.getMessage());
+    appUtility.sendLog(ex.getMessage(), "");
     return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
   }
 
@@ -126,6 +134,7 @@ public class GlobalExceptionHandler {
     // Maneja excepciones de tipo CredentialsExpiredException
     Map<String, String> response = new HashMap<>();
     response.put("error", ex.getMessage());
+    appUtility.sendLog(ex.getMessage(), "");
     return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
   }
 
@@ -143,6 +152,7 @@ public class GlobalExceptionHandler {
     // Maneja excepciones de tipo DisabledException
     Map<String, String> response = new HashMap<>();
     response.put("error", ex.getMessage());
+    appUtility.sendLog(ex.getMessage(), "");
     return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
   }
 
@@ -160,6 +170,7 @@ public class GlobalExceptionHandler {
     // Maneja excepciones de tipo DataAccessException
     Map<String, String> response = new HashMap<>();
     response.put("error", ex.getMessage());
+    appUtility.sendLog(ex.getMessage(), "");
     return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
@@ -177,6 +188,7 @@ public class GlobalExceptionHandler {
     // Maneja excepciones de tipo AccessDeniedException
     Map<String, String> response = new HashMap<>();
     response.put("error", ex.getMessage());
+    appUtility.sendLog(ex.getMessage(), "");
     return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
   }
 
@@ -192,6 +204,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<Object> handleMailSendException(MailSendException ex) {
     Map<String, String> response = new HashMap<>();
     response.put("error", ex.getMessage());
+    appUtility.sendLog(ex.getMessage(), "");
     return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
@@ -229,6 +242,7 @@ public class GlobalExceptionHandler {
     Map<String, String> response = new HashMap<>();
     response.put("error", "archivo no encontrado");
     response.put("details", ex.getMessage());
+    appUtility.sendLog(ex.getMessage(), "");
     return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
   }
 
@@ -249,6 +263,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<Object> handleSecurityException(SecurityException ex) {
     Map<String, String> response = new HashMap<>();
     response.put("error", ex.getMessage());
+    appUtility.sendLog(ex.getMessage(), "");
     return new ResponseEntity<>(response, HttpStatus.FORBIDDEN); // Devolver un código 403 Forbidden
   }
 

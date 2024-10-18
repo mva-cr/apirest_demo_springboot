@@ -6,9 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mvanalytic.apirest_demo_springboot.dto.user.FailedLoginAttemptResponseDTO;
 import com.mvanalytic.apirest_demo_springboot.services.user.FailedLoginAttemptService;
 import com.mvanalytic.apirest_demo_springboot.utility.AppUtility;
-import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
 import com.mvanalytic.apirest_demo_springboot.utility.UserValidationService;
-import org.apache.logging.log4j.Logger;
 import java.time.Instant;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,9 +25,6 @@ import org.springframework.http.ResponseEntity;
 @RequestMapping("/api/admin/failed-login")
 @PreAuthorize("hasRole('ROLE_ADMIN')")
 public class AdminFailedLoginAttemptController {
-
-  // Instancia singleton de logger
-  private static final Logger logger = LoggerSingleton.getLogger(AdminFailedLoginAttemptController.class);
 
   @Autowired
   private FailedLoginAttemptService fLoginAttemptService;
@@ -67,7 +62,6 @@ public class AdminFailedLoginAttemptController {
 
     // validar si el correo es correcto el formato
     if (!userValidationService.isValidGeneralEmail(email)) {
-      logger.error("El correo no cumple el formato definido");
       throw new IllegalArgumentException("123, El correo no cumple el formato definido");
     }
     // Se llama al servicio para obtener los intentos de inicio de sesión paginados
@@ -133,12 +127,10 @@ public class AdminFailedLoginAttemptController {
       @PathVariable String email, @PathVariable String attemptTimeString) {
     // validar si el correo es correcto el formato
     if (!userValidationService.isValidGeneralEmail(email)) {
-      logger.error("El correo no cumple el formato definido");
       throw new IllegalArgumentException("123, El correo no cumple el formato definido");
     }
     // Validar el formato de la fecha recibida como parámetro
     if (!appUtility.isValidDateFormat(attemptTimeString)) {
-      logger.error("Error en el formato de la fecha y hora");
       throw new IllegalArgumentException("184, Error en el formato de la fecha y hora");
     }
 
@@ -178,7 +170,6 @@ public class AdminFailedLoginAttemptController {
 
     // Validar el formato de la fecha recibida como parámetro
     if (!appUtility.isValidDateFormat(attemptTimeString)) {
-      logger.error("Error en el formato de la fecha y hora");
       throw new IllegalArgumentException("184, Error en el formato de la fecha y hora");
     }
 
@@ -211,7 +202,6 @@ public class AdminFailedLoginAttemptController {
       @PathVariable String attemptTimeString) {
     // Validar el formato de la fecha recibida como parámetro
     if (!appUtility.isValidDateFormat(attemptTimeString)) {
-      logger.error("Error en el formato de la fecha y hora");
       throw new IllegalArgumentException("184, Error en el formato de la fecha y hora");
     }
 
@@ -242,7 +232,6 @@ public class AdminFailedLoginAttemptController {
   public ResponseEntity<Long> countByEmail(@PathVariable String email) {
     // validar si el correo es correcto el formato
     if (!userValidationService.isValidGeneralEmail(email)) {
-      logger.error("El correo no cumple el formato definido");
       throw new IllegalArgumentException("123, El correo no cumple el formato definido");
     }
     Long count = fLoginAttemptService.countByEmail(email);
@@ -319,13 +308,11 @@ public class AdminFailedLoginAttemptController {
       @PathVariable String endTimeString) {
     // validar si el correo es correcto el formato
     if (!userValidationService.isValidGeneralEmail(email)) {
-      logger.error("El correo no cumple el formato definido");
       throw new IllegalArgumentException("123, El correo no cumple el formato definido");
     }
     // Validar el formato de la fecha recibida como parámetro
     if (!appUtility.isValidDateFormat(startTimeString) ||
         !appUtility.isValidDateFormat(endTimeString)) {
-      logger.error("Error en el formato de la fecha y hora");
       throw new IllegalArgumentException("184, Error en el formato de la fecha y hora");
     }
     // Convertir el string en un objeto Instant
@@ -367,7 +354,6 @@ public class AdminFailedLoginAttemptController {
     // Validar el formato de la fecha recibida como parámetro
     if (!appUtility.isValidDateFormat(startTimeString) ||
         !appUtility.isValidDateFormat(endTimeString)) {
-      logger.error("Error en el formato de la fecha y hora");
       throw new IllegalArgumentException("184, Error en el formato de la fecha y hora");
     }
     // Convertir el string en un objeto Instant
@@ -404,7 +390,6 @@ public class AdminFailedLoginAttemptController {
     // Validar el formato de la fecha recibida como parámetro
     if (!appUtility.isValidDateFormat(startTimeString) ||
         !appUtility.isValidDateFormat(endTimeString)) {
-      logger.error("Error en el formato de la fecha y hora");
       throw new IllegalArgumentException("184, Error en el formato de la fecha y hora");
     }
     // Convertir el string en un objeto Instant

@@ -13,19 +13,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mvanalytic.apirest_demo_springboot.domain.user.UserKey;
 import com.mvanalytic.apirest_demo_springboot.dto.user.ActivateAccountRequestDTO;
 import com.mvanalytic.apirest_demo_springboot.dto.user.PasswordResetRequestDTO;
-import com.mvanalytic.apirest_demo_springboot.dto.user.ChangePasswordByResetRequestDTO;
 import com.mvanalytic.apirest_demo_springboot.services.user.UserKeyServiceImpl;
 import com.mvanalytic.apirest_demo_springboot.services.user.UserService;
 import com.mvanalytic.apirest_demo_springboot.utility.UserValidationService;
-import org.apache.logging.log4j.Logger;
-import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
 
 @RestController
 @RequestMapping("/api/public")
 public class PublicUserController {
 
-  // Instancia singleton de logger
-  private static final Logger logger = LoggerSingleton.getLogger(PublicUserController.class);
+
 
   @Autowired
   private UserKeyServiceImpl userKeyServiceImpl;

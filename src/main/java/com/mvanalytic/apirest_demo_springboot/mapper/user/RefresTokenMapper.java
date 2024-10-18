@@ -2,14 +2,9 @@ package com.mvanalytic.apirest_demo_springboot.mapper.user;
 
 import com.mvanalytic.apirest_demo_springboot.domain.user.RefreshToken;
 import com.mvanalytic.apirest_demo_springboot.dto.user.RefreshTokenResponseDTO;
-import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
-
-import org.apache.logging.log4j.Logger;
 
 public class RefresTokenMapper {
 
-  // Instancia singleton de logger
-  private static final Logger logger = LoggerSingleton.getLogger(RefresTokenMapper.class);
 
   /**
    * Convierte un objeto `RefreshToken` en un `RefreshTokenResponseDTO`.
@@ -42,7 +37,6 @@ public class RefresTokenMapper {
       // Devolver el DTO mapeado
       return dto;
     } catch (Exception e) {
-      logger.error("Error al mappear el RefreshToken a su DTO {}", e.getMessage());
       throw new IllegalArgumentException("200, Error al mappear el RefreshToken a su DTO");
     }
   }

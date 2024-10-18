@@ -1,6 +1,5 @@
 package com.mvanalytic.apirest_demo_springboot.controllers.user;
 
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -19,9 +18,7 @@ import com.mvanalytic.apirest_demo_springboot.dto.user.UserProfileRequestDTO;
 import com.mvanalytic.apirest_demo_springboot.mapper.user.UserMapper;
 import com.mvanalytic.apirest_demo_springboot.services.user.RefreshTokenService;
 import com.mvanalytic.apirest_demo_springboot.services.user.UserService;
-import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
 import com.mvanalytic.apirest_demo_springboot.utility.UserValidationService;
-
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,9 +32,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-
-  // Instancia singleton de logger
-  private static final Logger logger = LoggerSingleton.getLogger(UserController.class);
 
   @Autowired
   private UserValidationService userValidationService;
@@ -60,7 +54,6 @@ public class UserController {
     // Verifica que el id del usuario recibido en el endpoint coincida con el del
     // usuario autenticado
     if (!authenticatedUser.getId().equals(id)) {
-      logger.error("");
       throw new AccessDeniedException("119, No puede acceder a información de otro usuario");
     }
   }

@@ -6,20 +6,15 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Collection;
-import org.apache.logging.log4j.Logger;
 import com.mvanalytic.apirest_demo_springboot.domain.user.User;
 import com.mvanalytic.apirest_demo_springboot.dto.user.AuthorityDTO;
 import com.mvanalytic.apirest_demo_springboot.dto.user.UserAuthorityRequestDTO;
 import com.mvanalytic.apirest_demo_springboot.repositories.user.UserAuthorityRepository;
-import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
 @Service
 public class UserAuthorityService {
-
-  // Instancia singleton de logger
-  private static final Logger logger = LoggerSingleton.getLogger(UserAuthorityService.class);
 
   @Autowired
   private UserService userService;
@@ -105,11 +100,9 @@ public class UserAuthorityService {
       return userService.getUserById(userAuthorityRequestDTO.getUserId());
 
     } catch (DataAccessException e) {
-      logger.error("Error al actualizar el rol: {}", e.getMessage());
       // Lanza una excepción de tiempo de ejecución con un mensaje más específico
       throw new RuntimeException(e.getMostSpecificCause().getMessage());
     } catch (IllegalArgumentException e) {
-      logger.error("Error de validación: {}", e.getMessage());
       throw e; // Relanzar la excepción para que sea manejada por un controlador global de
                // excepciones
     }

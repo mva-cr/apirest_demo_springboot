@@ -21,12 +21,10 @@ import com.mvanalytic.apirest_demo_springboot.dto.user.UserStatusRequestDTO;
 import com.mvanalytic.apirest_demo_springboot.repositories.user.UserRepository;
 import com.mvanalytic.apirest_demo_springboot.services.mail.MailService;
 import com.mvanalytic.apirest_demo_springboot.utility.AppUtility;
-import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
 import com.mvanalytic.apirest_demo_springboot.utility.RandomKeyGenerator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.EntityManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Servicio para gestionar operaciones CRUD relacionadas con los usuarios.
@@ -34,9 +32,6 @@ import org.apache.logging.log4j.Logger;
  */
 @Service
 public class UserService {
-
-  // Instancia singleton de logger
-  private static final Logger logger = LoggerSingleton.getLogger(UserService.class);
 
   /**
    * Para cuando se necesita manejar procedimientos almacenados que no se ajustan
@@ -98,12 +93,10 @@ public class UserService {
     Optional<User> existingUserByNickname = userRepository.findByNickname(user.getNickname());
 
     if (existingUserByEmail.isPresent()) {
-      logger.error("El email ingresado ya existe");
       throw new IllegalArgumentException("106, El email ingresado ya existe");
     }
 
     if (existingUserByNickname.isPresent()) {
-      logger.error("El nickname ingresado ya existe");
       throw new IllegalArgumentException("105, El nickname ingresado ya existe");
     }
 
@@ -205,7 +198,6 @@ public class UserService {
       mailService.sendActivationReportToAdmin(user.getUser(), userAdmin);
 
     } catch (Exception e) {
-      logger.error(e.getMessage());
       throw new IllegalArgumentException(e.getMessage());
     }
   }
@@ -344,7 +336,6 @@ public class UserService {
           user.getNickname(), user.getPassword(), user.getLanguageKey(),
           userKey.getKeyValue(), userKey.getKeyPurpose(), userKey.getCreatedAt());
     } catch (Exception e) {
-      logger.error(e.getMessage());
       throw new IllegalArgumentException(e.getMessage());
     }
   }
@@ -391,7 +382,6 @@ public class UserService {
           user.getId(), user.getPassword(),
           userKey.getKeyValue(), userKey.getKeyPurpose(), userKey.getCreatedAt());
     } catch (Exception e) {
-      logger.error(e.getMessage());
       throw new IllegalArgumentException(e.getMessage());
     }
   }
@@ -458,7 +448,6 @@ public class UserService {
 
     } catch (Exception e) {
       String errorMessage = appUtility.extractErrorMessage(e.getMessage());
-      logger.error(errorMessage);
       throw new IllegalArgumentException(errorMessage);
     }
   }
@@ -479,7 +468,6 @@ public class UserService {
     try {
       userRepository.updatePasswordById(id, password);
     } catch (Exception e) {
-      logger.error(e.getMessage());
       throw new IllegalArgumentException("157, Error al actualizar contraseña");
     }
   }
@@ -496,9 +484,6 @@ public class UserService {
       return userRepository.findById(id)
           .orElseThrow(() -> new EntityNotFoundException("102, El usuario no existe"));
     } catch (EntityNotFoundException e) {
-      // Loguea el error con el mensaje de excepción
-      logger.error("El usuario no existe con el id: {}", id, e.getMessage());
-      // Relanza la excepción para que sea manejada por otros manejadores de
       // excepciones
       throw e;
     }
@@ -516,8 +501,6 @@ public class UserService {
       return userRepository.findByEmail(email)
           .orElseThrow(() -> new UsernameNotFoundException("102, El usuario no existe"));
     } catch (UsernameNotFoundException e) {
-      // Loguea el error con el mensaje de excepción
-      logger.error("El usuario no existe con el email: {}", email, e);
       // Relanza la excepción para que sea manejada por otros manejadores de
       // excepciones
       throw e;
@@ -539,16 +522,11 @@ public class UserService {
         User user = optionalUser.get();
         return user;
       } else {
-        // Si el usuario no existe, lanza una excepción
-        logger.error("El usuario no existe con el nickname: {}", nickname);
         throw new UsernameNotFoundException("102, El usuario no existe");
       }
-
     } catch (UsernameNotFoundException e) {
-      logger.error("Error al buscar usuario por nickname: {}", e.getMessage());
       throw e; // Relanza la excepción para que sea manejada por los manejadores de excepciones
     } catch (Exception e) {
-      logger.error("Error inesperado al buscar usuario por nickname: {}", e.getMessage());
       throw new RuntimeException("114, Error inesperado al buscar el usuario", e);
     }
   }
@@ -604,7 +582,6 @@ public class UserService {
     try {
       return userRepository.save(user);
     } catch (Exception e) {
-      logger.error("Error al registrar el usuario {}", e.getMessage());
       throw new IllegalArgumentException("158, Error al cargar el usuario");
     }
   }
@@ -644,12 +621,9 @@ public class UserService {
       return getUserById(userStatusUpdateRequestDTO.getId());
 
     } catch (DataAccessException e) {
-      logger.error("Error de acceso a datos al actualizar el usuario: {}", e.getMostSpecificCause().getMessage());
       throw new RuntimeException(e.getMostSpecificCause().getMessage());
     } catch (Exception e) {
-      logger.error("Error inesperado al actualizar el usuario: {}", e.getMessage());
-      throw new IllegalArgumentException(
-          "115, Error inesperado al actualizar el usuario " + e.getMessage());
+      throw new IllegalArgumentException(e.getMessage());
     }
 
   }
@@ -693,7 +667,6 @@ public class UserService {
       return getUserById(userProfileUpdateRequestDTO.getId());
 
     } catch (DataAccessException e) {
-      logger.error("Error inesperado al actualizar el usuario: {}", e.getMessage());
       // Lanza una excepción de tiempo de ejecución con un mensaje más específico
       throw new RuntimeException(e.getMostSpecificCause().getMessage());
     }
@@ -733,11 +706,9 @@ public class UserService {
       return getUserById(userNicknameUpdateRequestDTO.getId());
 
     } catch (DataAccessException e) {
-      logger.error("Error al actualizar el nickname: {}", e.getMessage());
       // Lanza una excepción de tiempo de ejecución con un mensaje más específico
       throw new RuntimeException(e.getMostSpecificCause().getMessage());
     } catch (IllegalArgumentException e) {
-      logger.error("Error de validación: {}", e.getMessage());
       throw e; // Relanzar la excepción para que sea manejada por un controlador global de
                // excepciones
     }
@@ -777,11 +748,9 @@ public class UserService {
       return getUserById(userEmailUpdateRequestDTO.getId());
 
     } catch (DataAccessException e) {
-      logger.error("Error al actualizar el correo: {}", e.getMessage());
       // Lanza una excepción de tiempo de ejecución con un mensaje más específico
       throw new RuntimeException(e.getMostSpecificCause().getMessage());
     } catch (IllegalArgumentException e) {
-      logger.error("Error de validación del correo: {}", e.getMessage());
       throw e; // Relanzar la excepción para que sea manejada por un controlador global de
                // excepciones
     }
@@ -836,11 +805,9 @@ public class UserService {
       return getUserById(userPasswordUpdateRequestDTO.getId());
 
     } catch (DataAccessException e) {
-      logger.error("Error al actualizar la contraseña: {}", e.getMessage());
       // Lanza una excepción de tiempo de ejecución con un mensaje más específico
       throw new RuntimeException(e.getMostSpecificCause().getMessage());
     } catch (IllegalArgumentException e) {
-      logger.error("Error al actualizar la contraseña: {}", e.getMessage());
       throw e; // Relanzar la excepción para que sea manejada por un controlador global de
                // excepciones
     }
@@ -880,9 +847,7 @@ public class UserService {
           newHashedPassword,
           expiracionTimeActivation);
 
-      logger.info("Clave de restablecimiento generada exitosamente");
     } catch (Exception e) {
-      logger.error(e.getMessage());
       throw new IllegalArgumentException(e.getMessage());
     }
   }

@@ -6,8 +6,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mvanalytic.apirest_demo_springboot.dto.user.UserLoginActivityResponseDTO;
 import com.mvanalytic.apirest_demo_springboot.services.user.UserLoginActivityService;
 import com.mvanalytic.apirest_demo_springboot.utility.AppUtility;
-import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,8 +27,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 @PreAuthorize("hasRole('ROLE_ADMIN')")
 public class AdminUserLoginActivityController {
 
-  // Instancia singleton de logger
-  private static final Logger logger = LoggerSingleton.getLogger(AdminUserLoginActivityController.class);
 
   @Autowired
   private UserLoginActivityService uLoginActivityService;
@@ -138,7 +134,6 @@ public class AdminUserLoginActivityController {
     // Validar el formato de la fecha recibida como parámetro
     if (!appUtility.isValidDateFormat(startTimeString) ||
         !appUtility.isValidDateFormat(endTimeString)) {
-      logger.error("Error en el formato de la fecha y hora");
       throw new IllegalArgumentException("184, Error en el formato de la fecha y hora");
     }
 
@@ -251,7 +246,6 @@ public class AdminUserLoginActivityController {
     // Validar el formato de la fecha recibida como parámetro
     if (!appUtility.isValidDateFormat(startTimeString) ||
         !appUtility.isValidDateFormat(endTimeString)) {
-      logger.error("Error en el formato de la fecha y hora");
       throw new IllegalArgumentException("184, Error en el formato de la fecha y hora");
     }
     // Convertir el string en un objeto Instant
@@ -302,7 +296,6 @@ public class AdminUserLoginActivityController {
     // Validar el formato de la fecha recibida como parámetro
     if (!appUtility.isValidDateFormat(startTimeString) ||
         !appUtility.isValidDateFormat(endTimeString)) {
-      logger.error("Error en el formato de la fecha y hora");
       throw new IllegalArgumentException("184, Error en el formato de la fecha y hora");
     }
     // Convertir el string en un objeto Instant

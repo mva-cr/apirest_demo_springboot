@@ -1,6 +1,5 @@
 package com.mvanalytic.apirest_demo_springboot.services.user;
 
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,8 +20,8 @@ import com.mvanalytic.apirest_demo_springboot.domain.user.UserLoginActivity;
 import com.mvanalytic.apirest_demo_springboot.dto.user.JwtResponseDTO;
 import com.mvanalytic.apirest_demo_springboot.mapper.user.UserMapper;
 import com.mvanalytic.apirest_demo_springboot.services.mail.MailService;
+import com.mvanalytic.apirest_demo_springboot.utility.AppUtility;
 import com.mvanalytic.apirest_demo_springboot.utility.JwtUtils;
-import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
@@ -32,8 +31,6 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 @Service
 public class AuthService {
-  // Instancia singleton de logger
-  private static final Logger logger = LoggerSingleton.getLogger(AuthService.class);
 
   private AuthenticationManager authenticationManager;
 
@@ -54,6 +51,9 @@ public class AuthService {
 
   @Autowired
   private MailService mailService;
+
+  @Autowired
+  private AppUtility appUtility;
 
   public AuthService(@Lazy AuthenticationManager authenticationManager, JwtUtils jwtUtils) {
     this.authenticationManager = authenticationManager;
@@ -92,7 +92,6 @@ public class AuthService {
    * @throws RuntimeException            Para cualquier otro error inesperado que
    *                                     ocurra durante la autenticación.
    */
-  // @Transactional
   public JwtResponseDTO authenticateUser(
       String identifier,
       String password,
@@ -144,35 +143,31 @@ public class AuthService {
     } catch (UsernameNotFoundException e) {
       // Registro del intento fallido por credenciales incorrectas
       failAuth(identifier, request);
-      // Manejo de excepción cuando el nickname no existe
-      logger.error("El identificador no existe ", e.getMessage());
       throw new UsernameNotFoundException("111, El identificador no existe");
     } catch (BadCredentialsException e) {
       // Registro del intento fallido por credenciales incorrectas
       failAuth(identifier, request);
       // Maneja el caso cuando el password es incorrecto
-      logger.error("La contraseña no coincide con la registrada {}", e.getMessage());
       throw new BadCredentialsException("108, La contraseña no coincide con la registrada");
-
     } catch (CredentialsExpiredException e) {
       // Registro del intento fallido por credenciales incorrectas
       failAuth(identifier, request);
       // Maneja el caso cuando las credenciales han expirado
-      logger.error("Las credenciales han expirado {}", e.getMessage());
+      appUtility.sendLog("112, Las credenciales han expirado", e.getMessage());
       throw new CredentialsExpiredException("112, Las credenciales han expirado");
 
     } catch (DisabledException e) {
       // Registro del intento fallido por credenciales incorrectas
       failAuth(identifier, request);
       // Maneja el caso cuando la cuenta está deshabilitada
-      logger.error("Cuenta deshabilitada {}", e.getMessage());
+      appUtility.sendLog("110, Cuenta deshabilitada", e.getMessage());
       throw new DisabledException("110, Cuenta deshabilitada");
     } catch (Exception e) {
       // Registro del intento fallido por credenciales incorrectas
       failAuth(identifier, request);
       // Manejo de cualquier otra excepción de autenticación
-      logger.error("Error en la autenticación {}", e.getMessage());
-      throw new RuntimeException("155, Error en tiempo de ejecución " + e.getMessage(), e);
+      appUtility.sendLog("155, Error en tiempo de ejecución ", e.getMessage());
+      throw new RuntimeException("155, Error en tiempo de ejecución " + e.getMessage());
     }
 
   }
@@ -341,7 +336,7 @@ public class AuthService {
       session.setIdSession(UUID.randomUUID().toString());
       return session;
     } catch (Exception e) {
-      logger.error("Error al crear el UserLoginActivity {}", e.getMessage());
+      appUtility.sendLog("Error al crear el UserLoginActivity {}", e.getMessage());
       throw new RuntimeException("227, Error al crear el UserLoginActivity");
     }
   }

@@ -104,12 +104,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-logging</artifactId> <!-- Exclusión de logback para usar log4j2 -->
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <!-- Documentación OpenAPI -->
@@ -149,11 +143,6 @@
             <scope>test</scope> <!-- Starter para pruebas con JUnit, Mockito, etc. -->
         </dependency>
 
-        <!-- Dependencias para Log4j -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-log4j2</artifactId> <!-- Starter para Log4j2 -->
-        </dependency>
 
     </dependencies>
 

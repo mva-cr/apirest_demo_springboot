@@ -4,6 +4,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import java.time.Instant;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,7 +14,6 @@ import com.mvanalytic.apirest_demo_springboot.domain.user.User;
 import java.security.Key;
 import java.util.Date;
 import java.util.stream.Collectors;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Utilidad para la gestión de JWT (JSON Web Tokens), que facilita la creación y
@@ -22,11 +22,9 @@ import org.apache.logging.log4j.Logger;
 @Component
 public class JwtUtils {
 
-  // Instancia singleton de logger
-  private static final Logger logger = LoggerSingleton.getLogger(JwtUtils.class);
 
-  // @Autowired
-  // private AppUtility appUtility;
+  @Autowired
+  private AppUtility appUtility;
 
   // La clave secreta utilizada para firmar el JWT.
   @Value("${app.jwtSecret}")
@@ -117,7 +115,6 @@ public class JwtUtils {
   public boolean validateJwtToken(String authToken) {
     // Verifica si el token es nulo o está vacío antes de intentar validarlo.
     if (authToken == null || authToken.isEmpty()) {
-      logger.error("El token suministrado es nulo o vacío");
       return false;
     }
     try {
@@ -125,17 +122,17 @@ public class JwtUtils {
       Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(authToken);
       return true;
     } catch (io.jsonwebtoken.security.SecurityException e) {
-      logger.error("Firma del token JWT no válida: {}", e.getMessage());
+      appUtility.sendLog("503, Token JWT nulo o inválido", e.getMessage());
     } catch (io.jsonwebtoken.ExpiredJwtException e) {
-      logger.error("El token JWT ha expirado: {}", e.getMessage());
+      appUtility.sendLog("509, Token JWT ha expirado", e.getMessage());
     } catch (io.jsonwebtoken.MalformedJwtException e) {
-      logger.error("El token JWT está mal formado: {}", e.getMessage());
+      appUtility.sendLog("510, Token JWT está mal formado", e.getMessage());
     } catch (io.jsonwebtoken.UnsupportedJwtException e) {
-      logger.error("El token JWT no está soportado: {}", e.getMessage());
+      appUtility.sendLog("511, Token JWT no está soportado", e.getMessage());
     } catch (IllegalArgumentException e) {
-      logger.error("El token JWT está vacío o tiene una cadena inválida: {}", e.getMessage());
+      appUtility.sendLog("512, Token JWT está vacío o tiene una cadena inválida", e.getMessage());
     } catch (Exception e) {
-      logger.error("El token suministrado no es válido: {}", e.getMessage());
+      appUtility.sendLog("503, Token JWT nulo o inválido", e.getMessage());
     }
     return false;
   }
@@ -168,7 +165,7 @@ public class JwtUtils {
 
     // Convierte Instant a Date
     Date expirationDate = Date.from(expiration);
-    
+
     return Jwts.builder()
         .setSubject(username)
         .setIssuedAt(new Date())

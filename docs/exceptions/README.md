@@ -299,6 +299,11 @@ Los códigos de error detallados se definen con base en la siguiente tabla:
 | 506    | Error en tiempo de ejecución                                             | Backend              |
 | 507    | Autenticación insuficiente                                               | Backend              |
 | 508    | Error al cargar el registro de llaves                                    | Backend              |
+| 509    | Token JWT ha expirado                                    | Backend              |
+| 510    | Token JWT está mal formado                                    | Backend              |
+| 511    | Token JWT no está soportado                                    | Backend              |
+| 512    | Token JWT está vacío o tiene una cadena inválida                                    | Backend              |
+| 513    | Error creando directorio de logs                                    | Backend              |
 
 El mensaje estará compuesto por el código separado una coma (,) y el detalle, de forma que al `Frontend` el mesaje de error llegue como el siguiente ejemplo:
 

@@ -227,3 +227,9 @@ mvn clean
 ```
 mvn dependency:tree
 ```
+
+5. `Reload Window` para forzar una actualización completa
+
+```
+Presiona Cmd + Shift + P (o Ctrl + Shift + P en Windows) y escribe "Reload Window".
+```

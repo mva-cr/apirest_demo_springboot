@@ -1,12 +1,10 @@
 package com.mvanalytic.apirest_demo_springboot.services.files;
 
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import com.mvanalytic.apirest_demo_springboot.utility.AppUtility;
-import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
@@ -36,16 +34,9 @@ import java.nio.file.Paths;
  * </ul>
  * </p>
  * 
- * <p>
- * El servicio usa el logger proporcionado por {@link LoggerSingleton} para
- * registrar errores y advertencias.
- * </p>
  */
 @Service
 public class FileServiceImpl implements FileService {
-
-  // Instancia singleton de logger
-  private static final Logger logger = LoggerSingleton.getLogger(FileServiceImpl.class);
 
   @Autowired
   private AppUtility appUtility;
@@ -96,10 +87,8 @@ public class FileServiceImpl implements FileService {
         throw new FileNotFoundException("164, Archivo no encontrado");
       }
     } catch (FileNotFoundException e) {
-      logger.error("Error: Archivo no encontrado", e);
       throw new RuntimeException(e.getMessage()); // Maneja la excepción
     } catch (MalformedURLException e) {
-      logger.error("Error de URL", e);
       throw new RuntimeException(e.getMessage());
     }
   }

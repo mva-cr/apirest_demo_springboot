@@ -5,9 +5,7 @@ import com.mvanalytic.apirest_demo_springboot.domain.user.FailedLoginAttempt;
 import com.mvanalytic.apirest_demo_springboot.dto.user.FailedLoginAttemptResponseDTO;
 import com.mvanalytic.apirest_demo_springboot.mapper.user.FailedLoginAttemptMapper;
 import com.mvanalytic.apirest_demo_springboot.repositories.user.FailedLoginAttemptRepository;
-import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
 import org.springframework.transaction.annotation.Transactional;
-import org.apache.logging.log4j.Logger;
 import java.time.Instant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,9 +15,6 @@ import org.springframework.data.domain.Sort;
 
 @Service
 public class FailedLoginAttemptService {
-
-  // Instancia singleton de logger
-  private static final Logger logger = LoggerSingleton.getLogger(FailedLoginAttemptService.class);
 
   @Autowired
   private FailedLoginAttemptRepository fRepository;
@@ -52,7 +47,6 @@ public class FailedLoginAttemptService {
     try {
       fRepository.save(fAttempt);
     } catch (Exception e) {
-      logger.error("Error al intentar guardar el registro FailedLoginAttempt {}", e.getMessage());
       throw new IllegalArgumentException("166, Error al intentar guardar el registro FailedLoginAttempt");
     }
   }
@@ -132,7 +126,6 @@ public class FailedLoginAttemptService {
     try {
       fRepository.deleteByEmailAndAttemptTimeBefore(email, attemptTime);
     } catch (Exception e) {
-      logger.error("Error al eliminar los FailedLoginAttempt previos a la fecha del correo {}", e.getMessage());
       throw new IllegalArgumentException("208, Error al eliminar los FailedLoginAttempt previos a la fecha del correo");
     }
   }
@@ -163,7 +156,6 @@ public class FailedLoginAttemptService {
     try {
       fRepository.deleteByNicknameAndAttemptTimeBefore(nickname, attemptTime);
     } catch (Exception e) {
-      logger.error("Error al eliminar los FailedLoginAttempt previos a la fecha del nickname {}", e.getMessage());
       throw new IllegalArgumentException(
           "220, Error al eliminar los FailedLoginAttempt previos a la fecha del nickname");
     }
@@ -188,7 +180,6 @@ public class FailedLoginAttemptService {
     try {
       fRepository.deleteByAttemptTimeBefore(attemptTime);
     } catch (Exception e) {
-      logger.error("Error al eliminar los loginAttempt previos a la fecha {}", e.getMessage());
       throw new IllegalArgumentException("207, Error al eliminar los loginAttempt previos a la fecha");
     }
   }
@@ -212,7 +203,6 @@ public class FailedLoginAttemptService {
     try {
       return fRepository.countByEmail(email);
     } catch (Exception e) {
-      logger.error("Error al contar los intentos de sesión por correo {}", e.getMessage());
       throw new IllegalArgumentException("221, Error al contar los intentos de sesión por correo");
     }
   }
@@ -235,7 +225,6 @@ public class FailedLoginAttemptService {
     try {
       return fRepository.countByNickname(nickname);
     } catch (Exception e) {
-      logger.error("Error al contar los intentos de sesión por nickname {}", e.getMessage());
       throw new IllegalArgumentException("222, Error al contar los intentos de sesión por nickname");
     }
   }
@@ -258,7 +247,6 @@ public class FailedLoginAttemptService {
     try {
       return fRepository.countByIpAddress(ipAddress);
     } catch (Exception e) {
-      logger.error("Error al contar los intentos de sesión por ipAddress {}", e.getMessage());
       throw new IllegalArgumentException("225, Error al contar los intentos de sesión por ipAddress");
     }
   }
@@ -286,7 +274,6 @@ public class FailedLoginAttemptService {
       Long fLong = fRepository.countByEmailAndAttemptTimeBetween(email, startTime, endTime);
       return fLong;
     } catch (Exception e) {
-      logger.error("Error al contar los intentos de sesión por correo por rango {}", e.getMessage());
       throw new IllegalArgumentException("223, Error al contar los intentos de sesión por correo por rango");
     }
   }
@@ -314,7 +301,6 @@ public class FailedLoginAttemptService {
       Long fLong = fRepository.countByNicknameAndAttemptTimeBetween(nickname, startTime, endTime);
       return fLong;
     } catch (Exception e) {
-      logger.error("Error al contar los intentos de sesión por nickname por rango {}", e.getMessage());
       throw new IllegalArgumentException("224, Error al contar los intentos de sesión por nickname por rango");
     }
   }
@@ -342,7 +328,6 @@ public class FailedLoginAttemptService {
       Long fLong = fRepository.countByIpAddressAndAttemptTimeBetween(ipAddress, startTime, endTime);
       return fLong;
     } catch (Exception e) {
-      logger.error("Error al contar los intentos de sesión por ipAddress por rango {}", e.getMessage());
       throw new IllegalArgumentException("226, Error al contar los intentos de sesión por ipAddress por rango");
     }
   }
@@ -368,7 +353,6 @@ public class FailedLoginAttemptService {
           .map(FailedLoginAttemptMapper::convertFailedLoginAttemptToFailedLoginAttemptResponseDTO);
       return fPagesDTO;
     } catch (Exception e) {
-      logger.error("Error mappear las sesiones: {}", e.getMessage());
       throw new IllegalArgumentException("219, Error mappear las sesiones");
     }
   }

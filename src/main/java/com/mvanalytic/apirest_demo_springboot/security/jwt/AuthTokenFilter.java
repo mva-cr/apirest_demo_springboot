@@ -13,14 +13,12 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import com.mvanalytic.apirest_demo_springboot.services.user.UserDetailsServiceImpl;
+import com.mvanalytic.apirest_demo_springboot.utility.AppUtility;
 import com.mvanalytic.apirest_demo_springboot.utility.JwtUtils;
-import com.mvanalytic.apirest_demo_springboot.utility.LoggerSingleton;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import org.apache.logging.log4j.Logger;
 
 /**
  * Filtro que se ejecuta una vez por solicitud para comprobar la existencia de
@@ -30,14 +28,15 @@ import org.apache.logging.log4j.Logger;
  */
 @Component
 public class AuthTokenFilter extends OncePerRequestFilter {
-  // Instancia singleton de logger
-  private static final Logger logger = LoggerSingleton.getLogger(AuthTokenFilter.class);
 
   @Autowired
   private JwtUtils jwtUtils;
 
   @Autowired
   private UserDetailsServiceImpl userDetailsServiceImpl;
+
+  @Autowired
+  private AppUtility appUtility;
 
   @Override
   protected void doFilterInternal(
@@ -73,22 +72,21 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authentication);
       } else {
         // Si el token es nulo o no es válido, se registra un mensaje de error
-        logger.error("Token JWT nulo o inválido para la solicitud a {}", request.getRequestURI());
         throw new InsufficientAuthenticationException(
             "503, Token JWT nulo o inválido " + request.getRequestURI());
       }
 
     } catch (CredentialsExpiredException e) {
-      logger.error("Las credenciales han expirado: {}", e.getMessage());
+      appUtility.sendLog("502, Token expirado",  e.getMessage());
       // Configura la respuesta con un error 401 y el mensaje correspondiente
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error: 502, Token expirado");
       return;
     } catch (InsufficientAuthenticationException e) {
       // Manejo de excepción para autenticación insuficiente
-      logger.error("Error de autenticación insuficiente: {}", e.getMessage());
+      appUtility.sendLog("507, Autenticación insuficiente",  e.getMessage());
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error: 507, Autenticación insuficiente");
     } catch (Exception e) {
-      logger.error("No se puede configurar la autenticación del usuario: {}", e.getMessage());
+      appUtility.sendLog("504, No se pudo configurar la autenticación", e.getMessage());
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
           "Error: 504, No se pudo configurar la autenticación " + e.getMessage());
     }
